@@ -6,16 +6,103 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id            Int           @id @default(autoincrement())
+  name          String
+  email         String        @unique
+  password      String
+  userType      String
+  createdAt     DateTime      @default(now())
+  events        Event[]
+  tickets       Ticket[]
+  points        Points[]
+  referrals     Referral[]
+  discounts     Discount[]
+  transactions  Transaction[]
 
-  @@map("samples") // if you want to use snake_case format
+  @@map("users")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  organizerId Int
+  name        String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  location    String
+  capacity    Int
+  basePrice   Decimal
+  createdAt   DateTime @default(now())
+  organizer   User     @relation(fields: [organizerId], references: [id])
+  tickets     Ticket[]
+
+  @@map("events")
+}
+
+model Ticket {
+  id           Int          @id @default(autoincrement())
+  eventId      Int
+  userId       Int
+  ticketType   String
+  price        Decimal
+  status       String
+  purchaseDate DateTime
+  event        Event        @relation(fields: [eventId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+
+  @@map("tickets")
+}
+
+model Transaction {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  ticketId   Int
+  amount     Decimal
+  pointsUsed Int
+  discountId Int?
+  date       DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  ticket     Ticket   @relation(fields: [ticketId], references: [id])
+  discount   Discount? @relation(fields: [discountId], references: [id])
+
+  @@map("transactions")
+}
+
+model Points {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  amount     Int
+  earnedDate DateTime @default(now())
+  expiryDate DateTime
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("points")
+}
+
+model Referral {
+  id           Int      @id @default(autoincrement())
+  referrerId   Int
+  referralCode String   @unique
+  createdAt    DateTime @default(now())
+  referrer     User     @relation(fields: [referrerId], references: [id])
+
+  @@map("referrals")
+}
+
+model Discount {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  percentage Decimal
+  startDate  DateTime
+  endDate    DateTime
+  user       User     @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+
+  @@map("discounts")
 }
