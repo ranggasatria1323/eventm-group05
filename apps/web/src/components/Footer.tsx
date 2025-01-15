@@ -2,9 +2,9 @@ import Link from "next/link"
 
 export function Footer() {
   return (
-    <footer className="border-t bg-[#0A1128] text-white">
-      <div className="container py-8 px-4 md:px-6">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+    <footer className="w-full border-t bg-[#152455] text-white">
+      <div className="w-full py-8 px-0 md:px-0">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 p-4">
           <div>
             <h3 className="mb-4 text-lg font-semibold text-white">Tentang LOKET</h3>
             <ul className="space-y-2 text-sm">
@@ -86,10 +86,11 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 border-t border-blue-900 pt-8 text-center text-sm text-gray-300">
+      </div>
+      <center><img src="https://purwadhika.com/static/brand/logopwdk-text-white.png" /></center>
+      <div className="mt-8 border-t border-blue-900 py-8 text-center text-sm text-gray-300">
           <p>© 2024 LOKET. All rights reserved.</p>
         </div>
-      </div>
     </footer>
   )
 }
