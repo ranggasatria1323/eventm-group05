@@ -3,8 +3,8 @@ import Link from "next/link"
 export function Footer() {
   return (
     <footer className="w-full border-t bg-[#152455] text-white">
-      <div className="w-full py-8 px-0 md:px-0">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 p-4">
+      <div className="w-full py-8 lg:px-[200px] xl:px-[150px]">
+        <div className="flex justify-between ">
           <div>
             <h3 className="mb-4 text-lg font-semibold text-white">Tentang LOKET</h3>
             <ul className="space-y-2 text-sm">

@@ -36,26 +36,23 @@ export default function LandingPage() {
           <CarouselNext />
         </Carousel>
       </div>
-      <div className="md:ml-[90px] lg:ml-[280px] xl:ml-[260px]">
-        <p className="text-3xl py-8">Event Pilihan</p>
-      </div>
-      <div className="">
+      <div className="flex-col justify-self-center max-w-[1100px] md:max-h-auto">
+      <p className="text-3xl py-8">Event Pilihan</p>
         <Carousel
           opts={{
             align: 'start',
-          }}
-          className="flex justify-center"
+          }} 
         >
-          <CarouselContent className="w-[320px] md:min-w-[700px] xl:min-w-[1400px]">
+          <CarouselContent className="w-[320px] md:w-[690px] xl:min-w-[1100px]">
             {Array.from({ length: 5 }).map((_, index) => (
               <CarouselItem
                 key={index}
-                className="md:basis-2/4 lg:basis-1/2 xl:basis-1/4"
+                className="md:basis-2/4 lg:basis-1/3 xl:basis-1/4"
               >
                 <div className="p-1 ">
-                  <Card className="w-[326px] h-[400px]">
+                  <Card className="xl:w-[250px] xl:h-[350px] md:h-[250px] md:w-[210px]">
                     <div
-                      className="w-auto h-[180px]"
+                      className="xl:w-auto xl:h-[130px] md:w-auto md:h-[80px]"
                       style={{
                         backgroundImage:
                           'url(https://marketplace.canva.com/EAFs0GMlUi8/1/0/1143w/canva-biru-kuning-modern-pop-konser-musik-poster-dicpZ-CfyKo.jpg)',
@@ -65,8 +62,7 @@ export default function LandingPage() {
                       }}
                     />
                     <div
-                      style={{ lineHeight: '35px' }}
-                      className="p-8 border-b-2"
+                      className="xl:border-b-2 md:border-d-2 md:leading-[35px] md:p-3 xl:p-8 xl:leading-[35px]"
                     >
                       <p style={{ fontWeight: 'bold' }}>Jakarta</p>
                       <p>21 Januari 2025</p>
@@ -74,13 +70,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <p
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          fontWeight: 'lighter',
-                          fontSize: '32px',
-                        }}
+                        className='flex justify-center items-center font-light xl:text-3xl md:text-xl'
                       >
                         PT. Konser Musik
                       </p>
@@ -90,8 +80,8 @@ export default function LandingPage() {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className='' />
+          <CarouselNext className='' />
         </Carousel>
       </div>
       <div
@@ -105,15 +95,9 @@ export default function LandingPage() {
       >
         <div
           style={{
-            height: '200px',
-            width: '1244px',
-            backgroundPosition: '40px 470px',
-            backgroundSize: '1170px',
             backgroundImage:
               "url('https://quotefancy.com/media/wallpaper/3840x2160/23550-Friedrich-Nietzsche-Quote-Without-music-life-would-be-a-mistake.jpg')",
-            borderRadius: '20px',
-            marginTop: '30px',
-          }}
+          }} className='xl:h-[200px] xl:w-[1100px] md:h-[130px] md:w-[700px] bg-cover bg-center rounded-[20px] mt-[30px] '
         />
       </div>
     </div>
