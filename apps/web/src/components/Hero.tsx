@@ -7,7 +7,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 
-export default function LandingPage() {
+export default function Hero() {
   return (
     <div className="w-[100%] my-8">
       <div className="flex justify-center">
