@@ -44,7 +44,7 @@ export default function Hero() {
           }} 
         >
           <CarouselContent className="w-[320px] md:w-[690px] xl:min-w-[1100px]">
-            {Array.from({ length: 5 }).map((_, index) => (
+            {Array.from({ length: 9 }).map((_, index) => (
               <CarouselItem
                 key={index}
                 className="md:basis-2/4 lg:basis-1/3 xl:basis-1/4"

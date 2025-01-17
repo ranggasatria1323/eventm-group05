@@ -1,6 +1,10 @@
 import { AuthPage } from '@/components/auth-page'
+import { HeaderOnlyLogo } from '@/components/HeaderOnlyLogo'
 
 export default function LoginPage() {
-  return <AuthPage initialView="login" />
+  return (<>
+  <HeaderOnlyLogo />
+  <AuthPage initialView="login" />
+  </>)
 }
 

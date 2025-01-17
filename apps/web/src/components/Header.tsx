@@ -91,7 +91,7 @@ export function Header() {
             className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
           >
             <Compass />
-            <Link href="/explore">Jelajah</Link>
+            <Link href="/Jelajah">Jelajah</Link>
           </Button>
           <Button
             variant="outline"
