@@ -8,11 +8,10 @@ import { Facebook, Linkedin } from 'lucide-react'
 export function RegisterForm() {
   const router = useRouter()
 
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically handle the registration logic
     console.log('Registration submitted')
-    // For demonstration, let's redirect to a dashboard
     router.push('/')
   }
 

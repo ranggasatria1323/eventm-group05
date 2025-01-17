@@ -21,4 +21,3 @@ export default class AuthRouter {
     return this.router;
   }
 }
-
