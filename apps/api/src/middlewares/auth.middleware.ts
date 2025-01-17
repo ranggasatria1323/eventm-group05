@@ -5,7 +5,7 @@ export const validateRegisterData = [
   body("name").notEmpty().withMessage("Name is required"),
   body("email").isEmail().withMessage("Valid email is required"),
   body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
-  body("userType").isIn(["user", "admin"]).withMessage("User type must be either 'user' or 'admin'"),
+  body("userType").isIn(["Customer", "Event Organizer"]).withMessage("User type must be either 'Customer' or 'Event Organizer'"),
 
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
