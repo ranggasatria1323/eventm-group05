@@ -32,7 +32,7 @@ export function AuthPage({ initialView }: AuthPageProps) {
         <div className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-600 ease-in-out z-100 ${isLoginActive ? '' : '-translate-x-full'}`}>
           <div className={`bg-[url('https://png.pngtree.com/thumb_back/fw800/background/20240610/pngtree-concert-music-festival-and-celebrate-image_15746657.jpg?height=500&width=384')] bg-no-repeat bg-cover bg-center text-white relative h-full w-[200%] transition-transform duration-600 ease-in-out ${isLoginActive ? '-left-full' : 'left-0'}`}>
             <div className="absolute inset-0 bg-gradient-to-t from-[rgba(46,94,109,0.4)] to-[rgba(46,94,109,0)] to-40%"></div>
-            <div className={`absolute flex flex-col items-center justify-center p-10 text-center top-0 h-full w-1/2 transition-transform duration-600 ease-in-out ${isLoginActive ? 'right-0' : 'translate-x-[-20%]'}`}>
+            <div className={`absolute flex flex-col items-center justify-center p-10 text-center top-0 h-full w-1/2 transition-transform duration-600 ease-in-out ${isLoginActive ? 'right-0' : '-translate-x-0'}`}>
               <h1 className="text-4xl font-bold mb-4 leading-tight">
                 {isLoginActive ? "Start your\njourney now" : "Hello\nfriends"}
               </h1>

@@ -1,6 +1,9 @@
 import { AuthPage } from '@/components/auth-page'
+import { HeaderOnlyLogo } from '@/components/HeaderOnlyLogo'
 
 export default function RegisterPage() {
-  return <AuthPage initialView="register" />
+  return (<><HeaderOnlyLogo />
+  <AuthPage initialView="register" />
+  </>)
 }
 
