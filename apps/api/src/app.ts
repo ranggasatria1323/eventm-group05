@@ -2,6 +2,7 @@ import express, { Application, Express, json, NextFunction, Request, Response, u
 import cors from "cors";
 import dotenv from "dotenv"
 import AuthRouter from "./routers/auth.router";
+import PostRouter from "@/routers/post.router"
 
 dotenv.config()
 
@@ -36,8 +37,10 @@ export default class App {
 
   private routes(): void {
     const authRouter = new AuthRouter();
+    const postRouter = new PostRouter();
 
     this.app.use("/api/auth", authRouter.getRouter());
+    this.app.use("/api/post", )
   }
 
   public start(): void {

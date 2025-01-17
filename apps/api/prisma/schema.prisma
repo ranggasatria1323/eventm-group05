@@ -11,35 +11,39 @@ datasource db {
 }
 
 model User {
-  id            Int           @id @default(autoincrement())
-  name          String
-  email         String        @unique
-  password      String
-  userType      String
-  createdAt     DateTime      @default(now())
-  events        Event[]
-  tickets       Ticket[]
-  points        Points[]
-  referrals     Referral[]
-  discounts     Discount[]
-  transactions  Transaction[]
+  id              Int @id @default(autoincrement())
+  first_name      String @db.VarChar(50)
+  last_name       String @db.VarChar (50)
+  email           String @db.VarChar (50)
+  password        String @db.VarChar (100)
+  role            String @db.VarChar (20)
+  events          Event[]
+  tickets         Ticket[]
+  transactions    Transaction[]
+  points          Points[]
+  disconts        Discount[]
+  referrals       Referral[]
+  created_at      DateTime @default(now())
 
   @@map("users")
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
-  organizerId Int
-  name        String
-  description String
-  startDate   DateTime
-  endDate     DateTime
-  location    String
-  capacity    Int
-  basePrice   Decimal
-  createdAt   DateTime @default(now())
-  organizer   User     @relation(fields: [organizerId], references: [id])
-  tickets     Ticket[]
+  id                              Int @id @default(autoincrement())
+  user                            User @relation(fields: [created_by],references: [id])
+  created_by                      Int
+  title                           String? @db.VarChar(200)
+  description                     String?
+  image                           String? @db.VarChar(50)
+  location                        String? @db.VarChar (50)
+  date                            DateTime?
+  event_type                      String? @db.VarChar(50)
+  price                           Int?
+  max_voucher_discount            Int?
+  ticket                          Ticket[]
+  category                        String? @db.VarChar (50)
+  created_at                      DateTime @default(now())
+  updated_at                      DateTime @updatedAt
 
   @@map("events")
 }
