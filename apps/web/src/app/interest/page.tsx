@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { useState } from 'react'
+import Cookies from 'js-cookie' // Import js-cookie
 import { Button } from '@/components/ui/button'
 
 export default function InterestPage() {
@@ -11,7 +12,7 @@ export default function InterestPage() {
 
   const handleSelectRole = async (role: 'Customer' | 'Event Organizer') => {
     try {
-      const token = localStorage.getItem('token')
+      const token = Cookies.get('token') // Ambil token dari cookie
       if (!token) {
         throw new Error('No token found')
       }
@@ -70,4 +71,3 @@ export default function InterestPage() {
     </div>
   )
 }
-
