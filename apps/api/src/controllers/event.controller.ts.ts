@@ -3,13 +3,18 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+interface AuthRequest extends Request {
+  user?: User;
+}
+
 type User = {
+  name: string
   email: string;
-  role: string;
-  id: string;
+  userType: string;
+  id: number;
 };
 
-export const getPosts = async (req: Request, res: Response) => {
+export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
     const events = await prisma.event.findMany();
 
@@ -26,14 +31,13 @@ export const getPosts = async (req: Request, res: Response) => {
   }
 };
 
-export const createPosts = async (req: Request, res: Response) => {
+export const createEvents = async (req: AuthRequest, res: Response) => {
   const {
     title,
     description,
     image,
     location,
     date,
-    time,
     event_type,
     price,
     max_voucher_discount,
@@ -54,7 +58,7 @@ export const createPosts = async (req: Request, res: Response) => {
         price: price || 0,
         max_voucher_discount: max_voucher_discount || 0,
         category: category || '',
-        created_by: parseInt(user.id),
+        created_by: user.id,
       },
     });
 
@@ -63,5 +67,11 @@ export const createPosts = async (req: Request, res: Response) => {
       message: 'post success',
       data: newPost,
     });
-  } catch (err) {}
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+      data: null,
+    });
+  }
 };

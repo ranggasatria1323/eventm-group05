@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getPosts } from "@/controllers/post.controller.ts";
+import AuthController from "@/controllers/auth.controller";
 
 export default class AuthRouter {
   private router: Router;

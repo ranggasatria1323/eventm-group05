@@ -1,7 +1,8 @@
 import { Response, NextFunction, Request } from 'express';
 import { body, validationResult } from 'express-validator';
-import jwt from 'jsonwebtoken';
+import jwt, { verify } from 'jsonwebtoken';
 import { User } from '@prisma/client';
+
 
 interface AuthRequest extends Request {
   user?: User;
@@ -65,3 +66,4 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     return res.status(401).json({ message: 'Unauthorized' });
   }
 };
+
