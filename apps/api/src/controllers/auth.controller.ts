@@ -53,7 +53,8 @@ export default class AuthController {
           name,
           email,
           password: hashedPassword,
-          userType: '', // User type will be set later
+          userType: '',
+          
         },
       });
 
