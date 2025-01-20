@@ -19,8 +19,11 @@ model User {
   createdAt     DateTime      @default(now())
   events        Event[]
   tickets       Ticket[]
-  points        Points[]
-  referrals     Referral[]
+  points        PointHistory[]
+  referralCode  String?       @unique // Referral code milik user
+  referredById  Int?          // ID user yang merujuk
+  referredUsers User[]        @relation("UserReferrals", references: [id]) // Daftar pengguna yang dirujuk
+  referredBy    User?         @relation("UserReferrals", fields: [referredById], references: [id])
   discounts     Discount[]
   transactions  Transaction[]
 
@@ -74,25 +77,17 @@ model Transaction {
   @@map("transactions")
 }
 
-model Points {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  amount     Int
-  earnedDate DateTime @default(now())
-  expiryDate DateTime
-  user       User     @relation(fields: [userId], references: [id])
+model PointHistory {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  amount          Int      // Jumlah poin yang diberikan
+  reason          String?  // Alasan pemberian poin (misal: "Referral Reward")
+  referredUserId  Int?     // User yang menggunakan referral code
+  earnedDate      DateTime @default(now())
+  expiryDate      DateTime
+  user            User     @relation(fields: [userId], references: [id])
 
-  @@map("points")
-}
-
-model Referral {
-  id           Int      @id @default(autoincrement())
-  referrerId   Int
-  referralCode String   @unique
-  createdAt    DateTime @default(now())
-  referrer     User     @relation(fields: [referrerId], references: [id])
-
-  @@map("referrals")
+  @@map("point_history")
 }
 
 model Discount {

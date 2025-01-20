@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Facebook, Linkedin } from "lucide-react"
+import { ToastContainer, toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 interface LoginFormValues {
   email: string
@@ -38,18 +40,19 @@ export function LoginForm() {
       })
 
       if (response.status === 200) {
-        const { token } = response.data.data // Akses token dari response.data.data
+        const { token } = response.data.data
         if (token) {
-          Cookies.set("token", token, { expires: 7 }) // Simpan token dalam cookie selama 7 hari
+          Cookies.set("token", token, { expires: 7 })
           console.log("Login berhasil")
           router.push("/")
         } else {
           console.error("Token tidak ditemukan dalam respons")
         }
       } else {
-        console.error("Login gagal")
+        toast.error("Login gagal: Email atau password salah")
       }
     } catch (error) {
+      toast.error("Terjadi kesalahan: Email atau password salah")
       console.error("Terjadi kesalahan", error)
     }
     setSubmitting(false)
@@ -104,9 +107,9 @@ export function LoginForm() {
               <Linkedin size={20} />
             </a>
           </div>
+          <ToastContainer />
         </Form>
       )}
     </Formik>
   )
 }
-
