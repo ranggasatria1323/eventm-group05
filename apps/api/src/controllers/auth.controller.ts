@@ -53,7 +53,7 @@ export default class AuthController {
           name,
           email,
           password: hashedPassword,
-          userType: '',
+          userType: '', //string kosong karena akan di update dibagian interest
           
         },
       });
@@ -63,6 +63,7 @@ export default class AuthController {
         `${process.env.JWT_KEY}` as string,
         { expiresIn: '1d' }
       );
+      
 
       res.status(201).json({
         status: "success",
