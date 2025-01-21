@@ -11,21 +11,27 @@ datasource db {
 }
 
 model User {
-  id              Int @id @default(autoincrement())
-  name            String @db.VarChar
-  email           String @unique
-  password        String @db.VarChar (100)
-  userType        String @db.VarChar (20)
-  events          Event[]
-  tickets         Ticket[]
-  transactions    Transaction[]
-  points          Points[]
-  disconts        Discount[]
-  referrals       Referral[]
-  created_at      DateTime @default(now())
+  id           Int         @id @default(autoincrement())
+  name         String
+  email        String      @unique
+  password     String
+  userType     String
+  image        String?
+  phoneNumber  String?
+  birthdate    DateTime?
+  gender       String?
+  referralCode String?     @unique
+  points       Int         @default(0)
+  createdAt    DateTime    @default(now())
+  events       Event[]
+  tickets      Ticket[]
+  discounts    Discount[]
+  transactions Transaction[]
 
   @@map("users")
 }
+
+
 
 model Event {
   id                              Int @id @default(autoincrement())
@@ -77,27 +83,6 @@ model Transaction {
   @@map("transactions")
 }
 
-model Points {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  amount     Int
-  earnedDate DateTime @default(now())
-  expiryDate DateTime
-  user       User     @relation(fields: [userId], references: [id])
-
-  @@map("points")
-}
-
-model Referral {
-  id           Int      @id @default(autoincrement())
-  referrerId   Int
-  referralCode String   @unique
-  createdAt    DateTime @default(now())
-  referrer     User     @relation(fields: [referrerId], references: [id])
-
-  @@map("referrals")
-}
-
 model Discount {
   id         Int      @id @default(autoincrement())
   userId     Int
@@ -109,3 +94,4 @@ model Discount {
 
   @@map("discounts")
 }
+
