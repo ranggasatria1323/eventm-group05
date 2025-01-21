@@ -11,24 +11,27 @@ datasource db {
 }
 
 model User {
-  id            Int           @id @default(autoincrement())
-  name          String
-  email         String        @unique
-  password      String
-  userType      String
-  createdAt     DateTime      @default(now())
-  events        Event[]
-  tickets       Ticket[]
-  points        PointHistory[]
-  referralCode  String?       @unique // Referral code milik user
-  referredById  Int?          // ID user yang merujuk
-  referredUsers User[]        @relation("UserReferrals", references: [id]) // Daftar pengguna yang dirujuk
-  referredBy    User?         @relation("UserReferrals", fields: [referredById], references: [id])
-  discounts     Discount[]
-  transactions  Transaction[]
+  id           Int         @id @default(autoincrement())
+  name         String
+  email        String      @unique
+  password     String
+  userType     String
+  image        String?
+  phoneNumber  String?
+  birthdate    DateTime?
+  gender       String?
+  referralCode String?     @unique
+  points       Int         @default(0)
+  createdAt    DateTime    @default(now())
+  events       Event[]
+  tickets      Ticket[]
+  discounts    Discount[]
+  transactions Transaction[]
 
   @@map("users")
 }
+
+
 
 model Event {
   id          Int      @id @default(autoincrement())
@@ -77,19 +80,6 @@ model Transaction {
   @@map("transactions")
 }
 
-model PointHistory {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  amount          Int      // Jumlah poin yang diberikan
-  reason          String?  // Alasan pemberian poin (misal: "Referral Reward")
-  referredUserId  Int?     // User yang menggunakan referral code
-  earnedDate      DateTime @default(now())
-  expiryDate      DateTime
-  user            User     @relation(fields: [userId], references: [id])
-
-  @@map("point_history")
-}
-
 model Discount {
   id         Int      @id @default(autoincrement())
   userId     Int
@@ -101,3 +91,4 @@ model Discount {
 
   @@map("discounts")
 }
+

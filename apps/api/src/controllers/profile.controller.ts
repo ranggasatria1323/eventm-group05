@@ -1,102 +1,123 @@
-import type { Request, Response } from "express"
-import prisma from "../prisma"
-import { uploadToStorage } from "../utils/storage"
+import { NextFunction, Request as ExpressRequest, Response } from "express";
+import prisma from "../prisma";
+import { User } from "@prisma/client";
 
-export const getProfile = async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id
-
-    if (!userId) {
-      return res.status(401).json({
-        status: "error",
-        message: "Unauthorized",
-      })
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        name: true,
-        email: true,
-        userType: true,
-        phone: true,
-        birthDate: true,
-        gender: true,
-        profileImage: true,
-      },
-    })
-
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "User not found",
-      })
-    }
-
-    res.json({
-      status: "success",
-      data: user,
-    })
-  } catch (error) {
-    console.error("Error fetching profile:", error)
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    })
-  }
+interface AuthRequest extends ExpressRequest {
+  user?: User;
 }
 
-export const updateProfile = async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id
+export default class ProfileController {
+  // Mengambil data profil pengguna
+  async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
 
-    if (!userId) {
-      return res.status(401).json({
-        status: "error",
-        message: "Unauthorized",
-      })
+      if (!userId) {
+        return res.status(400).json({
+          status: "error",
+          message: "User ID is missing",
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          userType: true,
+          phoneNumber: true,
+          birthdate: true,
+          gender: true,
+          image: true,
+          referralCode: true,
+          points: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
+
+      return res.status(200).json({
+        status: "success",
+        data: user,
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 
-    // Only allow updating these specific fields
-    const { phone, birthDate, gender } = req.body
-    let profileImage = undefined
+  // Mengupdate profil pengguna
+  async updateProfile(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { phoneNumber, birthdate, gender } = req.body;
+      const userId = req.user?.id;
 
-    // Handle file upload if present
-    if (req.file) {
-      const imageUrl = await uploadToStorage(req.file)
-      profileImage = imageUrl
+      if (!userId) {
+        return res.status(400).json({
+          status: "error",
+          message: "User ID is missing",
+        });
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          phoneNumber: phoneNumber || undefined,
+          birthdate: birthdate || undefined,
+          gender: gender || undefined,
+        },
+      });
+
+      return res.status(200).json({
+        status: "success",
+        message: "Profile updated successfully",
+        data: updatedUser,
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        phone: phone || null,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        gender: gender || null,
-        ...(profileImage && { profileImage }),
-      },
-      select: {
-        name: true,
-        email: true,
-        userType: true,
-        phone: true,
-        birthDate: true,
-        gender: true,
-        profileImage: true,
-      },
-    })
+  // Mengupdate gambar profil pengguna
+  async updateProfileImage(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
 
-    res.json({
-      status: "success",
-      data: updatedUser,
-      message: "Profile updated successfully",
-    })
-  } catch (error) {
-    console.error("Error updating profile:", error)
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    })
+      if (!userId) {
+        return res.status(400).json({
+          status: "error",
+          message: "User ID is missing",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          status: "error",
+          message: "No file uploaded",
+        });
+      }
+
+      const imagePath = req.file.path; // Lokasi file gambar yang diupload
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          image: imagePath,
+        },
+      });
+
+      return res.status(200).json({
+        status: "success",
+        message: "Profile image updated successfully",
+        data: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 }
-
