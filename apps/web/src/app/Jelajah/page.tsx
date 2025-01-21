@@ -16,7 +16,7 @@ export default function Jelajah() {
       const response = await axios.get(base_url + '/events');
       console.log('API response:', response.data);
 
-      if (response?.data?.status === 200) {
+      if (response?.status === 200) {
         console.log('Events data:', response.data.data);
         setEvents(response.data.data);
       } else {
@@ -55,8 +55,8 @@ export default function Jelajah() {
                     }}
                   />
                   <div className="xl:border-b-2 md:border-d-2 md:leading-[35px] md:p-3 xl:p-8 xl:leading-[35px]">
-                    <p style={{ fontWeight: 'bold' }}>{item.location}</p>
-                    <p>21 Januari 2025</p>
+                    <p style={{ fontWeight: 'bold' }}>{item.title}</p>
+                    <p>{item.date}</p>
                     <p>{item.price}</p>
                   </div>
                   <div>
