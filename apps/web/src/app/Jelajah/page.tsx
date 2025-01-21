@@ -41,26 +41,18 @@ export default function Jelajah() {
             key={index}
             className="md:basis-2/4 lg:basis-1/3 xl:basis-1/4"
           >
-            <div className="p-1 ">
+            <div className="p-2 ">
               <Link href={''}>
-                <Card className="xl:w-[250px] xl:h-[350px] md:h-[250px] md:w-[210px]">
-                  <div
-                    className="xl:w-auto xl:h-[130px] md:w-auto md:h-[80px]"
-                    style={{
-                      backgroundImage:
-                        'url(https://marketplace.canva.com/EAFs0GMlUi8/1/0/1143w/canva-biru-kuning-modern-pop-konser-musik-poster-dicpZ-CfyKo.jpg)',
-                      backgroundSize: 'cover',
-                      borderRadius: '10px 10px 0px 0px',
-                      backgroundPosition: 'top',
-                    }}
-                  />
-                  <div className="xl:border-b-2 md:border-d-2 md:leading-[35px] md:p-3 xl:p-8 xl:leading-[35px]">
+                <Card className="xl:w-[250px] h-full md:w-[210px]">
+                  <img src={item.image} />
+                  <div className="xl:border-b-2 md:border-d-2 md:leading-[35px] md:p-3 xl:p-5 xl:leading-[35px]">
                     <p style={{ fontWeight: 'bold' }}>{item.title}</p>
+                    <p>{item.description}</p>
                     <p>{item.date}</p>
-                    <p>{item.price}</p>
+                    <p>Rp. {item.price}</p>
                   </div>
                   <div>
-                    <p className="flex justify-center items-center font-light xl:text-3xl md:text-xl">
+                    <p className="flex justify-center items-center font-light xl:text-2xl md:text-xl">
                       PT. Konser Musik
                     </p>
                   </div>
