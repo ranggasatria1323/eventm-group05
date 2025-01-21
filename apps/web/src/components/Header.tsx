@@ -79,29 +79,29 @@ export function Header() {
 
         {/* Actions */}
         <div className="ml-auto flex items-center space-x-2">
-          <Button
+        <Link href="/buat"><Button
             variant="ghost"
             className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
           >
             <Calendar />
-            <Link href="/create">Buat Event</Link>
-          </Button>
-          <Button
+            Buat Event
+          </Button></Link>
+          <Link href="/Jelajah"><Button
             variant="ghost"
             className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
           >
             <Compass />
-            <Link href="/Jelajah">Jelajah</Link>
-          </Button>
-          <Button
+            Jelajah
+          </Button></Link>
+          <Link href="/register"><Button
             variant="outline"
             className="text-black border-none hover:bg-blue-700 hover:text-white"
           >
-            <Link href="/register">Daftar</Link>
-          </Button>
-          <Button className="bg-blue-600 text-white hover:bg-blue-700">
-            <Link href="/login">Masuk</Link>
-          </Button>
+            Daftar
+          </Button></Link>
+          <Link href="/login"><Button className="bg-blue-600 text-white hover:bg-blue-700">
+            Masuk
+          </Button></Link>
         </div>
       </div>
 
