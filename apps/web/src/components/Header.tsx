@@ -68,7 +68,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-[#152455]">
+    <header className="top-0 z-50 w-full border-b bg-[#152455]">
       <div className="flex justify-end h-8 bg-blue-900 px-10">
         <nav className="hidden lg:flex items-center space-x-6 text-sm">
           <Link href="/about" className="text-gray-300 transition-colors hover:text-white">Tentang Loket</Link>

@@ -288,7 +288,7 @@ function ProfilePage() {
               </p>
               <div className="mt-4 flex items-center">
                 <span className="text-3xl font-bold text-green-900">
-                  {profile.points}
+                  {profile.points.toLocaleString()}
                 </span>
                 <span className="ml-2 text-sm text-gray-500">poin</span>
               </div>
