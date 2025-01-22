@@ -3,21 +3,19 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from './ui/button'; // Updated import path
+import { Input } from './ui/input'; // Updated import path
 import { Calendar, Compass, Search } from 'lucide-react';
 import { setLoginCookie, removeLoginCookie, getLoginCookie } from '../../utils/cookies';
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'; // Updated import path
 
-// Menggunakan shadcn ui Popover
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-
-const defaultAvatar = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAogMBIgACEQEDEQH/xAAaAAEAAwEBAQAAAAAAAAAAAAAAAwQFAQIH/8QALRABAAIBAwIEBgEFAQAAAAAAAAECAwQRIRJRBTFBYSIjQnGBoWIyNIKRsRP/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABYRAQEBAAAAAAAAAAAAAAAAAAABEf/aAAwDAQACEQMRAD8A+qAKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOWtFKza07RHnLN1GotmnbmKx6d/uC3l1mOnFfjt7eX+1W2tyzPERX8bq4CeNZm7xP8AjCSuutv8dKzHtwqANbDlplrFq/mPWEjGra1LdVZ2nvDU02aM2Pf6o4kEoAAAAAAAAAAAAEgq+IX2xRSPqn9M/wA1rxGd80R/FVUAAAAFrw+22a1e8KqxouNTHvEwUaQCAAAAAAAAAAASEgz/ABCPnRPeqqn1mSb5piYj4eIQKAAAACbSf3NPz/xC94sk48kWiInbuUa4QIAAAAAAAAAAAAMvWRtqLe/KFe12G95jJXbaK7TCioAAAAPWOOrJWI9ZeVrRYLTeuX6Y/ZRoesgIAAAAAAAAAAAAOWrFqzWfWNmPas1maz6Ts2VHxDFETGSvG/FgUwFAABrYKf8AnipWfSGfo6RfPG/lHOzUKACAAAAAAAAAAADoOKfiM/LrX1mXvWaicW0UmOqf0z7Wtad7WmZ9wcAUAAWNBO2o27xw0mLEzHkt6TU364pktvWfKZKL4CAAAAAAADxlyVx0m1p2gHs3Z2XW5Jn5cRSO/qgvkvf+u9rfeQaWTVYqfV1T2ryqZNbkvxSOiP2rC4OzMzzM7y4AAAAAAAJsWpyYtoieqO0reLWY77dW9J9/JnBg2a2i0bxMT9pdYsWtWd6zMT7Snpq81fO3XH8jBpiLBnpm324tHnWZSoAADM1lptmtvPFdoiABBPE7AKAAAAAAAAAAAAAAPVZmluqszE15hsVnesT3BAAB/9k="
+const defaultAvatar = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAogMBIgACEQEDEQH/xAAaAAEAAwEBAQAAAAAAAAAAAAAAAwQFAQIH/8QALRABAAIBAwIEBgEFAQAAAAAAAAECAwQRIRJRBTFBYSIjQnGBoWIyNIKRsRP/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABYRAQEBAAAAAAAAAAAAAAAAAAABEf/aAAwDAQACEQMRAD8A+qAKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOWtFKza07RHnLN1GotmnbmKx6d/uC3l1mOnFfjt7eX+1W2tyzPERX8bq4CeNZm7xP8AjCSuutv8dKzHtwqANbDlplrFq/mPWEjGra1LdVZ2nvDU02aM2Pf6o4kEoAAAAAAAAAAAAEgq+IX2xRSPqn9M/wA1rxGd80R/FVUAAAAFrw+22a1e8KqxouNTHvEwUaQCAAAAAAAAAAASEgz/ABCPnRPeqqn1mSb5piYj4eIQKAAAACbSf3NPz/xC94sk48kWiInbuUa4QIAAAAAAAAAAAAMvWRtqLe/KFe12G95jJXbaK7TCioAAAAPWOOrJWI9ZeVrRYLTeuX6Y/ZRoesgIAAAAAAAAAAAAOWrFqzWfWNmPas1maz6Ts2VHxDFETGSvG/FgUwFAABrYKf8AnipWfSGfo6RfPG/lHOzUKACAAAAAAAAAAADoOKfiM/LrX1mXvWaicW0UmOqf0z7Wtad7WmZ9wcAUAAWNBO2o27xw0mLEzHkt6TU364pktvWfKZKL4CAAAAAAADxlyVx0m1p2gHs3Z2XW5Jn5cRSO/qgvkvf+u9rfeQaWTVYqfV1T2ryqZNbkvxSOiP2rC4OzMzzM7y4AAAAAAAJsWpyYtoieqO0reLWY77dW9J9/JnBg2a2i0bxMT9pdYsWtWd6zMT7Snpq81fO3XH8jBpiLBnpm324tHnWZSoAADM1lptmtvPFdoiABBPE7AKAAAAAAAAAAAAAAPVZmluqszE15hsVnesT3BAAB/9k="; // Replace with actual placeholder image URL
 
 export const Header: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({
     name: '',
-    avatarUrl: '',
+    avatarUrl: defaultAvatar, // Set default avatar initially
   });
 
   useEffect(() => {
@@ -29,10 +27,9 @@ export const Header: React.FC = () => {
         },
       })
       .then(response => {
-        // Set nama dan foto berdasarkan response data
         setUser({
           name: response.data.name,
-          avatarUrl: response.data.image,
+          avatarUrl: response.data.image || defaultAvatar, // Use placeholder if no image
         });
         setIsLoggedIn(true);
       })
@@ -44,7 +41,6 @@ export const Header: React.FC = () => {
 
   const handleLogin = () => {
     setLoginCookie("your_token");
-    // Set nama dan foto setelah login berhasil
     axios.get(`${process.env.NEXT_PUBLIC_BASE_API_URL}profile`, {
       headers: {
         Authorization: `Bearer your_token`,
@@ -53,7 +49,7 @@ export const Header: React.FC = () => {
     .then(response => {
       setUser({
         name: response.data.name,
-        avatarUrl: response.data.image || defaultAvatar,
+        avatarUrl: response.data.image || defaultAvatar, // Use placeholder if no image
       });
       setIsLoggedIn(true);
     })
@@ -67,7 +63,7 @@ export const Header: React.FC = () => {
     setIsLoggedIn(false);
     setUser({
       name: '',
-      avatarUrl: '',
+      avatarUrl: defaultAvatar, // Reset to default avatar on logout
     });
   };
 
@@ -110,9 +106,9 @@ export const Header: React.FC = () => {
               <PopoverTrigger>
                 <div className="flex items-center cursor-pointer">
                   <img 
-                    src={user.avatarUrl || 'url_placeholder_image'} // Ganti dengan url placeholder/foto hitam jika tidak ada
+                    src={user.avatarUrl} // Use user avatar or placeholder
                     alt="User Avatar" 
-                    className="h-10 w-10 rounded-full border" // Bordered circle
+                    className="h-10 w-10 rounded-full border" 
                   />
                   <span className="text-white ml-2">{user.name}</span>
                 </div>

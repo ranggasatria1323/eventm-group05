@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { useState } from 'react'
 import Cookies from 'js-cookie'
-import { Button } from '@/components/ui/button'
+import { Button } from './../../components/ui/button'
 
 export default function InterestPage() {
   const router = useRouter()

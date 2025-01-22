@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { LoginForm } from '@/components/login-form'
-import { RegisterForm } from '@/components/register-form'
-import { Button } from '@/components/ui/button'
+import { LoginForm } from './../components/login-form'
+import { RegisterForm } from './../components/register-form'
+import { Button } from './../components/ui/button'
 
 interface AuthPageProps {
   initialView: 'login' | 'register'

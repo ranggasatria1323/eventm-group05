@@ -33,9 +33,9 @@ export default function Dashboard() {
                   ></path>
                 </svg>
               </button>
-              <a href="/" className="flex ms-2 md:me-24">
+              <a href="/dashboard" className="flex ms-2 md:me-24">
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-white dark:text-white">
-                  EventBuzz
+                  EVENTASY
                 </span>
               </a>
             </div>

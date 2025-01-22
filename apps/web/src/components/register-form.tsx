@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "components/ui/button";
+import { Input } from "components/ui/input";
 import { Facebook, Linkedin } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -16,12 +16,14 @@ interface FormValues {
   name: string;
   email: string;
   password: string;
+  referralCode: string; // Added referral code
 }
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
   email: Yup.string().email("Invalid email address").required("Email is required"),
   password: Yup.string().min(6, "Password must be at least 6 characters long").required("Password is required"),
+  referralCode: Yup.string().optional(), // Optional referral code
 });
 
 export function RegisterForm() {
@@ -70,7 +72,7 @@ export function RegisterForm() {
   return (
     <>
       <Formik
-        initialValues={{ name: "", email: "", password: "" }}
+        initialValues={{ name: "", email: "", password: "", referralCode: "" }} // Updated initial values
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
@@ -93,6 +95,12 @@ export function RegisterForm() {
               <Field type="password" name="password" placeholder="Password" as={Input} className="w-full sm:w-80" />
               <div className="h-5 mt-1">
                 <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+              </div>
+            </div>
+            <div className="mb-4 w-full">
+              <Field type="text" name="referralCode" placeholder="Referral Code" as={Input} className="w-full sm:w-80" />
+              <div className="h-5 mt-1">
+                <ErrorMessage name="referralCode" component="div" className="text-red-500 text-sm" />
               </div>
             </div>
             <Button
@@ -129,4 +137,3 @@ export function RegisterForm() {
     </>
   );
 }
-
