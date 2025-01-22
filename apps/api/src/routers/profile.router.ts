@@ -1,17 +1,20 @@
-// import express from "express"
-// import multer from "multer"
-// import { getProfile, updateProfile } from "../controllers/profile.controller"
-// import { authMiddleware } from "../middlewares/auth.middleware"
+import express from "express"
+import ProfileController from "../controllers/profile.controller"
+import { authMiddleware } from "../middlewares/auth.middleware"
+import { uploader } from "../../uploader"
 
-// const router = express.Router()
-// const upload = multer({
-//   limits: {
-//     fileSize: 1024 * 1024, // 1MB limit
-//   },
-// })
+const router = express.Router()
+const profileController = new ProfileController()
 
-// router.get("/profile", authMiddleware, getProfile)
-// router.post("/profile/update", authMiddleware, upload.single("profileImage"), updateProfile)
+const profileImageUploader = uploader("profile_", "images/profiles")
 
-// export default router
+router.get("/profile", authMiddleware, profileController.getProfile.bind(profileController))
+router.put(
+  "/profile",
+  authMiddleware,
+  profileImageUploader.single("profileImage"),
+  profileController.updateProfile.bind(profileController),
+)
+
+export default router
 

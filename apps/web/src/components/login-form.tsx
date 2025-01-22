@@ -38,7 +38,6 @@ export function LoginForm() {
         email: values.email,
         password: values.password,
       })
-
       if (response.status === 200) {
         const { token } = response.data.data
         if (token) {

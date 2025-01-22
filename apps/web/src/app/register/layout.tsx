@@ -14,10 +14,9 @@ export default function RegisterLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        {children}
-      </body>
-    </html>
+    <div>
+      {children}
+    </div>
+      
   );
 }

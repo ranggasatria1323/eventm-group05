@@ -4,6 +4,14 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from '@prisma/client';
 
+const generateReferralCode = () => {
+   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = ''; 
+    for (let i = 0; i < 10; i++) { 
+      code += chars.charAt(Math.floor(Math.random() * chars.length)); 
+    } 
+    return code; };
+
 interface AuthRequest extends ExpressRequest {
   user?: User;
 }
@@ -48,12 +56,15 @@ export default class AuthController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
+      const referralCode = generateReferralCode();
+
       const user = await prisma.user.create({
         data: {
           name,
           email,
           password: hashedPassword,
           userType: '', //string kosong karena akan di update dibagian interest
+          referralCode,
           
         },
       });
@@ -68,7 +79,7 @@ export default class AuthController {
       res.status(201).json({
         status: "success",
         message: "User registered successfully",
-        data: { token },
+        data: { referralCode, token },
       });
     } catch (error) {
       next(error);

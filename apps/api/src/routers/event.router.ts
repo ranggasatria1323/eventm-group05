@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getEvents, createEvents } from "@/controllers/event.controller.ts";
+import { getEvents, createEvents } from "@/controllers/event.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
 const router = Router()

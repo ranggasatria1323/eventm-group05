@@ -30,7 +30,7 @@ export default function InterestPage() {
       const data = res.data
 
       if (data.status === 'success') {
-        router.push('/')
+        router.push('/login')
       } else {
         setError(data.message || 'Failed to update user role')
       }

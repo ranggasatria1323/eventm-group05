@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv"
 import AuthRouter from "./routers/auth.router";
 import eventRouter from "./routers/event.router"
+import profileRouter from "./routers/profile.router"
 
 dotenv.config()
 
@@ -38,8 +39,10 @@ export default class App {
   private routes(): void {
     const authRouter = new AuthRouter();
 
-    this.app.use("/api/auth", authRouter.getRouter());
+
+    this.app.use("/", authRouter.getRouter());
     this.app.use("/", eventRouter)
+    this.app.use("/", profileRouter)
   }
 
   public start(): void {

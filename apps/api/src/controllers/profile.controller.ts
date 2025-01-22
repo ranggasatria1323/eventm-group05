@@ -1,17 +1,18 @@
-import { NextFunction, Request as ExpressRequest, Response } from "express";
-import prisma from "../prisma";
-import { User } from "@prisma/client";
+// Controller/profile.controller.js
+import type { NextFunction, Request as ExpressRequest, Response } from "express"
+import prisma from "../prisma"
+import type { User } from "@prisma/client"
+import path from "path"
 
 interface AuthRequest extends ExpressRequest {
-  user?: User;
+  user?: User
+  file?: Express.Multer.File
 }
 
-export default class ProfileController {
-  // Mengambil data profil pengguna
-  async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
+class ProfileController {
+  getProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id;
-
       if (!userId) {
         return res.status(400).json({
           status: "error",
@@ -51,8 +52,7 @@ export default class ProfileController {
     }
   }
 
-  // Mengupdate profil pengguna
-  async updateProfile(req: AuthRequest, res: Response, next: NextFunction) {
+  updateProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { phoneNumber, birthdate, gender } = req.body;
       const userId = req.user?.id;
@@ -64,12 +64,18 @@ export default class ProfileController {
         });
       }
 
+      let profileImage;
+      if (req.file) {
+        profileImage = path.join("/images/profiles", req.file.filename);
+      }
+
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
           phoneNumber: phoneNumber || undefined,
-          birthdate: birthdate || undefined,
+          birthdate: birthdate ? new Date(birthdate) : undefined,
           gender: gender || undefined,
+          image: profileImage || undefined,
         },
       });
 
@@ -81,43 +87,7 @@ export default class ProfileController {
     } catch (error) {
       next(error);
     }
-  }
-
-  // Mengupdate gambar profil pengguna
-  async updateProfileImage(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user?.id;
-
-      if (!userId) {
-        return res.status(400).json({
-          status: "error",
-          message: "User ID is missing",
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          status: "error",
-          message: "No file uploaded",
-        });
-      }
-
-      const imagePath = req.file.path; // Lokasi file gambar yang diupload
-
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          image: imagePath,
-        },
-      });
-
-      return res.status(200).json({
-        status: "success",
-        message: "Profile image updated successfully",
-        data: updatedUser,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  };
 }
+
+export default ProfileController;

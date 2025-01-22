@@ -18,7 +18,7 @@ model User {
   userType     String
   image        String?
   phoneNumber  String?
-  birthdate    DateTime?
+  birthdate    DateTime?  @db.Date
   gender       String?
   referralCode String?     @unique
   points       Int         @default(0)
