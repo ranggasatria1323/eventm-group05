@@ -61,6 +61,7 @@ class ProfileController {
   updateProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { phoneNumber, birthdate, gender } = req.body;
+      const {file} = req;
       const userId = req.user?.id;
 
       if (!userId) {
@@ -70,11 +71,6 @@ class ProfileController {
         });
       }
 
-      let profileImage: string | undefined;
-
-      if (req.file) {
-        profileImage = path.join("/images/profiles", req.file.filename); // Store image in public/images
-      }
 
       const updatedUser = await prisma.user.update({
         where: { id: userId },
@@ -82,7 +78,7 @@ class ProfileController {
           phoneNumber: phoneNumber || undefined,
           birthdate: birthdate ? new Date(birthdate) : undefined,
           gender: gender || undefined,
-          image: profileImage || undefined,
+          image: file?.filename || undefined,
         },
       });
 

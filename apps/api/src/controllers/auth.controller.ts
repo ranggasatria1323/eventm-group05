@@ -19,28 +19,6 @@ interface AuthRequest extends ExpressRequest {
   user?: User;
 }
 
-// Middleware: Attach user to request
-const attachUserToRequest = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized!" });
-    }
-
-    const decoded = jwt.verify(token, `${process.env.JWT_KEY}`) as jwt.JwtPayload;
-    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
-
-    if (!user) {
-      return res.status(401).json({ message: "Unauthorized!" });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
-
 export default class AuthController {
   /**
    * User registration with optional referral code
@@ -110,7 +88,7 @@ export default class AuthController {
         { id: user.id, email: user.email },
         `${process.env.JWT_KEY}`,
         { expiresIn: "1d" }
-      );
+      ); 
 
       res.status(201).json({
         status: "success",

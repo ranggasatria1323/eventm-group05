@@ -52,6 +52,7 @@ function ProfilePage() {
       );
       if (response.data.status === 'success') {
         const data = response.data.data;
+        console.log('Profile data retrieved:', data); // Log the retrieved data
         setProfile({
           ...data,
           birthdate: data.birthdate
@@ -59,7 +60,9 @@ function ProfilePage() {
             : null,
         });
         if (data.image) {
-          setimage(`${process.env.NEXT_PUBLIC_BASE_API_URL}${data.image}`);
+          const imageUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL}${data.image}`;
+          console.log('Constructed image URL:', imageUrl); // Log the constructed image URL
+          setimage(imageUrl);
         }
       }
     } catch (error) {
@@ -97,6 +100,14 @@ function ProfilePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
+    if (name === 'phoneNumber') {
+      const numericValue = value.replace(/\D/g, ''); // Hanya menyimpan angka
+      setProfile((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+      return;
+    }
     setProfile((prev) => ({
       ...prev,
       [name]: value,
@@ -115,7 +126,7 @@ function ProfilePage() {
       );
       formData.append('gender', profile.gender || '');
       if (profile.image instanceof File) {
-        formData.append('image', profile.image);
+        formData.append('image', profile.image); // Updated field name
       }
 
       const response = await axios.put(
