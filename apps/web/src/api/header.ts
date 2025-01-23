@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getLoginCookie, setLoginCookie, removeLoginCookie } from '../../utils/cookies'; // Sesuaikan path
+import { getLoginCookie, setLoginCookie, removeLoginCookie } from './../utils/cookies'; // Sesuaikan path
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 

@@ -56,7 +56,12 @@ module.exports = {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+			  primary: '#0a192f', // Main Background
+        secondary: '#112240', // Secondary Background
+        accent: '#64ffda', // Cyan/Mint (Accent)
+        background: '#233554', // Border Color / Muted Blue
+        text: '#ffffff', // White Text
   		}
   	}
   },
