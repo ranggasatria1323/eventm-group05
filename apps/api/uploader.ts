@@ -7,7 +7,7 @@ type FileNameCallback = (error: Error | null, filename: string) => void;
 
 export const uploader = (filePrefix: string, folderName: string) => {
   // Tentukan direktori default
-  const defaultDir = join(__dirname, "/public");
+  const defaultDir = join(__dirname, "./public");
 
   // Konfigurasi penyimpanan menggunakan multer.diskStorage
   const storage = multer.diskStorage({

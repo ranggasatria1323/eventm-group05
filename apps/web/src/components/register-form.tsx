@@ -11,6 +11,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { registerUser } from "./../api/auth"; // Updated import path
 
 interface FormValues {
   name: string;
@@ -34,39 +35,16 @@ export function RegisterForm() {
     values: FormValues,
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
   ) => {
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}register`, values);
-      const data = res.data;
 
-      if (data.status === "success") {
-        Cookies.set("token", data.data.token, { expires: 1 });
-        toast.success("Registrasi berhasil! Silakan pilih minat Anda.");
-        router.push("/interest");
-      } else {
-        setError("");
-        toast.error(data.message);
-      }
-    } catch (error: any) {
-      setError("");
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          const errorMessage = error.response.data.message;
-          if (errorMessage === "Email sudah terdaftar") {
-            toast.warn("Email sudah terdaftar. Silakan gunakan email lain.");
-          } else {
-            toast.error(errorMessage || "Terjadi kesalahan saat registrasi. Silakan coba lagi.");
-          }
-        } else if (error.request) {
-          toast.error("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
-        } else {
-          toast.error("Terjadi kesalahan saat memproses permintaan Anda.");
-        }
-      } else {
-        toast.error("Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.");
-      }
-    } finally {
-      setSubmitting(false);
+    const result = await registerUser(values); // Panggil middleware
+
+    if (result.success) {
+      router.push("/interest"); // Redirect setelah registrasi berhasil
+    } else {
+      setError(result.message || "Terjadi kesalahan saat registrasi.");
     }
+
+    setSubmitting(false);
   };
 
   return (

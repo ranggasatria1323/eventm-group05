@@ -1,58 +1,50 @@
-"use client"
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
-import Cookies from "js-cookie"
-import axios from "axios"
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-const base_url = "http://localhost:5678"
+export const getProfileData = async () => {
+  try {
+    const token = Cookies.get('token');
+    const response = await axios.get(`${API_BASE_URL}profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    toast.error('Gagal mengambil data profil');
+    console.error('Error fetching profile data:', error);
+    throw error;
+  }
+};
 
-
-export function getUserDetail(){
-    try {
-        if(!Cookies.get("user")){
-            throw new Error("you are not login")
-        }
-    
-        const userCookie = String(Cookies.get("user")) 
-        const userSession = JSON.parse(userCookie)
-
-        let newToken = ""
-        if(Cookies.get("token")){
-            newToken = "Bearer "+Cookies.get("token")
-        }
-
-        return axios.get(base_url+`/api/users/${userSession?.id}`,{
-            headers:{
-                Authorization:newToken
-            }
-        })
-
-    } catch(err) {
-        console.log("err : ",err)
+export const updateProfileData = async (profile:any) => {
+  try {
+    const token = Cookies.get('token');
+    const formData = new FormData();
+    formData.append('phoneNumber', profile.phoneNumber || '');
+    formData.append(
+      'birthdate',
+      profile.birthdate ? new Date(profile.birthdate).toISOString() : '',
+    );
+    formData.append('gender', profile.gender || '');
+    if (profile.image instanceof File) {
+      formData.append('image', profile.image);
     }
-   
-}
 
-export async function updateUserProfile(data:FormData){
+    const response = await axios.put(`${API_BASE_URL}profile`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
-    try {   
-        if(!Cookies.get("user")){
-            throw new Error("you are not login")
-        }
-    
-        const userCookie = String(Cookies.get("user")) 
-        const userSession = JSON.parse(userCookie)
-        let newToken = ""
-        if(Cookies.get("token")){
-            newToken = "Bearer "+Cookies.get("token")
-        }
-    
-        return await axios.put(base_url+`/api/users/${userSession?.id}`,data,{
-            headers:{
-                Authorization:newToken
-            }
-        })
-    } catch(err){
-        console.log("err : ",err)
-    }
-    
-}
+    return response.data;
+  } catch (error) {
+    toast.error('Terjadi kesalahan saat menyimpan data.');
+    console.error('Error saving profile data:', error);
+    throw error;
+  }
+};

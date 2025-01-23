@@ -8,63 +8,50 @@ import { Input } from './ui/input'; // Updated import path
 import { Calendar, Compass, Search } from 'lucide-react';
 import { setLoginCookie, removeLoginCookie, getLoginCookie } from '../../utils/cookies';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'; // Updated import path
+import {
+  fetchUserProfile,
+  loginUser,
+  logoutUser,
+} from './../api/header'; // Updated import path
 
 const defaultAvatar = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAogMBIgACEQEDEQH/xAAaAAEAAwEBAQAAAAAAAAAAAAAAAwQFAQIH/8QALRABAAIBAwIEBgEFAQAAAAAAAAECAwQRIRJRBTFBYSIjQnGBoWIyNIKRsRP/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABYRAQEBAAAAAAAAAAAAAAAAAAABEf/aAAwDAQACEQMRAD8A+qAKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOWtFKza07RHnLN1GotmnbmKx6d/uC3l1mOnFfjt7eX+1W2tyzPERX8bq4CeNZm7xP8AjCSuutv8dKzHtwqANbDlplrFq/mPWEjGra1LdVZ2nvDU02aM2Pf6o4kEoAAAAAAAAAAAAEgq+IX2xRSPqn9M/wA1rxGd80R/FVUAAAAFrw+22a1e8KqxouNTHvEwUaQCAAAAAAAAAAASEgz/ABCPnRPeqqn1mSb5piYj4eIQKAAAACbSf3NPz/xC94sk48kWiInbuUa4QIAAAAAAAAAAAAMvWRtqLe/KFe12G95jJXbaK7TCioAAAAPWOOrJWI9ZeVrRYLTeuX6Y/ZRoesgIAAAAAAAAAAAAOWrFqzWfWNmPas1maz6Ts2VHxDFETGSvG/FgUwFAABrYKf8AnipWfSGfo6RfPG/lHOzUKACAAAAAAAAAAADoOKfiM/LrX1mXvWaicW0UmOqf0z7Wtad7WmZ9wcAUAAWNBO2o27xw0mLEzHkt6TU364pktvWfKZKL4CAAAAAAADxlyVx0m1p2gHs3Z2XW5Jn5cRSO/qgvkvf+u9rfeQaWTVYqfV1T2ryqZNbkvxSOiP2rC4OzMzzM7y4AAAAAAAJsWpyYtoieqO0reLWY77dW9J9/JnBg2a2i0bxMT9pdYsWtWd6zMT7Snpq81fO3XH8jBpiLBnpm324tHnWZSoAADM1lptmtvPFdoiABBPE7AKAAAAAAAAAAAAAAPVZmluqszE15hsVnesT3BAAB/9k="; // Replace with actual placeholder image URL
 
 export const Header: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState({
-    name: '',
-    avatarUrl: defaultAvatar, // Set default avatar initially
+  const [user, setUser] = useState<{ email: string, image: string}>({
+    email: "",
+    image: defaultAvatar, // Set default avatar initially
   });
 
   useEffect(() => {
-    const token = getLoginCookie();
-    if (token) {
-      axios.get(`${process.env.NEXT_PUBLIC_BASE_API_URL}profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then(response => {
+    const fetchUser = async () => {
+      const profile = await fetchUserProfile(); // Middleware call
+      if (profile) {
         setUser({
-          name: response.data.name,
-          avatarUrl: response.data.image || defaultAvatar, // Use placeholder if no image
+          email: profile.email,
+          image: profile.image || defaultAvatar, // Use placeholder if no image
         });
         setIsLoggedIn(true);
-      })
-      .catch(error => {
-        console.error('Gagal mengambil data pengguna', error);
-      });
-    }
+      }
+    };
+    fetchUser();
   }, []);
 
-  const handleLogin = () => {
-    setLoginCookie("your_token");
-    axios.get(`${process.env.NEXT_PUBLIC_BASE_API_URL}profile`, {
-      headers: {
-        Authorization: `Bearer your_token`,
-      },
-    })
-    .then(response => {
+  const handleLogin = async () => {
+    const profile = await loginUser(); // Middleware call
+    if (profile) {
       setUser({
-        name: response.data.name,
-        avatarUrl: response.data.image || defaultAvatar, // Use placeholder if no image
+        email: profile.email,
+        image: profile.image || defaultAvatar,
       });
       setIsLoggedIn(true);
-    })
-    .catch(error => {
-      console.error('Gagal mengambil data pengguna', error);
-    });
+    }
   };
 
   const handleLogout = () => {
-    removeLoginCookie();
+    const resetUser = logoutUser(); // Middleware call
+    setUser(resetUser);
     setIsLoggedIn(false);
-    setUser({
-      name: '',
-      avatarUrl: defaultAvatar, // Reset to default avatar on logout
-    });
   };
 
   return (
@@ -106,16 +93,18 @@ export const Header: React.FC = () => {
               <PopoverTrigger>
                 <div className="flex items-center cursor-pointer">
                   <img 
-                    src={user.avatarUrl} // Use user avatar or placeholder
+                    src={user.image} // Use user avatar or placeholder
                     alt="User Avatar" 
                     className="h-10 w-10 rounded-full border" 
                   />
-                  <span className="text-white ml-2">{user.name}</span>
+                  <span className="text-white ml-2">{user.email}</span>
                 </div>
               </PopoverTrigger>
               <PopoverContent className="mt-2 bg-white rounded-lg shadow-lg p-4 w-48 text-left">
                 <Link href="/profile" className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md">My Profile</Link>
-                <Button onClick={handleLogout} variant="ghost" className="block w-full text-left py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md">Logout</Button>
+                <Link href="/login">
+                <Button onClick={handleLogout}  variant="ghost" className="block w-full text-left py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md">Logout</Button>
+                </Link>
               </PopoverContent>
             </Popover>
           ) : (

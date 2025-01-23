@@ -7,8 +7,6 @@ const router = express.Router();
 const profileController = new ProfileController();
 
 
-
-
 // Routes
 router.get("/profile", authMiddleware, profileController.getProfile.bind(profileController));
 router.put(
