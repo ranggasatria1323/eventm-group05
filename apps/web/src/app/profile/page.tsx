@@ -3,11 +3,9 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Cookies from 'js-cookie';
-import { getProfileData, updateProfileData } from './../../api/profile'; // Import the API functions
+import { getProfileData, updateProfileData } from './../../api/profile';
 
 interface UserProfile {
   name: string;
@@ -22,7 +20,6 @@ interface UserProfile {
 }
 
 function ProfilePage() {
-  const [image, setimage] = useState<string>('/placeholder.svg');
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
     email: '',
@@ -35,6 +32,7 @@ function ProfilePage() {
     points: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -47,14 +45,9 @@ function ProfilePage() {
               ? new Date(data.data.birthdate).toISOString().split('T')[0]
               : null,
           });
-          if (data.data.image) {
-            setimage(
-              `${process.env.NEXT_PUBLIC_BASE_API_URL}/public/images/${data.data.image}`,
-            );
-          }
         }
       } catch (error) {
-        // Error already handled in getProfileData
+        toast.error('Failed to fetch profile data');
       }
     };
     fetchProfile();
@@ -73,15 +66,12 @@ function ProfilePage() {
         return;
       }
 
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setimage(reader.result as string);
+        setProfile((prev) => ({ ...prev, image: reader.result as string }));
       };
       reader.readAsDataURL(file);
-      setProfile((prev) => ({
-        ...prev,
-        image: file,
-      }));
     }
   };
 
@@ -90,7 +80,7 @@ function ProfilePage() {
   ) => {
     const { name, value } = e.target;
     if (name === 'phoneNumber') {
-      const numericValue = value.replace(/\D/g, ''); // Hanya menyimpan angka
+      const numericValue = value.replace(/\D/g, '');
       setProfile((prev) => ({
         ...prev,
         [name]: numericValue,
@@ -106,18 +96,29 @@ function ProfilePage() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const response = await updateProfileData(profile);
+      const formData = new FormData();
+      formData.append('phoneNumber', profile.phoneNumber || '');
+      formData.append(
+        'birthdate',
+        profile.birthdate ? new Date(profile.birthdate).toISOString() : '',
+      );
+      formData.append('gender', profile.gender || '');
+      if (imageFile) {
+        formData.append('profileImage', imageFile);
+      }
+
+      const response = await updateProfileData(formData);
       if (response.status === 'success') {
         toast.success('Data berhasil disimpan!');
-        const data = await getProfileData(); // Refresh profile data
-        if (data.status === 'success') {
-          setProfile(data.data);
+        const updatedData = await getProfileData();
+        if (updatedData.status === 'success') {
+          setProfile(updatedData.data);
         }
       } else {
         toast.error('Gagal menyimpan data.');
       }
     } catch (error) {
-      // Error already handled in updateProfileData
+      toast.error('Terjadi kesalahan saat menyimpan data.');
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +138,7 @@ function ProfilePage() {
                 <img
                   src={
                     profile.image
-                      ? `${process.env.NEXT_PUBLIC_BASE_API_URL}/public/images/${profile.image}`
+                      ? `${process.env.NEXT_PUBLIC_BASE_API_URL}public/images/${profile.image}`
                       : '/placeholder.svg'
                   }
                   alt="Profile"

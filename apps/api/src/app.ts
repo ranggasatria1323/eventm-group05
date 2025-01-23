@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import AuthRouter from "./routers/auth.router";
 import eventRouter from "./routers/event.router"
 import profileRouter from "./routers/profile.router"
+import path from "path"
 
 dotenv.config()
 
@@ -23,7 +24,7 @@ export default class App {
     this.app.use(cors());
     this.app.use(json());
     this.app.use(urlencoded({ extended: true }));
-    this.app.use(express.static("public"));
+    this.app.use("/public", express.static(path.join(__dirname, "..", "public")))
   }
 
   private handleError():void{
