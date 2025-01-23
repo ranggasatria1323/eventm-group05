@@ -1,10 +1,12 @@
 "use client"
 
 import axios from "axios"
+import Cookies from "js-cookie";
 
+const base_url = "http://localhost:1234"
 
-export async function eventListProcess(p0: { content: string; }) {
-  const base_url = "http://localhost:1234"
+export async function eventListProcess(data: { content: string; }) {
+  
     try {
       const response = await axios.get(base_url + '/events');
       console.log('API response:', response.data);
@@ -19,5 +21,24 @@ export async function eventListProcess(p0: { content: string; }) {
     } catch (error) {
       console.error('Error fetching events:', error);
       return([]);
+    }
+}
+
+export async function eventCreateProcess(data:{content:string}) {
+    try {
+        let newToken = ""
+        if(Cookies.get("token")){
+            newToken = "Bearer "+Cookies.get("token")
+        }
+
+        return await axios.post(base_url+"/event",{
+            content:data.content,
+        },{
+            headers:{
+                Authorization:newToken
+            }
+        })
+    } catch (err:any) {
+        
     }
 }

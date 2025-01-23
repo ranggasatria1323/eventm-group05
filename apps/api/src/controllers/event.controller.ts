@@ -1,12 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { uploader } from 'uploader';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
-
-interface AuthRequest extends Request {
-  user?: User;
-}
 
 type User = {
   name: string
@@ -14,6 +9,10 @@ type User = {
   userType: string;
   id: number;
 } ;
+
+interface AuthRequest extends Request {
+  user?: User;
+}
 
 export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
@@ -86,6 +85,11 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
       data: newPost,
     });
   } catch (err) {
+
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      console.log(" error code : ", err.code)
+  }
+
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),

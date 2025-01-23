@@ -1,24 +1,35 @@
 'use client';
 
-import { PhotoIcon } from '@heroicons/react/24/solid';
-import * as React from 'react';
+import { CalendarIcon, PhotoIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useState } from 'react';
+import NumberInput from './NumberInput';
 
 export default function CreateEvent() {
-
-  
+  const [date, setDate] = useState<Date>();
   return (
-    <form className="px-20 py-10" onSubmit={createPost}>
-      <div className="space-y-12">
+    <form className="px-20 py-10 ">
+      <div className='border p-4 rounded-xl bg-gray-50'>
+      <div className="space-y-12 ">
         <div className="border-b border-gray-900/10 pb-12">
           <h2 className="text-base/7 font-semibold text-blue-900">
             Create Event
@@ -40,9 +51,7 @@ export default function CreateEvent() {
                   name="title"
                   type="text"
                   placeholder="judul event"
-                  className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)} // Menambahkan onChange
+                  className="block w-[50%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
             </div>
@@ -54,7 +63,7 @@ export default function CreateEvent() {
                 Date
               </label>
               <Popover>
-                <PopoverTrigger className="mt-2" asChild>
+                <PopoverTrigger asChild>
                   <Button
                     variant={'outline'}
                     className={cn(
@@ -89,8 +98,6 @@ export default function CreateEvent() {
                   name="description"
                   rows={3}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)} // Menambahkan onChange
                 />
               </div>
               <p className="mt-3 text-sm/6 text-gray-600">
@@ -110,7 +117,7 @@ export default function CreateEvent() {
                   name="location"
                   type="text"
                   placeholder="Lokasi Event"
-                  className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                  className="block w-[50%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
             </div>
@@ -122,47 +129,63 @@ export default function CreateEvent() {
                 Price
               </label>
               <div className="mt-2">
-                <input
-                  id="price"
-                  name="price"
-                  type="number"
-                  placeholder="IDR"
-                  className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                <NumberInput
                 />
               </div>
-            </div>
-            <div className="col-span-full">
-              <label
-                htmlFor="cover-photo"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Event Poster
-              </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                <div className="text-center">
-                  <PhotoIcon
-                    aria-hidden="true"
-                    className="mx-auto size-12 text-gray-300"
-                  />
-                  <div className="mt-4 flex text-sm/6 text-gray-600">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        onChange={(e) => setImageFile(e.target.files[0])} // Menambahkan onChange untuk file upload
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+              <div className="sm:col-span-4">
+                <label
+                  htmlFor="category"
+                  className="block text-sm/6 font-medium text-gray-900"
+                >
+                  Category
+                </label>
+                <Select>
+                  <SelectTrigger className="w-[180px] mt-2">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Category</SelectLabel>
+                      <SelectItem value="sport">Sport</SelectItem>
+                      <SelectItem value="konser">Konser</SelectItem>
+                      <SelectItem value="kuliner">Kuliner</SelectItem>
+                      <SelectItem value="pameran">Pameran</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-full mt-8">
+                <label
+                  htmlFor="cover-photo"
+                  className="block text-sm/6 font-medium text-gray-900"
+                >
+                  Event Poster
+                </label>
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                  <div className="text-center">
+                    <PhotoIcon
+                      aria-hidden="true"
+                      className="mx-auto size-12 text-gray-300"
+                    />
+                    <div className="mt-4 flex text-sm/6 text-gray-600">
+                      <label
+                        htmlFor="file-upload"
+                        className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="file-upload"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs/5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
                   </div>
-                  <p className="text-xs/5 text-gray-600">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
                 </div>
               </div>
             </div>
@@ -179,6 +202,7 @@ export default function CreateEvent() {
         >
           Create
         </button>
+      </div>
       </div>
     </form>
   );

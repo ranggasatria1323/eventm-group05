@@ -94,7 +94,7 @@ export function Header() {
 
         {/* Actions */}
         <div className="ml-auto flex items-center space-x-2">
-          <Link href="/buat">
+          <Link href="/dashboard/create-event">
             <Button
               variant="ghost"
               className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
