@@ -14,10 +14,8 @@ export default function LoginLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <div>
         {children}
-      </body>
-    </html>
+    </div>
   );
 }

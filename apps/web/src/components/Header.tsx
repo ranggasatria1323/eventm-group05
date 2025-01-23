@@ -1,9 +1,24 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar, Compass, Search } from 'lucide-react';
+import { useState } from 'react';
 
 export function Header() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const loginUser = () => {
+    // Simulate a login action
+    setIsLoggedIn(true);
+  };
+
+  const logoutUser = () => {
+    // Simulate a logout action
+    setIsLoggedIn(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#152455]">
       <div className="flex justify-end h-8 bg-blue-900 px-10">
@@ -79,29 +94,51 @@ export function Header() {
 
         {/* Actions */}
         <div className="ml-auto flex items-center space-x-2">
-        <Link href="/buat"><Button
-            variant="ghost"
-            className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
-          >
-            <Calendar />
-            Buat Event
-          </Button></Link>
-          <Link href="/Jelajah"><Button
-            variant="ghost"
-            className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
-          >
-            <Compass />
-            Jelajah
-          </Button></Link>
-          <Link href="/register"><Button
-            variant="outline"
-            className="text-black border-none hover:bg-blue-700 hover:text-white"
-          >
-            Daftar
-          </Button></Link>
-          <Link href="/login"><Button className="bg-blue-600 text-white hover:bg-blue-700">
-            Masuk
-          </Button></Link>
+          <Link href="/buat">
+            <Button
+              variant="ghost"
+              className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
+            >
+              <Calendar />
+              Buat Event
+            </Button>
+          </Link>
+          <Link href="/Jelajah">
+            <Button
+              variant="ghost"
+              className="hidden sm:inline-flex text-white hover:bg-blue-700  hover:text-white"
+            >
+              <Compass />
+              Jelajah
+            </Button>
+          </Link>
+          {!isLoggedIn ? (
+            <>
+              <Link href="/register">
+                <Button
+                  variant="outline"
+                  className="text-black border-none hover:bg-blue-700 hover:text-white"
+                >
+                  Daftar
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={loginUser}
+                >
+                  Masuk
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Button
+              onClick={logoutUser}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              Logout
+            </Button>
+          )}
         </div>
       </div>
 

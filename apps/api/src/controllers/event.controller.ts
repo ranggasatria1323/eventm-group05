@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { uploader } from 'uploader';
 
 const prisma = new PrismaClient();
 
@@ -12,7 +13,7 @@ type User = {
   email: string;
   userType: string;
   id: number;
-};
+} ;
 
 export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
@@ -47,11 +48,28 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
   const user = req.user as User;
 
   try {
+
+    const { file } = req
+
+    console.log({
+      data: {
+        title: title || '',
+        description: description || '',
+        image: file?.filename || '',
+        location: location || '',
+        date: new Date(date) || '',
+        event_type: event_type || '',
+        price: price || 0,
+        max_voucher_discount: max_voucher_discount || 0,
+        category: category || '',
+        created_by: user.id,
+      },
+    })
     const newPost = await prisma.event.create({
       data: {
         title: title || '',
         description: description || '',
-        image: image || '',
+        image: file?.filename || '',
         location: location || '',
         date: new Date(date) || '',
         event_type: event_type || '',

@@ -18,7 +18,7 @@ model User {
   userType     String
   image        String?
   phoneNumber  String?
-  birthdate    DateTime?
+  birthdate    DateTime?   @db.Date
   gender       String?
   referralCode String?     @unique
   points       Int         @default(0)
@@ -41,7 +41,7 @@ model Event {
   description                     String?
   image                           String? @db.VarChar(50)
   location                        String? @db.VarChar (50)
-  date                            DateTime?
+  date                            DateTime? @db.Date
   event_type                      String? @db.VarChar(50)
   price                           Int?
   max_voucher_discount            Int?
