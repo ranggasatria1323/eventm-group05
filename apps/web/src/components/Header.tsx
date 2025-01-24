@@ -30,7 +30,7 @@ export const Header: React.FC = () => {
         setIsLoggedIn(true);
       }
     };
-    fetchUser();
+    fetchUser(); //Memanggil fungsi untuk menjalanakan fetchUser
   }, []);
 
   const handleLogin = async () => {
@@ -124,12 +124,12 @@ export const Header: React.FC = () => {
               <PopoverTrigger>
                 <div className="flex items-center cursor-pointer">
                   <img
-                    src={user.image || defaultAvatar}
+                    src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}`|| defaultAvatar}
                     alt="User Avatar"
-                    className="h-10 w-10 rounded-full border"
+                    className="h-10 w-10 rounded-full border object-cover"
                   />
-                  <div className='text-left'>
-                    <span className="block font-medium text-[#64ffda]">
+                  <div className="ml-2 text-left">
+                    <span className="block font-medium text-white">
                       {user.email}
                     </span>
                   </div>
@@ -160,7 +160,7 @@ export const Header: React.FC = () => {
                   variant="outline"
                   className="text-black border-none hover:bg-blue-700 hover:text-white"
                 >
-                  Daftar
+                  Register
                 </Button>
               </Link>
               <Link href="/login">
@@ -168,7 +168,7 @@ export const Header: React.FC = () => {
                   className="bg-blue-600 text-white hover:bg-blue-700"
                   onClick={handleLogin}
                 >
-                  Masuk
+                  Login
                 </Button>
               </Link>
             </>

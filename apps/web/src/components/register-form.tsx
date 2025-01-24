@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { Button } from "components/ui/button";
-import { Input } from "components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Facebook, Linkedin } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";

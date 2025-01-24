@@ -7,7 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getProfileData, updateProfileData } from './../../api/profile';
 
-interface UserProfile {
+interface UserProfile {       //INTERFACE USERPROFILE
   name: string;
   email: string;
   userType: string;
@@ -138,7 +138,7 @@ function ProfilePage() {
                 <img
                   src={
                     profile.image
-                      ? `${process.env.NEXT_PUBLIC_BASE_API_URL}public/images/${profile.image}`
+                      ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile.image}`
                       : '/placeholder.svg'
                   }
                   alt="Profile"

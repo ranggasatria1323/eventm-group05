@@ -8,22 +8,22 @@ const Chart = dynamic(() => import('react-apexcharts'), { ssr: false }); // Lazy
 
 export default function Dashboard() {
   return (
-    <div className="bg-primary min-h-screen text-text">
+    <div className="bg-[#0A192F] min-h-screen text-[#ccd6f6]">
       {/* Navbar */}
-      <nav className="fixed top-0 z-50 w-full bg-primary border-b border-background">
+      <nav className="fixed top-0 z-50 w-full bg-[#0A192F] border-b border-[#112240]">
         <div className="px-4 py-3 lg:px-6 flex justify-between items-center">
           <div className="flex items-center">
             <Link href="/dashboard">
-              <span className="text-xl font-bold text-accent">EVENTASY</span>
+              <span className="text-xl font-bold text-[#64ffda]">EVENTASY</span>
             </Link>
           </div>
-          <h1 className="font-bold text-lg">EO Name</h1>
+          <h1 className="font-bold text-lg text-[#ccd6f6]">EO Name</h1>
         </div>
       </nav>
 
       {/* Sidebar */}
       <aside
-        className="fixed top-0 left-0 w-64 h-screen pt-20 bg-secondary border-r border-background transition-transform transform -translate-x-full md:translate-x-0"
+        className="fixed top-0 left-0 w-64 h-screen pt-20 bg-[#112240] border-r border-[#112240] transition-transform transform -translate-x-full md:translate-x-0"
         aria-label="Sidebar"
       >
         <ul className="px-3 space-y-4">
@@ -35,7 +35,7 @@ export default function Dashboard() {
           ].map((item) => (
             <li key={item.label}>
               <Link href={item.href}>
-                <Button variant="ghost" className="w-full justify-start text-accent hover:bg-background">
+                <Button variant="ghost" className="w-full justify-start text-[#64ffda] hover:bg-[#0A192F]">
                   {item.label}
                 </Button>
               </Link>
@@ -43,12 +43,12 @@ export default function Dashboard() {
           ))}
           <li>
             <Link href="/dashboard/create-event">
-              <Button className="w-full bg-accent text-primary hover:bg-opacity-80">Create Event</Button>
+              <Button className="w-full bg-[#64ffda] text-[#0A192F] hover:bg-opacity-80">Create Event</Button>
             </Link>
           </li>
           <li>
             <Link href="/">
-              <Button variant="ghost" className="w-full justify-start text-accent hover:bg-background">
+              <Button variant="ghost" className="w-full justify-start text-[#64ffda] hover:bg-[#0A192F]">
                 Log Out
               </Button>
             </Link>
@@ -58,7 +58,7 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="p-4 sm:ml-64">
-        <div className="p-6 bg-secondary border border-background rounded-lg">
+        <div className="p-6 bg-[#112240] border border-[#112240] rounded-lg">
           {/* Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
@@ -67,9 +67,9 @@ export default function Dashboard() {
               { title: 'Revenue', desc: 'Revenue generated this month.' },
               { title: 'Total Seat Sold', desc: 'Seats sold this month.' },
             ].map((card) => (
-              <div key={card.title} className="bg-primary border border-background p-4 rounded-lg">
-                <h5 className="text-lg font-bold mb-2 text-accent">{card.title}</h5>
-                <p className="text-sm text-gray-400">{card.desc}</p>
+              <div key={card.title} className="bg-[#0A192F] border border-[#112240] p-4 rounded-lg">
+                <h5 className="text-lg font-bold mb-2 text-[#64ffda]">{card.title}</h5>
+                <p className="text-sm text-[#8892b0]">{card.desc}</p>
               </div>
             ))}
           </div>
@@ -109,10 +109,11 @@ export default function Dashboard() {
                 },
                 xaxis: {
                   categories: ['Q1', 'Q2', 'Q3', 'Q4'], // Quarter labels
+                  labels: { style: { colors: '#ccd6f6' } }, // X-axis labels color
                 },
                 legend: {
                   position: 'bottom',
-                  labels: { colors: '#ffffff' }, // Legend text color
+                  labels: { colors: '#ccd6f6' }, // Legend text color
                 },
                 responsive: [
                   {

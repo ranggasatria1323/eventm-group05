@@ -1,8 +1,6 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import axios from "axios"
-import Cookies from "js-cookie"
 import { Formik, Form, Field, ErrorMessage, type FormikHelpers } from "formik"
 import * as Yup from "yup"
 import { Button } from "./../components/ui/button"

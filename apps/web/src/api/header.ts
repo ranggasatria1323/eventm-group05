@@ -9,7 +9,7 @@ const defaultAvatar = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAA
 export const fetchUserProfile = async () => {
   const token = getLoginCookie();
   if (!token) return null;
-
+  
   try {
     const response = await axios.get(`${API_BASE_URL}profile`, {
       headers: {
@@ -17,8 +17,8 @@ export const fetchUserProfile = async () => {
       },
     });
     return {
-      email: response.data.email,
-      image: response.data.image || null, // Gunakan placeholder jika `image` kosong
+      email: response.data.data.email,
+      image: response.data.data.image || null, // Gunakan placeholder jika `image` kosong
     };
   } catch (error) {
     console.error('Gagal mengambil data pengguna', error);
