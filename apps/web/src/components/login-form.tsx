@@ -1,16 +1,15 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import axios from "axios"
-import Cookies from "js-cookie"
 import { Formik, Form, Field, ErrorMessage, type FormikHelpers } from "formik"
 import * as Yup from "yup"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "./../components/ui/button"
+import { Input } from "./../components/ui/input"
+import { Checkbox } from "./../components/ui/checkbox"
 import { Facebook, Linkedin } from "lucide-react"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { loginUser } from "../api/auth"
 
 interface LoginFormValues {
   email: string
@@ -32,29 +31,19 @@ export function LoginForm() {
     password: Yup.string().required("Wajib diisi"),
   })
 
-  const handleSubmit = async (values: LoginFormValues, { setSubmitting }: FormikHelpers<LoginFormValues>) => {
-    try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}login`, {
-        email: values.email,
-        password: values.password,
-      })
-      if (response.status === 200) {
-        const { token } = response.data.data
-        if (token) {
-          Cookies.set("token", token, { expires: 7 })
-          console.log("Login berhasil")
-          router.push("/")
-        } else {
-          console.error("Token tidak ditemukan dalam respons")
-        }
-      } else {
-        toast.error("Login gagal: Email atau password salah")
-      }
-    } catch (error) {
-      toast.error("Terjadi kesalahan: Email atau password salah")
-      console.error("Terjadi kesalahan", error)
+  const handleSubmit = async (
+    values: LoginFormValues, 
+    { setSubmitting }: FormikHelpers<LoginFormValues>
+  ) => {
+    const { email, password } = values;
+
+    const result = await loginUser(email, password); // Panggil middleware login
+
+    if (result.success) {
+      router.push("/"); // Redirect setelah login berhasil
     }
-    setSubmitting(false)
+
+    setSubmitting(false);
   }
 
   return (

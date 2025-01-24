@@ -3,12 +3,11 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Cookies from 'js-cookie';
+import { getProfileData, updateProfileData } from './../../api/profile';
 
-interface UserProfile {
+interface UserProfile {       //INTERFACE USERPROFILE
   name: string;
   email: string;
   userType: string;
@@ -21,7 +20,6 @@ interface UserProfile {
 }
 
 function ProfilePage() {
-  const [image, setimage] = useState<string>('/placeholder.svg');
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
     email: '',
@@ -34,39 +32,26 @@ function ProfilePage() {
     points: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
-    getProfileData();
-  }, []);
-
-  const getProfileData = async () => {
-    try {
-      const token = Cookies.get('token');
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL}profile`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (response.data.status === 'success') {
-        const data = response.data.data;
-        setProfile({
-          ...data,
-          birthdate: data.birthdate
-            ? new Date(data.birthdate).toISOString().split('T')[0]
-            : null,
-        });
-        if (data.image) {
-          setimage(`${process.env.NEXT_PUBLIC_BASE_API_URL}${data.image}`);
+    const fetchProfile = async () => {
+      try {
+        const data = await getProfileData();
+        if (data.status === 'success') {
+          setProfile({
+            ...data.data,
+            birthdate: data.data.birthdate
+              ? new Date(data.data.birthdate).toISOString().split('T')[0]
+              : null,
+          });
         }
+      } catch (error) {
+        toast.error('Failed to fetch profile data');
       }
-    } catch (error) {
-      toast.error('Gagal mengambil data profil');
-      console.error('Error fetching profile data:', error);
-    }
-  };
+    };
+    fetchProfile();
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,15 +66,12 @@ function ProfilePage() {
         return;
       }
 
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setimage(reader.result as string);
+        setProfile((prev) => ({ ...prev, image: reader.result as string }));
       };
       reader.readAsDataURL(file);
-      setProfile((prev) => ({
-        ...prev,
-        image: file,
-      }));
     }
   };
 
@@ -97,6 +79,14 @@ function ProfilePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
+    if (name === 'phoneNumber') {
+      const numericValue = value.replace(/\D/g, '');
+      setProfile((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+      return;
+    }
     setProfile((prev) => ({
       ...prev,
       [name]: value,
@@ -106,7 +96,6 @@ function ProfilePage() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const token = Cookies.get('token');
       const formData = new FormData();
       formData.append('phoneNumber', profile.phoneNumber || '');
       formData.append(
@@ -114,30 +103,22 @@ function ProfilePage() {
         profile.birthdate ? new Date(profile.birthdate).toISOString() : '',
       );
       formData.append('gender', profile.gender || '');
-      if (profile.image instanceof File) {
-        formData.append('image', profile.image);
+      if (imageFile) {
+        formData.append('profileImage', imageFile);
       }
 
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL}profile`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-
-      if (response.data.status === 'success') {
+      const response = await updateProfileData(formData);
+      if (response.status === 'success') {
         toast.success('Data berhasil disimpan!');
-        getProfileData(); // Refresh profile data, including points
+        const updatedData = await getProfileData();
+        if (updatedData.status === 'success') {
+          setProfile(updatedData.data);
+        }
       } else {
         toast.error('Gagal menyimpan data.');
       }
     } catch (error) {
       toast.error('Terjadi kesalahan saat menyimpan data.');
-      console.error('Error saving profile data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -157,8 +138,8 @@ function ProfilePage() {
                 <img
                   src={
                     profile.image
-                      ? `${process.env.NEXT_PUBLIC_BASE_API_URL}${profile.image}`
-                      : 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQArwMBIgACEQEDEQH/xAAbAAEAAgMBAQAAAAAAAAAAAAAAAwQBAgUGB//EAC0QAAICAQIFAwMEAwEAAAAAAAABAgMRBEEFEiExcRMyUSJCYVJigZEzQ6Ej/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/APuIAAAAAAAABhtLu0BkEcrUuyyaO6T7JATgrerP5Hqy+cgWQQK57o3jan36eQJAYTzuZAAAAAAAAAAAAAAADILLPtiBvO1LourIJSb79TAAAAAAAAAA2jJx7f0TQsUvJXAFwENVmejJgAAAAAAAAABrOXLFsDS6ePpX8kBlvLMAAAAI7rq6VmyWPxuRa3U+hXhf5Jdl8fk5EpObcpttvu2B0pcTrXtrk/LwZjxOp+6E4/8ATl4AHfrshbHmrkpLfGxscCqyVM+auTizs6W+N9XMu66SXwBMAABYqllde5XMxfK8oC2DCeUmZAAAAAABDe+yJirY8zYGoAAAB9n4A4ept9a+c9s4XgiCAAAACzw6309SltLoysb0Z9evHfmQHeAAAAAT0PMcfBKV6XiaWzLAAAAAABhlV9W2WmVAAAAAADh6mt1aicHsyI7Gt03rwzDHqLtnc5EoyjJxksNPswMAAAWeH1uzVRa7Q+pkEISskowWZPY7Ol0609XLn6n1kwJgAAAAG1fvXktFWHvXktAAAAAABlWXvl5LRXuWJZ+QIwAAAAAiv09V6xZHL2e5LJqKzJ4W7exUs4hTH2Zn47ARS4XF+21ryjaPDIJ/XZJ+FgjfE5fbUl5ZmPE391S/hgXqqa6Y4rjj87m5Vq19E+km4P8Aci0mms7bfkAAAAAA3qWZoskNC65JgAAAAAAR3RzDwSB9gKYN7I8svwaACHVamOnhmXWT7RN7rY01Ssn2RxLbJW2Oc+7AzfdZfLNksraOyIwAAAAE2n1Nmnf0vMf0t9CEAd2i6F8OaH8rdEhw9NfOi1SXb7l8o7cJKcIyj1i1lMDJlGCSqHNLOyAlrjyxS3NwAAAAAAAAANZx5lgrSjystms4KXkDh8VtzOFa7LqygW+JVW16mcrIvll7XsVAAAAAAAAAB0+F25rlU/teUcw6HCabZ3c6TVeGnIDpwi5MsxiorCMRiorCNgAAAAAAAAAAAAADWUIzi4zipJ90zmanhEX100uX9suq/s6oA8xdpb6X9dcl+V1RCj1pDPT02P8A9KoS/LQHmAeifDtI/wDSv7YXDtIuvop+WwPO7/n4LFGi1N3traX6pdEeghRTX/jqhHxElA5ul4VXW1K6XqP42OikkkksJbIyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2Q=='
+                      ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile.image}`
+                      : '/placeholder.svg'
                   }
                   alt="Profile"
                   className="w-full h-full object-cover"

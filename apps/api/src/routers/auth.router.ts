@@ -1,6 +1,6 @@
 import { Router } from "express";
 import AuthController from "../controllers/auth.controller";
-import { validateRegisterData, validateLoginData, authMiddleware } from "../middlewares/auth.middleware";
+import { validateRegisterData, validateLoginData, authMiddleware, attachUserToRequest } from "../middlewares/auth.middleware";
 
 export default class AuthRouter {
   private router: Router;
