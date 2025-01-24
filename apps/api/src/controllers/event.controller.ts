@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { uploader } from 'uploader';
 
 const prisma = new PrismaClient();
@@ -86,6 +86,10 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
       data: newPost,
     });
   } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      console.log(" error code : ", err.code)
+  }
+
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),

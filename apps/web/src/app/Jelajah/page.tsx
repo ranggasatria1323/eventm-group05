@@ -33,7 +33,11 @@ export default function Jelajah() {
                   <div className="xl:border-b-2 md:border-b-2 md:leading-4 md:p-3 xl:p-5 xl:leading-4">
                     <p style={{ fontWeight: 'bold' }} className='mb-4'>{item.title}</p>
                     <p className='mb-4'>{item.description}</p>
-                    <p className='mb-4'>{item.date}</p>
+                    <p className='mb-4'>{new Date(item.date).toLocaleString("en-GB",{
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric"
+                    })}</p>
                     <p>Rp. {item.price.toLocaleString()}</p>
                   </div>
                   <div>
