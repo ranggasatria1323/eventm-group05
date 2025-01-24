@@ -17,7 +17,7 @@ export default function CreateEvent() {
 
   
   return (
-    <form className="px-20 py-10" onSubmit={createPost}>
+    <form className="px-20 py-10" onSubmit={createPos}>
       <div className="space-y-12">
         <div className="border-b border-gray-900/10 pb-12">
           <h2 className="text-base/7 font-semibold text-blue-900">
