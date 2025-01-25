@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button'; // Button Import
-import { Footer } from '@/components/Footer';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false }); // Lazy-loaded Chart
 
 export default function Dashboard() {
+  
   return (
     <div className="bg-[#ffffff] min-h-screen text-[#ccd6f6]">
       {/* Navbar */}

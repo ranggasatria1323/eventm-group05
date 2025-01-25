@@ -67,6 +67,21 @@ export const attachUserToRequest = async (
   }
 };
 
+// New Middleware: Restrict access to Event Organizers only
+export const restrictToEventOrganizer = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.user?.userType !== 'Event Organizer') {
+    return res.status(403).json({
+      status: 'error',
+      message: 'Access denied. Only Event Organizers can access this resource.',
+    });
+  }
+  next();
+};
+
 export const validateRegisterData = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required'),

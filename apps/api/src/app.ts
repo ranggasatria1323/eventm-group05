@@ -33,7 +33,6 @@ export default class App {
     this.app.use(json());
     this.app.use(express.static('public'))
     this.app.use(urlencoded({ extended: true }));
-    this.app.use(express.static('public'));
   }
 
   private handleError(): void {

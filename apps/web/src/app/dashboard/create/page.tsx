@@ -1,4 +1,6 @@
-import CreateEvent from '@/components/create-event';
+import CreateEvent from "@/components/create-event";
+
+
 
 export default function EventCreate() {
   return (

@@ -96,3 +96,40 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const getEventById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    const event = await prisma.event.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+            userType: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      res.status(400).json({
+        status: 'event not found',
+      });
+    } else {
+      res.status(200).json({
+        status: 'success',
+        data: event,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
+  }
+};
