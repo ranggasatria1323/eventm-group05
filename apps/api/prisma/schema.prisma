@@ -18,10 +18,11 @@ model User {
   userType     String
   image        String?
   phoneNumber  String?
-  birthdate    DateTime?   @db.Date
+  birthdate    DateTime?  @db.Date
   gender       String?
   referralCode String?     @unique
   points       Int         @default(0)
+  referrerId   Int?        // ID pengguna yang mereferensikan
   createdAt    DateTime    @default(now())
   events       Event[]
   tickets      Ticket[]
@@ -30,8 +31,6 @@ model User {
 
   @@map("users")
 }
-
-
 
 model Event {
   id                              Int @id @default(autoincrement())

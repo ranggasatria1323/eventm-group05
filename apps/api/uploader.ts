@@ -5,7 +5,7 @@ import { join } from "path";
 type DestinationCallback = (error: Error | null, destination:string) => void
 type FileNameCallback = (error: Error | null, destination:string) => void
 
-export const uploader = (filePrefix:string, folderName:string) =>{
+export const eventUploader = (filePrefix:string, folderName:string) =>{
     const defaultDir = join(__dirname,"./public/")
 
     const storage = multer.diskStorage({
@@ -31,4 +31,32 @@ export const uploader = (filePrefix:string, folderName:string) =>{
         }
     })
     return multer({ storage:storage })
+}
+
+export const userUploader = (filePrefix:string, folderName:string) =>{
+  const defaultDir = join(__dirname,"./public/")
+
+  const storage = multer.diskStorage({
+      destination:(
+          req:Request,
+          file:Express.Multer.File,
+          cb:DestinationCallback
+      ) => {
+          const destination = folderName ? defaultDir + folderName : defaultDir
+          cb(null,destination)
+      },
+      filename:(
+          req:Request,
+          file:Express.Multer.File,
+          cb:FileNameCallback
+      ) => {
+          // bentuknya array 
+          const originalNameParts = file.originalname.split(".")
+          const fileExtension = originalNameParts[originalNameParts.length - 1]
+          const newFileName = filePrefix+Date.now()+"."+fileExtension
+
+          cb(null,newFileName)
+      }
+  })
+  return multer({ storage:storage })
 }

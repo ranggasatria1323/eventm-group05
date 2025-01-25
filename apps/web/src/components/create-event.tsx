@@ -24,7 +24,6 @@ import {
 import { useEffect, useState } from 'react';
 import { eventCreateProcess } from '@/api/event';
 import NumberInput from './NumberInput';
-import { title } from 'process';
 
 
 export default function CreateEvent() {

@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { uploader } from 'uploader';
 
 const prisma = new PrismaClient();
 
@@ -73,8 +72,8 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
         location: location || '',
         date: new Date(date) || '',
         event_type: event_type || '',
-        price: price || 0,
-        max_voucher_discount: max_voucher_discount || 0,
+        price: Number(price) || 0,
+        max_voucher_discount: Number(max_voucher_discount) || 0,
         category: category || '',
         created_by: user.id,
       },

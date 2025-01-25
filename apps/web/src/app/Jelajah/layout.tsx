@@ -16,12 +16,11 @@ export default function JelajahRoot({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Header />
+    <div>
+      <Header />
         {children}
-        <Footer />
-      </body>
-    </html>
+      <Footer />
+    </div>
+     
   );
 }

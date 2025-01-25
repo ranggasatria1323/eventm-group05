@@ -1,7 +1,7 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { Carousel, CarouselItem } from '@/components/ui/carousel';
+import { Card } from './../../components/ui/card';
+import { Carousel, CarouselItem } from './../../components/ui/carousel';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { eventListProcess } from '@/api/event';
