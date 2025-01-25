@@ -3,7 +3,7 @@
 import { CalendarIcon, PhotoIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Formik } from 'formik';
+import { Formik, useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -30,7 +30,7 @@ import { title } from 'process';
 export default function CreateEvent() {
   const [date, setDate] = useState<Date>();
 
-  const validationSchema = Yup.object({
+  const validationSchema = Yup.object().shape({
     title: Yup.string().required("Title harus di isi"),
     description: Yup.string().required("Deskripsi harus di isi"),
     image: Yup.string().required("Gambar harus di isi"),
@@ -42,9 +42,27 @@ export default function CreateEvent() {
     category:Yup.string().required("Kategori harus di isi"),
 
 })
-  {}
+
+  const formik = useFormik({
+    validationSchema:validationSchema,
+      initialValues:{
+        title:"",
+        description:"",
+        image:'',
+        location:'',
+        date:'',
+        event_type:'',
+        price:0,
+        max_voucher_disc:0,
+        category:'',
+      }, 
+      onSubmit:async (values) => {
+        await eventCreateProcess(values)
+      }
+    
+  })
   return (
-    <form className="px-20 py-10 ">
+    <form onSubmit={formik.handleSubmit} className="px-20 py-10 ">
       <div className='border p-4 rounded-xl bg-gray-50'>
       <div className="space-y-12 ">
         <div className="border-b border-gray-900/10 pb-12">
@@ -69,8 +87,8 @@ export default function CreateEvent() {
                   type="text"
                   placeholder="judul event"
                   className="block w-[50%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  value={title}
-                  onChange={(e) => (e.target.value)}
+                  onChange={formik.handleChange}
+                  value={formik.values.title}
                 />
               </div>
             </div>
@@ -117,8 +135,8 @@ export default function CreateEvent() {
                   name="description"
                   rows={3}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  value={description}
-                  onChange={(e) => (e.target.value)}
+                  onChange={formik.handleChange}
+                  value={formik.values.description}
                 />
               </div>
               <p className="mt-3 text-sm/6 text-gray-600">
@@ -138,6 +156,8 @@ export default function CreateEvent() {
                   name="location"
                   type="text"
                   placeholder="Lokasi Event"
+                  onChange={formik.handleChange}
+                  value={formik.values.location}
                   className="block w-[50%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -160,7 +180,8 @@ export default function CreateEvent() {
                 >
                   Category
                 </label>
-                <Select>
+                <Select onValueChange={formik.handleChange}
+                  value={formik.values.category}>
                   <SelectTrigger className="w-[180px] mt-2">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
@@ -198,6 +219,8 @@ export default function CreateEvent() {
                           id="file-upload"
                           name="file-upload"
                           type="file"
+                          onChange={formik.handleChange}
+                          value={formik.values.image}
                           className="sr-only"
                         />
                       </label>

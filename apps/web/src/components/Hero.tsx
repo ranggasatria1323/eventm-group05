@@ -68,7 +68,7 @@ export default function Hero() {
             <div className="p-2 ">
               <Link href={''}>
                 <Card className="xl:w-[250px] h-full md:w-[210px]">
-                  <img src={item.image} className='rounded-t-[10px]' style={{width:"100%", height:'150px', objectFit:'cover', objectPosition:'top'}} />
+                  <img src={`${process.env.NEXT_PUBLIC_BASE_API_URL}event-images/${item.image}`} className='rounded-t-[10px]' style={{width:"100%", height:'150px', objectFit:'cover', objectPosition:'top'}} />
                   <div className="xl:border-b-2 md:border-b-2 md:leading-4 md:p-3 xl:p-5 xl:leading-4">
                     <p style={{ fontWeight: 'bold' }} className='mb-4'>{item.title}</p>
                     <p className='mb-4'>{item.description}</p>

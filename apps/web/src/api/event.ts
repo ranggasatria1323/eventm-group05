@@ -5,6 +5,18 @@ import Cookies from "js-cookie";
 
 const base_url = "http://localhost:1234"
 
+interface IEventsDto {
+  title:string,
+  description:string,
+  image:string,
+  location:string,
+  date:string,
+  event_type:string,
+  price:number,
+  max_voucher_disc:number,
+  category:string
+}
+
 export async function eventListProcess(data: { content: string; }) {
   
     try {
@@ -24,16 +36,14 @@ export async function eventListProcess(data: { content: string; }) {
     }
 }
 
-export async function eventCreateProcess(data:{content:string}) {
+export async function eventCreateProcess(data:IEventsDto) {
     try {
         let newToken = ""
         if(Cookies.get("token")){
             newToken = "Bearer "+Cookies.get("token")
         }
 
-        return await axios.post(base_url+"/event",{
-            content:data.content,
-        },{
+        return await axios.post(base_url+"/event",data,{
             headers:{
                 Authorization:newToken
             }
