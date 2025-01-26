@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { useState } from 'react'
 import Cookies from 'js-cookie'
-import { Button } from '@/components/ui/button'
+import { Button } from './../../components/ui/button'
 
 export default function InterestPage() {
   const router = useRouter()
@@ -30,7 +30,7 @@ export default function InterestPage() {
       const data = res.data
 
       if (data.status === 'success') {
-        router.push('/')
+        router.push('/login')
       } else {
         setError(data.message || 'Failed to update user role')
       }

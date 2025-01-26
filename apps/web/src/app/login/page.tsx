@@ -1,3 +1,5 @@
+"use client"
+
 import { AuthPage } from '@/components/auth-page'
 import { HeaderOnlyLogo } from '@/components/HeaderOnlyLogo'
 
