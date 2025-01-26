@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-export const loginUser = async (email:string, password:string) => {
+export const loginUser = async (email: string, password: string) => {
   try {
     const response = await axios.post(`${API_BASE_URL}login`, {
       email,
@@ -34,7 +34,7 @@ export const loginUser = async (email:string, password:string) => {
   }
 };
 
-export const registerUser = async (values:any) => {
+export const registerUser = async (values: any) => {
   try {
     const response = await axios.post(`${API_BASE_URL}register`, values);
     const data = response.data;
@@ -55,15 +55,22 @@ export const registerUser = async (values:any) => {
         if (errorMessage === 'Email sudah terdaftar') {
           toast.warn('Email sudah terdaftar. Silakan gunakan email lain.');
         } else {
-          toast.error(errorMessage || 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
+          toast.error(
+            errorMessage ||
+              'Terjadi kesalahan saat registrasi. Silakan coba lagi.',
+          );
         }
       } else if (error.request) {
-        toast.error('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+        toast.error(
+          'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
+        );
       } else {
         toast.error('Terjadi kesalahan saat memproses permintaan Anda.');
       }
     } else {
-      toast.error('Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.');
+      toast.error(
+        'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.',
+      );
     }
     return { success: false };
   }

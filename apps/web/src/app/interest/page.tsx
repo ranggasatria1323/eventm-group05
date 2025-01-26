@@ -1,48 +1,40 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import axios from 'axios'
-import { useState } from 'react'
-import Cookies from 'js-cookie'
-import { Button } from './../../components/ui/button'
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Cookies from 'js-cookie';
+import axios from 'axios'; // Import axios
+import { Button } from './../../components/ui/button';
+import { updateUserRole } from './../../api/interest'; // Import helper API
 
 export default function InterestPage() {
-  const router = useRouter()
-  const [error, setError] = useState('')
+  const router = useRouter();
+  const [error, setError] = useState('');
 
   const handleSelectRole = async (role: 'Customer' | 'Event Organizer') => {
     try {
-      const token = Cookies.get('token')
+      const token = Cookies.get('token');
       if (!token) {
-        throw new Error('No token found')
+        throw new Error('No token found');
       }
 
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL}interest`,
-        { userType: role },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
-
-      const data = res.data
+      const data = await updateUserRole(role, token);
 
       if (data.status === 'success') {
-        router.push('/login')
+        router.push('/login');
       } else {
-        setError(data.message || 'Failed to update user role')
+        setError(data.message || 'Failed to update user role');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
-        setError(error.response.data.message || 'Failed to update user role')
+        setError(error.response.data.message || 'Failed to update user role');
+      } else if (error instanceof Error) {
+        setError(error.message);
       } else {
-        console.error('There was an error!', error)
-        setError('An unexpected error occurred. Please try again later.')
+        setError('An unexpected error occurred.');
       }
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 px-4">
@@ -81,7 +73,7 @@ export default function InterestPage() {
               <p className="text-gray-600 text-center mb-6">
                 Discover amazing events and activities near you
               </p>
-              <Button 
+              <Button
                 onClick={() => handleSelectRole('Customer')}
                 className="w-full bg-[#D1410C] hover:bg-[#F05537] text-white"
               >
@@ -106,7 +98,7 @@ export default function InterestPage() {
               <p className="text-gray-600 text-center mb-6">
                 Create and manage your own successful events
               </p>
-              <Button 
+              <Button
                 onClick={() => handleSelectRole('Event Organizer')}
                 className="w-full bg-[#D1410C] hover:bg-[#F05537] text-white"
               >
@@ -117,5 +109,5 @@ export default function InterestPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

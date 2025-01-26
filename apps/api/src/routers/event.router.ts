@@ -1,9 +1,23 @@
-import { Router } from "express";
-import { getEvents, createEvents } from "@/controllers/event.controller";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import { Router } from 'express';
+import { getEvents, createEvents, getOrganizerEvents, getEventById } from '../controllers/event.controller';
+import {
+  authMiddleware
+} from '../middlewares/auth.middleware';
+import { uploader } from 'uploader';
 
-const router = Router()
-router.get('/events/', getEvents)
-router.post('/event', authMiddleware, createEvents)
+const router = Router();
 
-export default router
+
+
+router.get('/events/', getEvents);
+router.post(
+  '/event',
+  authMiddleware,
+  uploader('IMG', 'event-images').single('file'),
+  createEvents,
+);
+
+router.get('/events/:id', getEventById);
+router.get('/organizer-events', authMiddleware, getOrganizerEvents);
+
+export default router;
