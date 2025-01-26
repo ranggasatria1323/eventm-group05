@@ -160,7 +160,8 @@ class ProfileController {
         where: { id: referrer.id },
         data: {
           points: {
-            increment: 10000, // Increment points by 10,000
+            increment: 10000,
+             
           },
         },
       })
