@@ -7,7 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getProfileData, updateProfileData } from './../../api/profile';
 
-interface UserProfile {       //INTERFACE USERPROFILE
+interface UserProfile {
   name: string;
   email: string;
   userType: string;
@@ -17,6 +17,7 @@ interface UserProfile {       //INTERFACE USERPROFILE
   image: string | File | null;
   referralCode: string;
   points: number;
+  remainingDays?: number;
 }
 
 function ProfilePage() {
@@ -44,6 +45,7 @@ function ProfilePage() {
             birthdate: data.data.birthdate
               ? new Date(data.data.birthdate).toISOString().split('T')[0]
               : null,
+            remainingDays: data.data.remainingDays || 0,
           });
         }
       } catch (error) {
@@ -159,81 +161,116 @@ function ProfilePage() {
 
           {/* Input Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              {
-                label: 'Nama',
-                name: 'name',
-                value: profile.name,
-                readOnly: true,
-              },
-              {
-                label: 'Email',
-                name: 'email',
-                value: profile.email,
-                readOnly: true,
-              },
-              {
-                label: 'Tipe Pengguna',
-                name: 'userType',
-                value: profile.userType,
-                readOnly: true,
-              },
-              {
-                label: 'Nomor Telepon',
-                name: 'phoneNumber',
-                value: profile.phoneNumber,
-                readOnly: false,
-                type: 'tel',
-              },
-              {
-                label: 'Tanggal Lahir',
-                name: 'birthdate',
-                value: profile.birthdate,
-                readOnly: false,
-                type: 'date',
-              },
-              {
-                label: 'Jenis Kelamin',
-                name: 'gender',
-                value: profile.gender,
-                readOnly: false,
-                type: 'select',
-              },
-            ].map((field) => (
-              <div key={field.name} className="mb-4">
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor={field.name}
-                >
-                  {field.label}
-                </label>
-                {field.type === 'select' ? (
-                  <select
-                    id={field.name}
-                    name={field.name}
-                    value={field.value || ''}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={field.readOnly}
-                  >
-                    <option value="">Pilih jenis kelamin</option>
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                  </select>
-                ) : (
-                  <input
-                    type={field.type || 'text'}
-                    id={field.name}
-                    name={field.name}
-                    value={field.value || ''}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    readOnly={field.readOnly}
-                    disabled={field.readOnly}
-                  />
-                )}
-              </div>
-            ))}
+            {/* Nama */}
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="name"
+              >
+                Nama
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={profile.name}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="email"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={profile.email}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Tipe Pengguna */}
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="userType"
+              >
+                Tipe Pengguna
+              </label>
+              <input
+                type="text"
+                id="userType"
+                name="userType"
+                value={profile.userType}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Nomor Telepon */}
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="phoneNumber"
+              >
+                Nomor Telepon
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={profile.phoneNumber || ''}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Tanggal Lahir */}
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="birthdate"
+              >
+                Tanggal Lahir
+              </label>
+              <input
+                type="date"
+                id="birthdate"
+                name="birthdate"
+                value={profile.birthdate || ''}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Jenis Kelamin */}
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="gender"
+              >
+                Jenis Kelamin
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={profile.gender || ''}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Pilih jenis kelamin</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+            </div>
           </div>
 
           {/* Points Section */}
@@ -247,7 +284,7 @@ function ProfilePage() {
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-xl font-bold text-blue-900">
-                  {profile.referralCode}
+                {profile.referralCode || "Tidak ada referral code"}
                 </span>
                 <button
                   onClick={() => {
@@ -273,6 +310,12 @@ function ProfilePage() {
                 </span>
                 <span className="ml-2 text-sm text-gray-500">poin</span>
               </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Sisa waktu sebelum poin kadaluarsa:{' '}
+                <span className="font-semibold text-green-800">
+                  {profile.remainingDays} hari
+                </span>
+              </p>
             </div>
           </div>
 

@@ -68,7 +68,7 @@ export default function Dashboard() {
             </li>
           ))}
           <li>
-            <Link href="/dashboard/create-event">
+            <Link href="/dashboard/create">
               <Button className="w-full bg-[#64ffda] text-[#0A192F] hover:bg-opacity-80">
                 Create Event
               </Button>

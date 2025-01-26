@@ -10,7 +10,7 @@ import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { fetchUserProfile, loginUser, logoutUser } from '../api/header';
 
 const defaultAvatar =
-  'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAogMBIgACEQEDEQH/xAAaAAEAAwEBAQAAAAAAAAAAAAAAAwQFAQIH/8QALRABAAIBAwIEBgEFAQAAAAAAAAECAwQRIRJRBTFBYSIjQnGBoWIyNIKRsRP/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABYRAQEBAAAAAAAAAAAAAAAAAAABEf/aAAwDAQACEQMRAD8A+qAKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOWtFKza07RHnLN1GotmnbmKx6d/uC3l1mOnFfjt7eX+1W2tyzPERX8bq4CeNZm7xP8AjCSuutv8dKzHtwqANbDlplrFq/mPWEjGra1LdVZ2nvDU02aM2Pf6o4kEoAAAAAAAAAAAAEgq+IX2xRSPqn9M/wA1rxGd80R/FVUAAAAFrw+22a1e8KqxouNTHvEwUaQCAAAAAAAAAAASEgz/ABCPnRPeqqn1mSb5piYj4eIQKAAAACbSf3NPz/xC94sk48kWiInbuUa4QIAAAAAAAAAAAAMvWRtqLe/KFe12G95jJXbaK7TCioAAAAPWOOrJWI9ZeVrRYLTeuX6Y/ZRoesgIAAAAAAAAAAAAOWrFqzWfWNmPas1maz6Ts2VHxDFETGSvG/FgUwFAABrYKf8AnipWfSGfo6RfPG/lHOzUKACAAAAAAAAAAADoOKfiM/LrX1mXvWaicW0UmOqf0z7Wtad7WmZ9wcAUAAWNBO2o27xw0mLEzHkt6TU364pktvWfKZKL4CAAAAAAADxlyVx0m1p2gHs3Z2XW5Jn5cRSO/qgvkvf+u9rfeQaWTVYqfV1T2ryqZNbkvxSOiP2rC4OzMzzM7y4AAAAAAAJsWpyYtoieqO0reLWY77dW9J9/JnBg2a2i0bxMT9pdYsWtWd6zMT7Snpq81fO3XH8jBpiLBnpm324tHnWZSoAADM1lptmtvPFdoiABBPE7AKAAAAAAAAAAAAAAPVZmluqszE15hsVnesT3BAAB/9k=';
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk_FXy4YZZT1e7rhjFmME4WVyH4VUwGdM0iQ&s';
 
 export const Header: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -120,6 +120,15 @@ export const Header: React.FC = () => {
 
         <div className="ml-auto flex items-center space-x-2">
           {isLoggedIn ? (
+            <>
+            <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  className="bg-blue-600 text-white hover:bg-blue-800 border-none"
+                >
+                  Dashboard
+                </Button>
+              </Link>
             <Popover>
               <PopoverTrigger>
                 <div className="flex items-center cursor-pointer">
@@ -153,6 +162,7 @@ export const Header: React.FC = () => {
                 </Link>
               </PopoverContent>
             </Popover>
+            </>
           ) : (
             <>
               <Link href="/register">

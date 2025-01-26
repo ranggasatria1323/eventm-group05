@@ -1,13 +1,13 @@
 import express from "express"
 import ProfileController from "../controllers/profile.controller"
 import { authMiddleware } from "../middlewares/auth.middleware"
-import { uploader } from "../../uploader"
+import { userUploader } from "../../uploader"
 
 const router = express.Router()
 const profileController = new ProfileController()
 
 // Configure uploader
-const profileImageUploader = uploader("IMG", "images")
+const profileImageUploader = userUploader("IMG", "images")
 
 // Routes
 router.get("/profile", authMiddleware, profileController.getProfile)

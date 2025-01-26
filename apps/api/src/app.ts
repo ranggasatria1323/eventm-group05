@@ -13,6 +13,7 @@ import AuthRouter from './routers/auth.router';
 import eventRouter from './routers/event.router';
 import profileRouter from './routers/profile.router';
 import path from 'path';
+import discountRouter from './routers/discount.router';
 
 dotenv.config();
 
@@ -31,8 +32,8 @@ export default class App {
   private configure(): void {
     this.app.use(cors());
     this.app.use(json());
+    this.app.use(express.static('public'))
     this.app.use(urlencoded({ extended: true }));
-    this.app.use(express.static('public'));
   }
 
   private handleError(): void {
@@ -54,6 +55,7 @@ export default class App {
     this.app.use('/', authRouter.getRouter());
     this.app.use('/', eventRouter);
     this.app.use('/', profileRouter);
+    this.app.use('/', discountRouter)
   }
 
   public start(): void {

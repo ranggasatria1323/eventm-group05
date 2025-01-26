@@ -1,9 +1,9 @@
-import { NextFunction, Request as ExpressRequest, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import prisma from '../prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '@prisma/client';
 
+// Helper untuk menghasilkan kode referral
 const generateReferralCode = (): string => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
@@ -13,23 +13,19 @@ const generateReferralCode = (): string => {
   return code;
 };
 
-interface AuthRequest extends ExpressRequest {
-  user?: User;
+// Middleware untuk Auth Request
+interface AuthRequest extends Request {
+  user?: any; // Sesuaikan dengan tipe user jika ada tipe khusus
 }
 
 export default class AuthController {
+  // Register user
   async register(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const {
-        name,
-        email,
-        password,
-        referralCode: usedReferralCode,
-      } = req.body;
+      const { name, email, password, referralCode } = req.body;
 
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
+      // Cek apakah user dengan email tersebut sudah terdaftar
+      const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         return res.status(400).json({
           status: 'error',
@@ -40,13 +36,12 @@ export default class AuthController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      const referralCode = generateReferralCode();
+      let discount = null;
 
-      let referrerId = null;
-
-      if (usedReferralCode) {
+      if (referralCode) {
+        // Validasi referral code
         const referrer = await prisma.user.findUnique({
-          where: { referralCode: usedReferralCode },
+          where: { referralCode },
         });
 
         if (!referrer) {
@@ -56,29 +51,42 @@ export default class AuthController {
           });
         }
 
-        await prisma.user.update({
-          where: { id: referrer.id },
+        // Berikan diskon 10% ke pengguna baru
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 3);
+
+        discount = await prisma.discount.create({
           data: {
-            points: { increment: 10000 },
+            userId: referrer.id, // User yang menggunakan referral mendapatkan diskon
+            percentage: 10,
+            startDate,
+            endDate,
           },
         });
 
-        referrerId = referrer.id;
+        // Berikan poin kepada pemilik referral code
+        await prisma.user.update({
+          where: { id: referrer.id },
+          data: {
+            points: { increment: 10000 }, // Tambahkan 10.000 poin
+          },
+        });
       }
 
-      const user = await prisma.user.create({
+      // Buat user baru tanpa referral code
+      const newUser = await prisma.user.create({
         data: {
           name,
           email,
           password: hashedPassword,
-          userType: '',
-          referralCode,
-          referrerId,
+          userType: null, // Role belum dipilih
+          referralCode: null, // Belum digenerate
         },
       });
 
       const token = jwt.sign(
-        { id: user.id, email: user.email },
+        { id: newUser.id, email: newUser.email },
         `${process.env.JWT_KEY}`,
         { expiresIn: '1d' },
       );
@@ -86,13 +94,17 @@ export default class AuthController {
       res.status(201).json({
         status: 'success',
         message: 'User registered successfully',
-        data: { referralCode, token },
+        data: {
+          token,
+          discount, // Diskon jika referral code digunakan
+        },
       });
     } catch (error) {
       next(error);
     }
   }
 
+  // Login user
   async login(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
@@ -113,6 +125,19 @@ export default class AuthController {
         });
       }
 
+      const now = new Date();
+      const lastUpdated = new Date(user.pointsUpdatedAt || user.createdAt);
+      const diffInMonths =
+        (now.getFullYear() - lastUpdated.getFullYear()) * 12 +
+        (now.getMonth() - lastUpdated.getMonth());
+
+      if (diffInMonths >= 3) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { points: 0, pointsUpdatedAt: now },
+        });
+      }
+
       const token = jwt.sign(
         { id: user.id, email: user.email, userType: user.userType },
         `${process.env.JWT_KEY}`,
@@ -129,6 +154,7 @@ export default class AuthController {
     }
   }
 
+  // Update user interest (role)
   async updateUserInterest(
     req: AuthRequest,
     res: Response,
@@ -145,14 +171,92 @@ export default class AuthController {
         });
       }
 
-      await prisma.user.update({
+      // Generate referral code jika role diubah menjadi customer
+      const referralCode =
+        userType === 'Customer' ? generateReferralCode() : undefined;
+
+      const updatedUser = await prisma.user.update({
         where: { id: userId },
-        data: { userType },
+        data: {
+          userType,
+          referralCode,
+        },
       });
 
       res.status(200).json({
         status: 'success',
-        message: 'User interest updated successfully',
+        message: 'User role updated successfully',
+        data: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Create a discount
+  async createDiscount(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { percentage } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'User ID is missing',
+        });
+      }
+
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 3);
+
+      const discount = await prisma.discount.create({
+        data: {
+          userId,
+          percentage,
+          startDate,
+          endDate,
+        },
+      });
+
+      res.status(201).json({
+        status: 'success',
+        message: 'Discount created successfully',
+        data: discount,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Get active discounts
+  async getActiveDiscounts(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'User ID is missing',
+        });
+      }
+
+      const now = new Date();
+
+      const activeDiscounts = await prisma.discount.findMany({
+        where: {
+          userId,
+          endDate: { gt: now },
+        },
+      });
+
+      res.status(200).json({
+        status: 'success',
+        data: activeDiscounts,
       });
     } catch (error) {
       next(error);
