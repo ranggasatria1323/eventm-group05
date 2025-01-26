@@ -4,6 +4,7 @@ import { authMiddleware } from '../middlewares/auth.middleware'; // Middleware a
 
 const router = express.Router();
 
-router.get('/discounts',authMiddleware, getUserDiscounts); // Diskon hanya bisa diakses oleh user yang sudah login
+router.get('/discounts', authMiddleware, getUserDiscounts); // Diskon hanya bisa diakses oleh user yang sudah login
+
 
 export default router;

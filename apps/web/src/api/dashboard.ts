@@ -13,7 +13,7 @@ export const removeToken = () => {
 };
 
 
-export const fetchUserData = async (token :any) => {
+export const fetchUserData = async (token: string): Promise<{ name: string; userType: string } | null> => {
   try {
     const response = await axios.get(`${API_BASE_URL}profile`, {
       headers: {
@@ -21,8 +21,11 @@ export const fetchUserData = async (token :any) => {
       },
     });
 
-    if (response.status === 200 && response.data?.data?.name) {
-      return { name: response.data.data.name };
+    if (response.status === 200 && response.data?.data?.name && response.data?.data?.userType) {
+      return {
+        name: response.data.data.name,
+        userType: response.data.data.userType,
+      };
     }
 
     return null; // Data tidak ditemukan

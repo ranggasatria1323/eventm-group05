@@ -1,12 +1,12 @@
-import { Router } from "express";
-import AuthController from "../controllers/auth.controller";
-import { 
-  validateRegisterData, 
-  validateLoginData, 
-  authMiddleware, 
+import { Router } from 'express';
+import AuthController from '../controllers/auth.controller';
+import {
+  validateRegisterData,
+  validateLoginData,
+  authMiddleware,
   attachUserToRequest,
-  checkPointsExpiry
-} from "../middlewares/auth.middleware";
+  checkPointsExpiry,
+} from '../middlewares/auth.middleware';
 
 export default class AuthRouter {
   private router: Router;
@@ -21,40 +21,20 @@ export default class AuthRouter {
   private initializeRoutes() {
     // Register route
     this.router.post(
-      "/register", 
-      validateRegisterData, 
-      this.authController.register
+      '/register',
+      validateRegisterData,
+      this.authController.register,
     );
 
     // Login route (tanpa checkPointsExpiry)
-    this.router.post(
-      "/login", 
-      validateLoginData, 
-      this.authController.login
-    );
+    this.router.post('/login', validateLoginData, this.authController.login);
 
     // Update interest route
     this.router.put(
-      "/interest", 
-      authMiddleware, 
-      checkPointsExpiry, 
-      this.authController.updateUserInterest
-    );
-
-    // Create discount route (requires authentication and check for points expiry)
-    this.router.post(
-      "/discount", 
-      authMiddleware, 
-      checkPointsExpiry, 
-      this.authController.createDiscount
-    );
-
-    // Get active discounts route
-    this.router.get(
-      "/active-discounts", 
-      authMiddleware, 
-      checkPointsExpiry, 
-      this.authController.getActiveDiscounts
+      '/interest',
+      authMiddleware,
+      checkPointsExpiry,
+      this.authController.updateUserInterest,
     );
   }
 
