@@ -22,10 +22,9 @@ export default function EventDetail() {
       }
 
       const eventId = Array.isArray(id) ? id[0] : id; // Mengkonversi id ke string
-      const organizerId = 'organizerId'; // Mengganti organizerId dengan ID yang sesuai
 
       try {
-        const eventData = await fetchEventById(eventId, token, organizerId);
+        const eventData = await fetchEventById(eventId, token);
         setEvent(eventData);
         setIsLoading(false);
       } catch (error) {
