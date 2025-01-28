@@ -16,7 +16,6 @@ export const attachUserToRequest = async (
   next: NextFunction,
 ) => {
   try {
-    // Check for Authorization header
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -26,7 +25,6 @@ export const attachUserToRequest = async (
       });
     }
 
-    // Extract token from header
     const token = authHeader.split(' ')[1];
 
     if (!token) {
@@ -36,12 +34,10 @@ export const attachUserToRequest = async (
       });
     }
 
-    // Verify and decode token
     const decoded = jwt.verify(token, `${process.env.JWT_KEY}`) as {
       id: number;
     };
 
-    // Find the user in the database
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });
@@ -53,10 +49,7 @@ export const attachUserToRequest = async (
       });
     }
 
-    // Attach user to the request object
     req.user = user;
-
-    // Proceed to the next middleware or handler
     next();
   } catch (error) {
     console.error('Error in attachUserToRequest:', error);
@@ -67,21 +60,7 @@ export const attachUserToRequest = async (
   }
 };
 
-// New Middleware: Restrict access to Event Organizers only
-export const restrictToEventOrganizer = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  if (req.user?.userType !== 'Event Organizer') {
-    return res.status(403).json({
-      status: 'error',
-      message: 'Access denied. Only Event Organizers can access this resource.',
-    });
-  }
-  next();
-};
-
+// Middleware: Validate Register Data
 export const validateRegisterData = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
@@ -103,6 +82,7 @@ export const validateRegisterData = [
   },
 ];
 
+// Middleware: Validate Login Data
 export const validateLoginData = [
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').notEmpty().withMessage('Password is required'),
@@ -121,6 +101,7 @@ export const validateLoginData = [
   },
 ];
 
+// Middleware: General Authentication
 export const authMiddleware = (
   req: AuthRequest,
   res: Response,
@@ -148,5 +129,84 @@ export const authMiddleware = (
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Unauthorized' });
+  }
+};
+
+// Middleware: Check Points Expiry
+export const checkPointsExpiry = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Unauthorized',
+      });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (user) {
+      const now = new Date();
+      const lastUpdated = new Date(user.pointsUpdatedAt || user.createdAt); // Default ke createdAt jika null
+      const diffInMonths =
+        (now.getFullYear() - lastUpdated.getFullYear()) * 12 +
+        (now.getMonth() - lastUpdated.getMonth());
+
+      if (diffInMonths >= 3) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { points: 0, pointsUpdatedAt: now },
+        });
+      }
+    }
+
+    next();
+  } catch (error) {
+    console.error('Error in checkPointsExpiry:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'An error occurred while checking points expiry.',
+    });
+  }
+};
+
+export const verifyEventOrganizer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'Unauthorized: No token' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_KEY || '') as {
+      id: number;
+    };
+    const userId = decoded.id;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { userType: true },
+    });
+
+    if (!user || user.userType !== 'Event Organizer') {
+      return res
+        .status(403)
+        .json({ status: 'error', message: 'Forbidden: Access denied' });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Error in verifyEventOrganizer middleware:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 };

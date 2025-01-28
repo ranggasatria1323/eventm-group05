@@ -1,6 +1,12 @@
-import { Router } from "express";
-import AuthController from "../controllers/auth.controller";
-import { validateRegisterData, validateLoginData, authMiddleware, attachUserToRequest } from "../middlewares/auth.middleware";
+import { Router } from 'express';
+import AuthController from '../controllers/auth.controller';
+import {
+  validateRegisterData,
+  validateLoginData,
+  authMiddleware,
+  attachUserToRequest,
+  checkPointsExpiry,
+} from '../middlewares/auth.middleware';
 
 export default class AuthRouter {
   private router: Router;
@@ -13,9 +19,23 @@ export default class AuthRouter {
   }
 
   private initializeRoutes() {
-    this.router.post("/register", validateRegisterData, this.authController.register);
-    this.router.post("/login", validateLoginData, this.authController.login);
-    this.router.put("/interest", authMiddleware, this.authController.updateUserInterest);
+    // Register route
+    this.router.post(
+      '/register',
+      validateRegisterData,
+      this.authController.register,
+    );
+
+    // Login route (tanpa checkPointsExpiry)
+    this.router.post('/login', validateLoginData, this.authController.login);
+
+    // Update interest route
+    this.router.put(
+      '/interest',
+      authMiddleware,
+      checkPointsExpiry,
+      this.authController.updateUserInterest,
+    );
   }
 
   getRouter(): Router {

@@ -1,10 +1,15 @@
 import { Request, Response } from 'express';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma,  } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 interface AuthRequest extends Request {
-  user?: User;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    userType: string;
+  };
 }
 
 type User = {
@@ -123,13 +128,53 @@ export const getEventById = async (req: Request, res: Response) => {
     } else {
       res.status(200).json({
         status: 'success',
-        data: event,
+        data: {
+          ...event,
+          createdBy: event.user.name,
+        }
       });
     }
   } catch (err) {
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),
+    });
+  }
+};
+
+export const getOrganizerEvents = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Unauthorized: User not logged in',
+      });
+    }
+
+    const events = await prisma.event.findMany({
+      where: {
+        created_by: userId, // Event yang dibuat oleh pengguna login
+      },
+      select: {
+        id: true,
+        title: true,
+        date: true,
+        location: true,
+        event_type: true,
+        price: true,
+      },
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: events,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch events',
     });
   }
 };

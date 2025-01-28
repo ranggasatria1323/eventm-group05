@@ -11,26 +11,29 @@ datasource db {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  name         String
-  email        String      @unique
-  password     String
-  userType     String
-  image        String?
-  phoneNumber  String?
-  birthdate    DateTime?  @db.Date
-  gender       String?
-  referralCode String?     @unique
-  points       Int         @default(0)
-  referrerId   Int?        // ID pengguna yang mereferensikan
-  createdAt    DateTime    @default(now())
-  events       Event[]
-  tickets      Ticket[]
-  discounts    Discount[]
-  transactions Transaction[]
+  id                Int         @id @default(autoincrement())
+  name              String
+  email             String      @unique
+  password          String
+  userType          String?
+  image             String?
+  phoneNumber       String?
+  birthdate         DateTime?   @db.Date
+  gender            String?
+  referralCode      String?     @unique
+  points            Int         @default(0)
+  pointsUpdatedAt   DateTime    @default(now()) // Field baru untuk mencatat kapan poin diperbarui
+  referrerId        Int?        // ID pengguna yang mereferensikan
+  createdAt         DateTime    @default(now())
+  events            Event[]
+  tickets           Ticket[]
+  discounts         Discount[]
+  transactions      Transaction[]
+  reviews           Review[] // Relasi ke tabel Review
 
   @@map("users")
 }
+
 
 model Event {
   id                              Int @id @default(autoincrement())
@@ -48,6 +51,8 @@ model Event {
   category                        String? @db.VarChar (50)
   created_at                      DateTime @default(now())
   updated_at                      DateTime @updatedAt
+  reviews                         Review[] // Relasi ke tabel Review
+
 
   @@map("events")
 }
@@ -93,4 +98,18 @@ model Discount {
 
   @@map("discounts")
 }
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  userId    Int
+  comment   String   @db.Text
+  rating    Int      // Rating (1-5)
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
+
 

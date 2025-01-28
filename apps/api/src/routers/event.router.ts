@@ -1,16 +1,23 @@
-import { Router } from "express";
-import { getEvents, createEvents } from "../controllers/event.controller";
-import { authMiddleware, restrictToEventOrganizer } from "../middlewares/auth.middleware";
-import { eventUploader } from "uploader";
+import { Router } from 'express';
+import { getEvents, createEvents, getOrganizerEvents, getEventById } from '../controllers/event.controller';
+import {
+  authMiddleware
+} from '../middlewares/auth.middleware';
+import { uploader } from 'uploader';
 
 const router = Router();
 
-// Apply the restrictToEventOrganizer middleware to the dashboard route
-router.get('/dashboard', authMiddleware, restrictToEventOrganizer, (req, res) => {
-  res.status(200).json({ message: 'Welcome to the Event Organizer Dashboard!' });
-});
+
 
 router.get('/events/', getEvents);
-router.post('/event', authMiddleware, eventUploader("IMG","event-images").single("file"), createEvents);
+router.post(
+  '/event',
+  authMiddleware,
+  uploader('IMG', 'event-images').single('file'),
+  createEvents,
+);
+
+router.get('/events/:id', getEventById);
+router.get('/organizer-events', authMiddleware, getOrganizerEvents);
 
 export default router;

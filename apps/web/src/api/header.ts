@@ -17,7 +17,7 @@ export const fetchUserProfile = async () => {
       },
     });
     return {
-      email: response.data.data.email,
+      name: response.data.data.name,
       image: response.data.data.image || null, // Gunakan placeholder jika `image` kosong
     };
   } catch (error) {
@@ -38,7 +38,7 @@ export const loginUser = async () => {
     });
 
     return {
-      email: response.data.email,
+      name: response.data.name,
       image: response.data.image || null,
     };
   } catch (error) {
@@ -50,7 +50,7 @@ export const loginUser = async () => {
 export const logoutUser = () => {
   removeLoginCookie();
   return {
-    email: '',
+    name: '',
     image: defaultAvatar, // Reset ke avatar default setelah logout
   };
 };

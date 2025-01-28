@@ -5,7 +5,7 @@ import { join } from "path";
 type DestinationCallback = (error: Error | null, destination:string) => void
 type FileNameCallback = (error: Error | null, destination:string) => void
 
-export const eventUploader = (filePrefix:string, folderName:string) =>{
+export const uploader = (filePrefix:string, folderName:string) =>{
     const defaultDir = join(__dirname,"./public/")
 
     const storage = multer.diskStorage({
