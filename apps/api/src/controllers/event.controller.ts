@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient, Prisma,  } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -13,11 +13,11 @@ interface AuthRequest extends Request {
 }
 
 type User = {
-  name: string
+  name: string;
   email: string;
   userType: string;
   id: number;
-} ;
+};
 
 export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
@@ -52,8 +52,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
   const user = req.user as User;
 
   try {
-
-    const { file } = req
+    const { file } = req;
 
     console.log({
       data: {
@@ -68,7 +67,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
         category: category || '',
         created_by: user.id,
       },
-    })
+    });
     const newPost = await prisma.event.create({
       data: {
         title: title || '',
@@ -91,8 +90,8 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      console.log(" error code : ", err.code)
-  }
+      console.log(' error code : ', err.code);
+    }
 
     res.status(500).json({
       status: 'error',
@@ -131,7 +130,7 @@ export const getEventById = async (req: Request, res: Response) => {
         data: {
           ...event,
           createdBy: event.user.name,
-        }
+        },
       });
     }
   } catch (err) {

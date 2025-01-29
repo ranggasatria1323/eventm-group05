@@ -199,6 +199,12 @@ export default function CreateEvent() {
                         </SelectItem>
                         <SelectItem value="Seminar">Seminar</SelectItem>
                         <SelectItem value="Workshop">Workshop</SelectItem>
+                        <SelectItem value="Teknologi">Teknologi</SelectItem>
+                        <SelectItem value="Musik">
+                          Musik
+                        </SelectItem>
+                        <SelectItem value="Gaming">Gaming</SelectItem>
+                        <SelectItem value="Bisnis">Bisnis</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>

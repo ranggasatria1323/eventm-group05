@@ -26,7 +26,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold">Kategori Event</h2>
-          <a href="#" className="text-blue-600 flex items-center">
+          <a href="/events/category" className="text-blue-600 flex items-center">
             Lihat Semua <ChevronRight className="w-4 h-4 ml-1" />
           </a>
         </div>
