@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { eventListProcess } from '../api/event';
@@ -10,16 +10,18 @@ export default function Hero() {
 
   const getEventList = async () => {
     const eventsData = await eventListProcess();
-    setEvents(eventsData);
+
+    const limitEvents = eventsData.slice(0, 4);
+    setEvents(limitEvents);
   };
 
   useEffect(() => {
-    getEventList()
+    getEventList();
   }, []);
 
   return (
     <>
-    <CarouselSlide />
+      <CarouselSlide />
       {/* Categories */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex justify-between items-center mb-8">
@@ -29,8 +31,18 @@ export default function Hero() {
           </a>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {['Musik', 'Olahraga', 'Workshop', 'Festival', 'Seminar', 'Exhibition'].map((category) => (
-            <div key={category} className="bg-gray-100 rounded-[7px] p-4 text-center hover:bg-gray-200 cursor-pointer">
+          {[
+            'Musik',
+            'Olahraga',
+            'Workshop',
+            'Festival',
+            'Seminar',
+            'Exhibition',
+          ].map((category) => (
+            <div
+              key={category}
+              className="bg-gray-100 rounded-[7px] p-4 text-center hover:bg-gray-200 cursor-pointer"
+            >
               <h3 className="font-medium">{category}</h3>
             </div>
           ))}
@@ -46,30 +58,45 @@ export default function Hero() {
           </a>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {events.map((item: any, index) => (
-            <div key={item} className="bg-white rounded-xl shadow-lg overflow-hidden">
+          {events.map((item: any, index) => (
+            <div
+              key={item}
+              className="bg-white rounded-xl shadow-lg overflow-hidden"
+            >
               <img
-                src={`${process.env.NEXT_PUBLIC_BASE_API_URL}event-images/${item.image}` || 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'}
+                src={
+                  `${process.env.NEXT_PUBLIC_BASE_API_URL}event-images/${item.image}` ||
+                  'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'
+                }
                 alt="Event"
                 className="w-full h-48 object-cover object-top"
               />
               <div className="p-4">
-                <div className="text-sm text-gray-500 mb-2">{new Date(item.date).toLocaleString("en-GB",{
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric"
-                    })}</div>
-                <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
+                <div className="text-sm text-gray-500 mb-2">
+                  {new Date(item.date).toLocaleString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </div>
+                <h3 className="font-semibold mb-2 line-clamp-2">
+                  {item.title}
+                </h3>
                 <div className="flex items-center text-sm text-gray-500 mb-4">
                   <MapPin className="w-4 h-4 mr-1" />
                   {item.location}
                 </div>
                 <div className="flex justify-between items-center">
-                  <div className="text-blue-600 font-semibold">Rp {item.price.toLocaleString()}</div>
-                  <a href={`/events/${item.id}`} className="text-blue-600 flex items-center">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                    Lihat Detail
-                  </button>
+                  <div className="text-blue-600 font-semibold">
+                  {item.price === 0 ? "Free" : `Rp ${item.price.toLocaleString()}`}
+                  </div>
+                  <a
+                    href={`/events/${item.id}`}
+                    className="text-blue-600 flex items-center"
+                  >
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                      Lihat Detail
+                    </button>
                   </a>
                 </div>
               </div>
@@ -89,21 +116,30 @@ export default function Hero() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((item) => (
-              <div key={item} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div
+                key={item}
+                className="bg-white rounded-lg shadow-md overflow-hidden"
+              >
                 <img
                   src={`https://source.unsplash.com/random/400x200?event&sig=${item}`}
                   alt="Event"
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <div className="text-sm text-gray-500 mb-2">Sab, 27 Mar 2024</div>
-                  <h3 className="font-semibold mb-2 line-clamp-2">Workshop Digital Marketing</h3>
+                  <div className="text-sm text-gray-500 mb-2">
+                    Sab, 27 Mar 2024
+                  </div>
+                  <h3 className="font-semibold mb-2 line-clamp-2">
+                    Workshop Digital Marketing
+                  </h3>
                   <div className="flex items-center text-sm text-gray-500 mb-4">
                     <MapPin className="w-4 h-4 mr-1" />
                     Online Event
                   </div>
                   <div className="flex justify-between items-center">
-                    <div className="text-blue-600 font-semibold">Rp 150.000</div>
+                    <div className="text-blue-600 font-semibold">
+                      Rp 150.000
+                    </div>
                     <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
                       Beli Tiket
                     </button>
@@ -113,6 +149,7 @@ export default function Hero() {
             ))}
           </div>
         </div>
-      </div></>
+      </div>
+    </>
   );
 }

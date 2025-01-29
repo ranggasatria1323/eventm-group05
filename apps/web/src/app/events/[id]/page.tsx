@@ -5,12 +5,14 @@ import { useRouter, useParams } from 'next/navigation';
 import { fetchEventById } from '../../../api/event';
 import { getToken } from '../../../api/dashboard';
 import { createReview, fetchReviews } from './../../../api/review';
+import { getProfileData } from '@/api/profile';
 
 interface Review {
   comment: string;
   rating: number;
   user: {
     name: string;
+    image: string | File | null;
   };
   createdAt: string; // Tambahkan createdAt untuk tanggal post
 }
@@ -27,6 +29,10 @@ interface Event {
   createdBy: string;
 }
 
+interface UserProfile {
+  image: string | File | null;
+}
+
 export default function EventDetail() {
   const { id } = useParams();
   const router = useRouter();
@@ -35,6 +41,9 @@ export default function EventDetail() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [newReview, setNewReview] = useState<string>('');
   const [newRating, setNewRating] = useState<number>(5); // Default rating
+  const [profile, setProfile] = useState<UserProfile>({
+    image:null
+  });
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -55,9 +64,11 @@ export default function EventDetail() {
       try {
         const eventData = await fetchEventById(eventId, token);
         const eventReviews = await fetchReviews(eventId, token);
+        const eventProfile = await getProfileData();
 
         setEvent(eventData);
         setReviews(eventReviews);
+        setProfile(eventProfile)
       } catch (error) {
         console.error('Error fetching event details:', error);
       } finally {
@@ -88,7 +99,9 @@ export default function EventDetail() {
         {
           comment: newReview,
           rating: newRating,
-          user: { name: 'You' },
+          user: { name: 'You',
+            image:null
+           },
           createdAt: new Date().toISOString(), // Tambahkan tanggal post baru
         },
         ...prevReviews,
@@ -233,12 +246,15 @@ export default function EventDetail() {
           <div className="bg-gray-100 p-6 rounded-lg shadow-md">
             {reviews.length > 0 ? (
               reviews.map((review, index) => (
+                <div className='flex'>
+                  <img className="h-10 w-10 rounded-full border object-cover mr-3" src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${review.user.image}`}/>
                 <div key={index} className="mb-3 border-b pb-2">
                   <p className="text-gray-700">{review.comment}</p>
                   <p className="text-sm text-gray-500">
                     Rating: {review.rating} | By {review.user.name} |{' '}
                     {new Date(review.createdAt).toLocaleDateString()}
                   </p>
+                </div>
                 </div>
               ))
             ) : (
