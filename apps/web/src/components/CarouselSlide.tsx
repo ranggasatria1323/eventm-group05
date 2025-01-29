@@ -20,7 +20,8 @@ export default function CarouselSlide() {
     return () => clearInterval(interval);
   }, []);
   return (
-    <div className="relative bg-blue-600 h-[500px] overflow-hidden">
+    <div className='mx-3 my-3 w-auto md:w-full md:mx-0 md:my-0'>
+    <div className="rounded-[10px] md:rounded-none relative bg-blue-600 h-[150px] md:h-[500px] overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
         {heroImages.map((image, index) => (
           <div
@@ -41,6 +42,7 @@ export default function CarouselSlide() {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 }

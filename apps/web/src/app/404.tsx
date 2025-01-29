@@ -1,6 +1,6 @@
 export default function NotFoundPage() {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900 text-white">
+    return (<>
+      <div className="max-sm:hidden min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900 text-white">
         {/* Animated Illustration */}
         <div className="relative flex items-center justify-center">
           <div className="absolute w-64 h-64 bg-blue-700 rounded-full blur-3xl opacity-30 animate-pulse"></div>
@@ -35,6 +35,7 @@ export default function NotFoundPage() {
           <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-500 opacity-20 blur-3xl rounded-full animate-pulse"></div>
         </div>
       </div>
+      </>
     );
   }
   

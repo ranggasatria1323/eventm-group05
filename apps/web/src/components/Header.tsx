@@ -55,7 +55,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="top-0 z-50 w-full border-b bg-[#152455]">
+    <header className="h-auto md:h-auto top-0 z-50 w-full border-b bg-[#152455]">
       <div
         id="tentang"
         className="md:flex justify-end h-8 bg-blue-900 px-4 md:px-10"
@@ -99,7 +99,7 @@ export const Header: React.FC = () => {
           </Link>
         </nav>
       </div>
-      <div className="flex flex-col md:flex-row justify-between w-full md:h-16 items-center px-4 md:px-10">
+      <div className="flex flex-row md:flex-row justify-between w-full md:h-16 items-center px-4 md:px-10">
         <Link
           id="logo"
           href="/"
@@ -135,29 +135,29 @@ export const Header: React.FC = () => {
           </Button>
         </div>
 
-        <div className="ml-auto flex items-center space-x-2">
+        <div className="md:ml-auto md:flex md:items-center md:space-x-2">
           {isLoggedIn ? (
             <>
               <Link href="/dashboard">
                 <Button
                   variant="outline"
-                  className="bg-blue-600 text-white hover:bg-blue-800 border-none"
+                  className="bg-blue-600 max-sm:mr-[30px] flex-col text-white hover:bg-blue-800 border-none"
                 >
                   Dashboard
                 </Button>
               </Link>
               <Popover>
                 <PopoverTrigger>
-                  <div className="flex items-center cursor-pointer">
+                  <div className="max-sm:absolute max-sm:right-0 max-sm:top-0 flex items-center cursor-pointer">
                     <img
                       src={
                         `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}` ||
                         defaultAvatar
                       }
                       alt="User Avatar"
-                      className="h-10 w-10 rounded-full border object-cover"
+                      className="h-10 w-10 max-sm:h-9 max-sm:w-9 max-sm:mr-1 rounded-full border object-cover"
                     />
-                    <div className="ml-2 text-left">
+                    <div className="max-sm:hidden ml-2 text-left">
                       <span className="block font-medium text-white">
                         {user.name}
                       </span>
@@ -187,7 +187,7 @@ export const Header: React.FC = () => {
             <>
               <button
                 onClick={() => setIsDrawerOpen(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex ml-[113px] bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Masuk
               </button>
