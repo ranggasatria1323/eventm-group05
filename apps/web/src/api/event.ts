@@ -5,6 +5,8 @@ import Cookies from 'js-cookie';
 
 const base_url = 'http://localhost:1234';
 
+
+
 interface IEventsDto {
   title: string;
   description: string;
@@ -88,5 +90,20 @@ export const fetchEventById = async (id: string, token: string) => {
   } catch (error) {
     console.error('Failed to fetch event details:', error);
     return null;
+  }
+};
+
+export const searchEvents = async (query: string) => {
+  try {
+    const response = await axios.get(`${base_url}/search`, {
+      params: { search: query },
+      headers: {
+        Authorization: `Bearer ${Cookies.get('token')}`,
+      },
+    });
+    return response.data.data; 
+  } catch (error) {
+    console.error('Error searching events:', error);
+    return [];
   }
 };

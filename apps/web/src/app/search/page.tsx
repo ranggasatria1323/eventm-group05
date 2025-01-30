@@ -1,5 +1,7 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, Calendar, MapPin, Ticket } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -7,33 +9,35 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Calendar, MapPin, Clock, ArrowRight } from 'lucide-react';
-import { eventListProcess } from '@/api/event';
-import { useEffect, useState } from 'react';
+import { searchEvents } from '@/api/event';
 import Link from 'next/link';
 
-export default function Jelajah() {
-  const [events, setEvents] = useState<any[]>([]);
+function App() {
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
-  const getEventList = async () => {
-    const eventsData = await eventListProcess();
-    setEvents(eventsData);
+  const getSearch = async (query: string) => {
+    try {
+      const results = await searchEvents(query);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+    }
   };
 
   useEffect(() => {
-    getEventList();
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('query');
+    if (query) {
+      getSearch(query);
+    }
   }, []);
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-        <div className="container mx-auto px-4 py-12">
-          <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">
-            Upcoming Events
-          </h1>
-
+    <div className="min-h-auto bg-gradient-to-br from-blue-50 to-blue-100">
+       <div className="container mx-auto px-4 py-12">
+        {searchResults.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {events.map((item: any, index) => (
+            {searchResults.map((item, index) => (
               <Card
                 key={index}
                 className="overflow-hidden hover:shadow-lg transition-shadow bg-white"
@@ -87,8 +91,10 @@ export default function Jelajah() {
               </Card>
             ))}
           </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
+
+export default App;

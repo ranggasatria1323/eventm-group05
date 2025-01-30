@@ -36,9 +36,6 @@ export const getEvents = async (req: AuthRequest, res: Response) => {
       });
     }
 
-
-   
-
     res.status(200).json({
       status: 'success',
       message: 'get post success',
@@ -190,6 +187,45 @@ export const getOrganizerEvents = async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch events',
+    });
+  }
+};
+
+export const searchEvents = async (req: Request, res: Response) => {
+  try {
+    const searchQuery = req.query.search || '';
+
+    const events = await prisma.event.findMany({
+      where: {
+        OR: [
+          {
+            title: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+          {
+            description: {
+              contains: searchQuery as string,
+              mode: 'insensitive',
+            },
+          },
+          {
+            location: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+          {
+            category: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+        ],
+      },
+    });
+
+    if (events.length === 0) {
+      res.status(200).json({ status: 'success', message: 'No events found', data: events });
+    } else {
+      res.status(200).json({ status: 'success', data: events });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(error),
     });
   }
 };

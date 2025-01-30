@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Calendar, Compass, Search, X } from 'lucide-react';
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { Search, X } from 'lucide-react';
 import { fetchUserProfile, loginUser, logoutUser } from '../api/header';
+import { searchEvents } from '../api/event';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 const defaultAvatar =
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk_FXy4YZZT1e7rhjFmME4WVyH4VUwGdM0iQ&s';
@@ -17,7 +18,19 @@ export const Header: React.FC = () => {
     name: '',
     image: '',
   });
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // State for drawer visibility
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]); // State to hold search results
+  const router = useRouter(); // Initialize useRouter
+
+  const getSearch = async () => {
+    try {
+      const results = await searchEvents(searchQuery);
+      setSearchResults(results); // Update state with search results
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -33,12 +46,18 @@ export const Header: React.FC = () => {
     fetchUser();
   }, []);
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await getSearch();
+    router.push(`/search?query=${encodeURIComponent(searchQuery)}`); // Redirect to search results page
+  };
+
   const handleLogin = async () => {
     const profile = await loginUser();
     if (profile) {
       setUser({
         name: profile.name,
-        image: profile.image || defaultAvatar,
+        image: profile.image,
       });
       setIsLoggedIn(true);
     }
@@ -51,7 +70,7 @@ export const Header: React.FC = () => {
   };
 
   const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen); // Toggle drawer visibility
+    setIsDrawerOpen(!isDrawerOpen);
   };
 
   return (
@@ -108,16 +127,22 @@ export const Header: React.FC = () => {
           <span className="text-xl font-bold text-white">EVENTASY</span>
         </Link>
 
-        <div className="hidden mt-2 md:flex items-center w-[1200px]">
+        <form
+          onSubmit={handleSubmit}
+          className="hidden mt-2 md:flex items-center w-[1200px]"
+        >
           <div className="relative w-full">
             <Input
               type="search"
               placeholder="Cari event seru di sini"
               className="rounded-l-[5px] w-full pl-4 bg-[#101c46] text-white placeholder:text-gray-400 border-none rounded-r-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="relative bottom-[18px] ml-[255px] md:relative md:bottom-0 md:ml-0 w-full">
             <button
+              type="submit"
               className="absolute h-full items-center"
               style={{ bottom: '18px' }}
             >
@@ -127,61 +152,13 @@ export const Header: React.FC = () => {
               />
             </button>
           </div>
-        </div>
-
-        <div className="hidden md:hidden flex-1 ">
-          <Button variant="ghost" size="icon" className="text-white ">
-            <Search className="h-5 w-5 " />
-          </Button>
-        </div>
+        </form>
+        <div className="hidden md:hidden flex-1 "></div>
 
         <div className="md:ml-auto md:flex md:items-center md:space-x-2">
           {isLoggedIn ? (
             <>
-              {/* <Link href="/dashboard">
-                <Button
-                  variant="outline"
-                  className="bg-blue-600 max-sm:mr-[30px] flex-col text-white hover:bg-blue-800 border-none"
-                >
-                  Dashboard
-                </Button>
-              </Link>
-              <Popover>
-                <PopoverTrigger>
-                  <div className="max-sm:absolute max-sm:right-0 max-sm:top-0 flex items-center cursor-pointer">
-                    <img
-                      src={ user.image ?
-                        `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}` :
-                        defaultAvatar
-                      }
-                      alt="User Avatar"
-                      className="h-10 w-10 max-sm:h-9 max-sm:w-9 max-sm:mr-1 rounded-full border object-cover"
-                    />
-                    <div className="max-sm:hidden ml-2 text-left">
-                      <span className="block font-medium text-white">
-                        {user.name}
-                      </span>
-                    </div>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="mt-2 bg-white rounded-xl shadow-lg p-4 w-48 text-left">
-                  <Link
-                    href="/profile"
-                    className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    My Profile
-                  </Link>
-                  <Link href="/login">
-                    <Button
-                      onClick={handleLogout}
-                      variant="ghost"
-                      className="block w-full text-left py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
-                    >
-                      Logout
-                    </Button>
-                  </Link>
-                </PopoverContent>
-              </Popover> */}
+              {/* Drawer */}
               <button onClick={() => setIsDrawerOpen(true)}>
                 <div className="max-sm:absolute max-sm:right-0 max-sm:top-0 flex items-center cursor-pointer">
                   <img
