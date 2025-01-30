@@ -7,7 +7,7 @@ import { getToken } from '../../../../api/dashboard';
 import LoadingSpinner from '../../../../components/loading';
 
 export default function EventDetail() {
-  const { id } = useParams(); // Mengambil ID event dari URL
+  const { id } = useParams(); 
   const router = useRouter();
   const [event, setEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +21,7 @@ export default function EventDetail() {
         return;
       }
 
-      const eventId = Array.isArray(id) ? id[0] : id; // Mengkonversi id ke string
+      const eventId = Array.isArray(id) ? id[0] : id; 
 
       try {
         const eventData = await fetchEventById(eventId, token);
@@ -89,7 +89,7 @@ export default function EventDetail() {
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-semibold text-[#64ffda]">Price</h2>
               <p className="text-[#ccd6f6]">
-                RP.{event.price.toLocaleString()}
+              {event.price === 0 ? "Free" : `Rp ${event.price.toLocaleString()}`}
               </p>
             </div>
           </div>

@@ -94,20 +94,9 @@ export default function EventDetail() {
 
     try {
       const response = await createReview(event!.id.toString(), newReview, newRating, token);
-
-      setReviews((prevReviews) => [
-        {
-          comment: newReview,
-          rating: newRating,
-          user: { name: 'You',
-            image:null
-           },
-          createdAt: new Date().toISOString(), // Tambahkan tanggal post baru
-        },
-        ...prevReviews,
-      ]);
-      setNewReview('');
-      setNewRating(5);
+      const eventReviews = await fetchReviews(event!.id.toString(), token);
+      setReviews(eventReviews);
+      
     } catch (error) {
       console.error('Failed to add review:', error);
     }
@@ -173,7 +162,7 @@ export default function EventDetail() {
                 <div>
                   <h2 className="text-sm font-semibold text-gray-500">Price</h2>
                   <p className="text-black">
-                    RP.{event.price.toLocaleString()}
+                  {event.price === 0 ? "Free" : `Rp ${event.price.toLocaleString()}`}
                   </p>
                 </div>
                 <div className="col-span-2">

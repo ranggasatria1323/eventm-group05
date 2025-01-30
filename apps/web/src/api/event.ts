@@ -17,9 +17,9 @@ interface IEventsDto {
   category: string;
 }
 
-export async function eventListProcess(data: { content: string }) {
+export async function eventListProcess(data?: { type: string }) {
   try {
-    const response = await axios.get(base_url + '/events');
+    const response = await axios.get(base_url + '/events?type=' + data?.type);
     console.log('API response:', response.data);
 
     if (response?.status === 200) {
@@ -72,7 +72,7 @@ export const fetchOrganizerEvents = async (token: string) => {
   }
 };
 
-export const fetchEventById = async (id: string, token: string,) => {
+export const fetchEventById = async (id: string, token: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}events/${id}`, {
       headers: {

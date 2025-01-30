@@ -35,25 +35,7 @@ function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await getProfileData();
-        if (data.status === 'success') {
-          setProfile({
-            ...data.data,
-            birthdate: data.data.birthdate
-              ? new Date(data.data.birthdate).toISOString().split('T')[0]
-              : null,
-            remainingDays: data.data.remainingDays || 0,
-          });
-        }
-      } catch (error) {
-        toast.error('Failed to fetch profile data');
-      }
-    };
-    fetchProfile();
-  }, []);
+  
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,6 +108,26 @@ function ProfilePage() {
     }
   };
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getProfileData();
+        if (data.status === 'success') {
+          setProfile({
+            ...data.data,
+            birthdate: data.data.birthdate
+              ? new Date(data.data.birthdate).toISOString().split('T')[0]
+              : null,
+            remainingDays: data.data.remainingDays || 0,
+          });
+        }
+      } catch (error) {
+        toast.error('Failed to fetch profile data');
+      }
+    };
+    fetchProfile();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
@@ -137,15 +139,8 @@ function ProfilePage() {
           <div className="flex flex-col items-center mb-8">
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden">
-                <img
-                  src={
-                    profile.image
-                      ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile.image}`
-                      : '/placeholder.svg'
+              { imageFile ? <img src={URL.createObjectURL(imageFile)} />  : profile?.image ?  <img src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile?.image}`} /> : <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_G0N9CN_iM6-kvF6qpZFibDRcR-t25KVQQA&s' />
                   }
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
               </div>
               <label className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full cursor-pointer group-hover:bg-blue-700 transition-colors">
                 <Camera className="w-5 h-5 text-white" />

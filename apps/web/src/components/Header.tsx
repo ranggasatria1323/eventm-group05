@@ -15,7 +15,7 @@ export const Header: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<{ name: string; image: string }>({
     name: '',
-    image: defaultAvatar,
+    image: '',
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false); // State for drawer visibility
 
@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
       if (profile) {
         setUser({
           name: profile.name,
-          image: profile.image || defaultAvatar,
+          image: profile.image,
         });
         setIsLoggedIn(true);
       }
@@ -138,7 +138,7 @@ export const Header: React.FC = () => {
         <div className="md:ml-auto md:flex md:items-center md:space-x-2">
           {isLoggedIn ? (
             <>
-              <Link href="/dashboard">
+              {/* <Link href="/dashboard">
                 <Button
                   variant="outline"
                   className="bg-blue-600 max-sm:mr-[30px] flex-col text-white hover:bg-blue-800 border-none"
@@ -150,8 +150,8 @@ export const Header: React.FC = () => {
                 <PopoverTrigger>
                   <div className="max-sm:absolute max-sm:right-0 max-sm:top-0 flex items-center cursor-pointer">
                     <img
-                      src={
-                        `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}` ||
+                      src={ user.image ?
+                        `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}` :
                         defaultAvatar
                       }
                       alt="User Avatar"
@@ -181,7 +181,90 @@ export const Header: React.FC = () => {
                     </Button>
                   </Link>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
+              <button onClick={() => setIsDrawerOpen(true)}>
+                <div className="max-sm:absolute max-sm:right-0 max-sm:top-0 flex items-center cursor-pointer">
+                  <img
+                    src={
+                      user.image
+                        ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}`
+                        : defaultAvatar
+                    }
+                    alt="User Avatar"
+                    className="h-10 w-10 max-sm:h-9 max-sm:w-9 max-sm:mr-1 rounded-full border object-cover"
+                  />
+                  <div className="max-sm:hidden ml-2 text-left">
+                    <span className="block font-medium text-white">
+                      {user.name}
+                    </span>
+                  </div>
+                </div>
+              </button>
+              {/* Auth Drawer */}
+              <div
+                className={`fixed inset-0 bg-black/50 transition-opacity z-50 ${
+                  isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+                onClick={() => setIsDrawerOpen(false)}
+              >
+                <div
+                  className={`fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transition-transform duration-300 ${
+                    isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+                  }`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Drawer Header */}
+                  <div className="p-4 border-b flex justify-between items-center">
+                    <img
+                      src={
+                        user.image
+                          ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}`
+                          : defaultAvatar
+                      }
+                      alt="User Avatar"
+                      className="h-10 w-10 max-sm:h-9 max-sm:w-9 max-sm:mr-1 rounded-full border object-cover"
+                    />
+                    <h2 className="text-xl font-semibold">{user.name}</h2>
+                    <button
+                      onClick={() => setIsDrawerOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Drawer Content */}
+                  <div className="p-6 flex flex-col space-y-4">
+                    <Link
+                      href="/profile"
+                      className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/ticket"
+                      className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      My Ticket
+                    </Link>
+                    <Link
+                      href="/dashboard"
+                      className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link href="/login">
+                      <Button
+                        onClick={handleLogout}
+                        variant="ghost"
+                        className="block w-full text-left py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                      >
+                        Logout
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </>
           ) : (
             <>

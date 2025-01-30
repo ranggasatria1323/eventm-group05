@@ -192,19 +192,11 @@ export default function CreateEvent() {
                     </SelectTrigger>
                     <SelectContent className="bg-white ">
                       <SelectGroup>
-                        <SelectLabel>Category</SelectLabel>
-                        <SelectItem value="Meetup">Meetup</SelectItem>
-                        <SelectItem value="Fashion Show">
-                          Fashion Show
+                        <SelectLabel>Event Type</SelectLabel>
+                        <SelectItem value="Paid">Paid</SelectItem>
+                        <SelectItem value="Free">
+                          Free
                         </SelectItem>
-                        <SelectItem value="Seminar">Seminar</SelectItem>
-                        <SelectItem value="Workshop">Workshop</SelectItem>
-                        <SelectItem value="Teknologi">Teknologi</SelectItem>
-                        <SelectItem value="Musik">
-                          Musik
-                        </SelectItem>
-                        <SelectItem value="Gaming">Gaming</SelectItem>
-                        <SelectItem value="Bisnis">Bisnis</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -259,10 +251,10 @@ export default function CreateEvent() {
                   </label>
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                     <div className="text-center">
-                      <PhotoIcon
+                      { eventImage ? <img src={URL.createObjectURL(eventImage)} /> : <PhotoIcon
                         aria-hidden="true"
                         className="mx-auto size-12 text-gray-300"
-                      />
+                      />}
                       <div className="mt-4 flex text-sm/6 text-gray-600">
                         <label
                           htmlFor="file-upload"
@@ -279,6 +271,7 @@ export default function CreateEvent() {
                             }
                             className="sr-only"
                           />
+                          
                         </label>
                         <p className="pl-1">or drag and drop</p>
                       </div>

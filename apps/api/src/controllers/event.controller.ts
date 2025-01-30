@@ -21,7 +21,23 @@ type User = {
 
 export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
-    const events = await prisma.event.findMany();
+    let events = [];
+    if(req.query.type == 'landing'){
+      events = await prisma.event.findMany({
+        orderBy:{
+          date:'asc'
+        }
+      });
+    }else{
+      events = await prisma.event.findMany({
+        orderBy:{
+          created_at:'desc'
+        }
+      });
+    }
+
+
+   
 
     res.status(200).json({
       status: 'success',

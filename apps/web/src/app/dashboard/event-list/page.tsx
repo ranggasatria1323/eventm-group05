@@ -99,7 +99,7 @@ export default function EventList() {
                   <strong>Type:</strong> {event.event_type}
                 </p>
                 <p className="text-sm text-[#8892b0]">
-                  <strong>Price:</strong> RP.{event.price}
+                  <strong>Price:</strong> {event.price === 0 ? "Free" : `Rp ${event.price.toLocaleString()}`}
                 </p>
                 <div className="flex items-center mt-4">
                   <span
