@@ -11,8 +11,12 @@ import {
 } from '@/components/ui/card';
 import { searchEvents } from '@/api/event';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
-function App() {
+function Search() {
+  const router = useSearchParams()
+  const query = router.get('query')
+
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const getSearch = async (query: string) => {
@@ -25,16 +29,14 @@ function App() {
   };
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get('query');
     if (query) {
       getSearch(query);
     }
-  }, []);
+  }, [query]);
 
   return (
     <div className="min-h-auto bg-gradient-to-br from-blue-50 to-blue-100">
-       <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12">
         {searchResults.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {searchResults.map((item, index) => (
@@ -97,4 +99,4 @@ function App() {
   );
 }
 
-export default App;
+export default Search;

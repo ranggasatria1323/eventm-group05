@@ -23,14 +23,6 @@ export const Header: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]); // State to hold search results
   const router = useRouter(); // Initialize useRouter
 
-  const getSearch = async () => {
-    try {
-      const results = await searchEvents(searchQuery);
-      setSearchResults(results); // Update state with search results
-    } catch (error) {
-      console.error('Error fetching search results:', error);
-    }
-  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -48,7 +40,6 @@ export const Header: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await getSearch();
     router.push(`/search?query=${encodeURIComponent(searchQuery)}`); // Redirect to search results page
   };
 
