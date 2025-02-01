@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { PhotoIcon } from '@heroicons/react/24/solid';
 import {
   Select,
@@ -22,7 +22,7 @@ const getUserRole = () => {
 
 export default function CreateEvent() {
   const userRole = getUserRole();
-  const router = useRouter()
+  const router = useRouter();
 
   if (userRole !== 'Event Organizer') {
     return <p>You do not have permission to create an event.</p>;
@@ -40,6 +40,7 @@ export default function CreateEvent() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     // Prepare the data for submission
     const formData = new FormData();
     formData.append('title', eventName);
@@ -49,7 +50,9 @@ export default function CreateEvent() {
     }
     formData.append('location', eventLocation);
     formData.append('date', eventDate);
-    formData.append('price', Number(eventPrice).toString());
+    if (eventType !== 'Free') {
+      formData.append('price', Number(eventPrice).toString());
+    }
     formData.append(
       'max_voucher_discount',
       Number(eventMaxDiscount).toString(),
@@ -61,10 +64,23 @@ export default function CreateEvent() {
     try {
       await eventCreateProcess(formData);
       console.log('Event created successfully');
-      router.push('/dashboard/event-list')
+      router.push('/dashboard/event-list');
     } catch (error) {
       console.error('Error creating event:', error);
     }
+  };
+
+  const handleEventTypeChange = (selectedType: string) => {
+    setEventType(selectedType);
+    if (selectedType === 'Free') {
+      setEventPrice('');
+    }
+  };
+
+  const handlePriceChange = (e: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    setEventPrice(e.target.value);
   };
 
   return (
@@ -169,9 +185,10 @@ export default function CreateEvent() {
                     <Input
                       type="text"
                       value={eventPrice.replace(/[^0-9]/g, '')}
-                      onChange={(e) => setEventPrice(e.target.value)}
+                      onChange={handlePriceChange}
+                      disabled={eventType === 'Free'}
                       required
-                      className='outline outline-1 -outline-offset-1 outline-gray-300'
+                      className="outline outline-1 -outline-offset-1 outline-gray-300"
                     />
                   </div>
                 </div>
@@ -184,7 +201,7 @@ export default function CreateEvent() {
                   </label>
                   <Select
                     value={eventType}
-                    onValueChange={setEventType}
+                    onValueChange={handleEventTypeChange}
                     required
                   >
                     <SelectTrigger className="w-[180px] mt-2 outline outline-1 -outline-offset-1 outline-gray-300">
@@ -194,9 +211,7 @@ export default function CreateEvent() {
                       <SelectGroup>
                         <SelectLabel>Event Type</SelectLabel>
                         <SelectItem value="Paid">Paid</SelectItem>
-                        <SelectItem value="Free">
-                          Free
-                        </SelectItem>
+                        <SelectItem value="Free">Free</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -239,7 +254,7 @@ export default function CreateEvent() {
                     value={eventMaxDiscount.replace(/[^0-9]/g, '')}
                     onChange={(e) => setEventMaxDiscount(e.target.value)}
                     required
-                    className='outline outline-1 -outline-offset-1 outline-gray-300'
+                    className="outline outline-1 -outline-offset-1 outline-gray-300"
                   />
                 </div>
                 <div className="col-span-full mt-8">
@@ -251,10 +266,14 @@ export default function CreateEvent() {
                   </label>
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                     <div className="text-center">
-                      { eventImage ? <img src={URL.createObjectURL(eventImage)} /> : <PhotoIcon
-                        aria-hidden="true"
-                        className="mx-auto size-12 text-gray-300"
-                      />}
+                      {eventImage ? (
+                        <img src={URL.createObjectURL(eventImage)} />
+                      ) : (
+                        <PhotoIcon
+                          aria-hidden="true"
+                          className="mx-auto size-12 text-gray-300"
+                        />
+                      )}
                       <div className="mt-4 flex text-sm/6 text-gray-600">
                         <label
                           htmlFor="file-upload"
@@ -271,7 +290,6 @@ export default function CreateEvent() {
                             }
                             className="sr-only"
                           />
-                          
                         </label>
                         <p className="pl-1">or drag and drop</p>
                       </div>

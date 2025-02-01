@@ -229,3 +229,65 @@ export const searchEvents = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const editEvent = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const {
+      title,
+      description,
+      date,
+      image,
+      location,
+      event_type,
+      price,
+      stock,
+      max_voucher_discount,
+      category,
+    } = req.body;
+
+    const event = await prisma.event.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!event) {
+      res.status(404).json({
+        status: 'not found',
+      });
+    } else {
+      const eventUpdate = await prisma.event.update({
+        where: {
+          id: id,
+        },
+        data: {
+          title: title || '',
+          description: description || '',
+          image: image || '',
+          location: location || '',
+          date: new Date(date) || '',
+          event_type: event_type || '',
+          price: price || 0,
+          stock: stock || 0,
+          max_voucher_discount: max_voucher_discount || 0,
+          category: category || '',
+        },
+      });
+
+      const outputData = { ...eventUpdate };
+
+      console.log({ ...outputData});
+
+      res.status(201).json({
+        status: 'success',
+        message: 'update event success',
+        data: { ...outputData},
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
+  }
+};

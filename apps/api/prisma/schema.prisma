@@ -46,6 +46,7 @@ model Event {
   date                            DateTime? @db.Date
   event_type                      String? @db.VarChar(50)
   price                           Int?
+  stock                           Int?
   max_voucher_discount            Int?
   ticket                          Ticket[]
   category                        String? @db.VarChar (50)
