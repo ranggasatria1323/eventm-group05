@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getEvents, createEvents, getOrganizerEvents, getEventById } from '../controllers/event.controller';
+import { getEvents, createEvents, getOrganizerEvents, getEventById, searchEvents } from '../controllers/event.controller';
 import {
   authMiddleware
 } from '../middlewares/auth.middleware';
@@ -19,5 +19,6 @@ router.post(
 
 router.get('/events/:id', getEventById);
 router.get('/organizer-events', authMiddleware, getOrganizerEvents);
+router.get('/search', searchEvents);
 
 export default router;

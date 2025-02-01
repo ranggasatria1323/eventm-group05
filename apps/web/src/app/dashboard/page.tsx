@@ -51,7 +51,6 @@ export default function Dashboard() {
       {isLoggedIn ? (
         <>
           <Navbar userName={userName} />
-
           <aside
             className="fixed top-0 left-0 w-64 h-screen pt-20 bg-[#112240] border-r border-[#112240] transition-transform transform -translate-x-full md:translate-x-0"
             aria-label="Sidebar"
@@ -110,7 +109,7 @@ export default function Dashboard() {
             </ul>
           </aside>
 
-          <main className="p-4 sm:ml-64">
+          <main className="p-4 sm:ml-64 mt-5">
             <div className="p-6 bg-[#112240] border border-[#112240] rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[

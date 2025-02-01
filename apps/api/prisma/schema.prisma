@@ -22,14 +22,14 @@ model User {
   gender            String?
   referralCode      String?     @unique
   points            Int         @default(0)
-  pointsUpdatedAt   DateTime    @default(now()) // Field baru untuk mencatat kapan poin diperbarui
-  referrerId        Int?        // ID pengguna yang mereferensikan
+  pointsUpdatedAt   DateTime    @default(now())
+  referrerId        Int?        
   createdAt         DateTime    @default(now())
   events            Event[]
   tickets           Ticket[]
   discounts         Discount[]
   transactions      Transaction[]
-  reviews           Review[] // Relasi ke tabel Review
+  reviews           Review[] 
 
   @@map("users")
 }

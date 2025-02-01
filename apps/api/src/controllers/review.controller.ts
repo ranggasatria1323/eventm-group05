@@ -71,7 +71,8 @@ export const getReviewsByEvent = async (req: Request, res: Response, next: NextF
       include: {
         user: {
           select: {
-            name: true, // Sertakan nama pengguna
+            name: true,
+            image: true // Sertakan nama pengguna
           },
         },
       },

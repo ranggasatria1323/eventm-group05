@@ -13,15 +13,28 @@ interface AuthRequest extends Request {
 }
 
 type User = {
-  name: string
+  name: string;
   email: string;
   userType: string;
   id: number;
-} ;
+};
 
 export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
-    const events = await prisma.event.findMany();
+    let events = [];
+    if(req.query.type == 'landing'){
+      events = await prisma.event.findMany({
+        orderBy:{
+          date:'asc'
+        }
+      });
+    }else{
+      events = await prisma.event.findMany({
+        orderBy:{
+          created_at:'desc'
+        }
+      });
+    }
 
     res.status(200).json({
       status: 'success',
@@ -52,8 +65,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
   const user = req.user as User;
 
   try {
-
-    const { file } = req
+    const { file } = req;
 
     console.log({
       data: {
@@ -68,7 +80,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
         category: category || '',
         created_by: user.id,
       },
-    })
+    });
     const newPost = await prisma.event.create({
       data: {
         title: title || '',
@@ -91,8 +103,8 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      console.log(" error code : ", err.code)
-  }
+      console.log(' error code : ', err.code);
+    }
 
     res.status(500).json({
       status: 'error',
@@ -131,7 +143,7 @@ export const getEventById = async (req: Request, res: Response) => {
         data: {
           ...event,
           createdBy: event.user.name,
-        }
+        },
       });
     }
   } catch (err) {
@@ -175,6 +187,45 @@ export const getOrganizerEvents = async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch events',
+    });
+  }
+};
+
+export const searchEvents = async (req: Request, res: Response) => {
+  try {
+    const searchQuery = req.query.search || '';
+
+    const events = await prisma.event.findMany({
+      where: {
+        OR: [
+          {
+            title: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+          {
+            description: {
+              contains: searchQuery as string,
+              mode: 'insensitive',
+            },
+          },
+          {
+            location: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+          {
+            category: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+        ],
+      },
+    });
+
+    if (events.length === 0) {
+      res.status(200).json({ status: 'success', message: 'No events found', data: events });
+    } else {
+      res.status(200).json({ status: 'success', data: events });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(error),
     });
   }
 };

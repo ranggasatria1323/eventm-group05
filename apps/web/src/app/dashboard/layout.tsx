@@ -13,5 +13,8 @@ export default function DashboardRoot({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <>
+
+  {children}
+  </>;
 }

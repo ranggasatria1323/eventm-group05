@@ -5,6 +5,8 @@ import Cookies from 'js-cookie';
 
 const base_url = 'http://localhost:1234';
 
+
+
 interface IEventsDto {
   title: string;
   description: string;
@@ -17,9 +19,9 @@ interface IEventsDto {
   category: string;
 }
 
-export async function eventListProcess(data: { content: string }) {
+export async function eventListProcess(data?: { type: string }) {
   try {
-    const response = await axios.get(base_url + '/events');
+    const response = await axios.get(base_url + '/events?type=' + data?.type);
     console.log('API response:', response.data);
 
     if (response?.status === 200) {
@@ -72,7 +74,7 @@ export const fetchOrganizerEvents = async (token: string) => {
   }
 };
 
-export const fetchEventById = async (id: string, token: string,) => {
+export const fetchEventById = async (id: string, token: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}events/${id}`, {
       headers: {
@@ -88,5 +90,20 @@ export const fetchEventById = async (id: string, token: string,) => {
   } catch (error) {
     console.error('Failed to fetch event details:', error);
     return null;
+  }
+};
+
+export const searchEvents = async (query: string) => {
+  try {
+    const response = await axios.get(`${base_url}/search`, {
+      params: { search: query },
+      headers: {
+        Authorization: `Bearer ${Cookies.get('token')}`,
+      },
+    });
+    return response.data.data; 
+  } catch (error) {
+    console.error('Error searching events:', error);
+    return [];
   }
 };

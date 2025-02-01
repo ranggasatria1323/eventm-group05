@@ -10,6 +10,7 @@ import { Facebook, Linkedin } from "lucide-react"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { loginUser } from "../api/auth"
+import Link from "next/link"
 
 interface LoginFormValues {
   email: string
@@ -49,7 +50,7 @@ export function LoginForm() {
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
       {({ isSubmitting }) => (
-        <Form className="flex flex-col items-center justify-center h-full px-4 sm:px-12 bg-white w-full max-w-md mx-auto">
+        <Form className="flex flex-col mt-6 items-center justify-center h-full px-4 sm:px-12 bg-white w-full max-w-md mx-auto">
           <h1 className="text-3xl font-bold mb-4">Login</h1>
           <div className="mb-4">
             <Field name="email" type="email" placeholder="Email" as={Input} className="w-full sm:w-80" />
@@ -77,6 +78,9 @@ export function LoginForm() {
           <Button type="submit" className="w-full sm:w-80 mb-4 bg-[#4bb6b7] hover:bg-[#45a3a4]" disabled={isSubmitting}>
             {isSubmitting ? "Logging in..." : "Login"}
           </Button>
+          <a href='/register' className="sm:hidden flex justify-center w-full sm:w-80 mb-4 bg-[#b2f5f7] hover:bg-[#45a3a4]">
+          <Button type="button" className="w-full">Register</Button>
+          </a>
           <span className="text-sm mb-4">or use your account</span>
           <div className="flex flex-wrap justify-center gap-4">
             <a href="#" className="border rounded-full p-2 hover:border-[#4bb6b7] transition-colors">
