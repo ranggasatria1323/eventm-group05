@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchDiscounts, fetchEventById, fetchUserPoints } from '@/api/transaction';
+import { fetchDiscounts, fetchEventById, fetchUserPoints, getUserProfile, createTransaction } from '@/api/transaction';
 import {ToastContainer, toast} from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
@@ -28,6 +28,7 @@ const paymentMethods: PaymentMethod[] = [
 
 const TransactionPage = () => {
   const { id } = useParams();
+  const eventId = Array.isArray(id) ? id[0] : id;
   const router = useRouter();
 
   const [eventDetail, setEventDetail] = useState<any>(null);
@@ -39,6 +40,9 @@ const TransactionPage = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null); // Added state for payment method
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isEventExpired, setIsEventExpired] = useState<boolean>(false);
+
 
   // Fetch data from API when the component first renders
   useEffect(() => {
@@ -51,19 +55,37 @@ const TransactionPage = () => {
         }
 
         // Fetch all data in parallel
-        const [eventData, discountData, pointsData] = await Promise.all([
-          fetchEventById(id),
+        const [eventData, discountData, pointsData, userProfile] = await Promise.all([
+          fetchEventById(eventId),
           fetchDiscounts(),
           fetchUserPoints(),
+          getUserProfile(),
         ]);
 
         if (eventData) {
           setEventDetail(eventData);
           setTotalPrice(eventData.price);
+          
+          // Cek apakah event sudah berakhir
+const eventDate = new Date(eventData.date);
+const now = new Date();
+if (eventDate < now) {
+  setIsEventExpired(true);
+}
+
         }
         
         setDiscounts(discountData);
         setUserPoints(pointsData);
+
+        setUserRole(userProfile.userType);
+
+        // Cek peran pengguna
+        if (userProfile.userType !== 'Customer') {
+          toast.error("Only customers can access this page!", { position: "top-center" });
+          router.push('/unauthorized');
+        }
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -100,20 +122,51 @@ const TransactionPage = () => {
     }
   }, [ticketQuantity, selectedDiscount, useAllPoints, eventDetail, userPoints]);
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = async () => {
     if (!selectedPaymentMethod) {
       toast.error("Please select a payment method!", { position: "top-center" });
       return;
     }
 
-    // Simulate payment success
-    toast.success("Payment successful! Redirecting to ticket page...", { position: "top-center" });
+    if (!eventDetail || eventDetail.stock < ticketQuantity) {
+      toast.error("Not enough tickets available!", { position: "top-center" });
+      return;
+    }
 
-    // Delay for 2 seconds before redirecting
-    setTimeout(() => {
-      router.push(`/ticket/${id}`);
-    }, 2000);
+    try {
+      // 🔹 Send transaction request
+      const transactionData = {
+        eventId,
+        ticketQuantity,
+        discountId: selectedDiscount,
+        usePoints: useAllPoints,
+        paymentMethod: selectedPaymentMethod,
+      };
+
+      const response = await createTransaction(transactionData);
+
+      // ✅ If successful, show toast & update UI
+      toast.success("Payment successful! Redirecting to ticket page...", { position: "top-center" });
+
+      // ✅ Reduce ticket stock on UI
+      setEventDetail((prev: any) => ({
+        ...prev,
+        stock: prev.stock - ticketQuantity,
+      }));
+
+      // ✅ Reset ticket quantity
+      setTicketQuantity(1);
+
+      // ✅ Redirect to ticket page after 2 seconds
+      setTimeout(() => {
+        router.push(`/ticket/${id}`);
+      }, 2000);
+    } catch (error) {
+      toast.error("Transaction failed! Please try again.", { position: "top-center" });
+      console.error("Transaction error:", error);
+    }
   };
+
 
   return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
@@ -130,6 +183,8 @@ const TransactionPage = () => {
                     <p className="mt-2"><strong>Event:</strong> {eventDetail.title}</p>
                     <p className="mt-1"><strong>Date:</strong> {new Date(eventDetail.date).toLocaleDateString("id-ID")}</p>
                     <p className="mt-1"><strong>Location:</strong> {eventDetail.location}</p>
+                    <p className="mt-1"><strong>Available Tickets:</strong> {eventDetail.stock}</p>
+
                   </>
                 ) : (
                   <p>Loading event details...</p>
@@ -228,12 +283,20 @@ const TransactionPage = () => {
               </div>
             </div>
       
-            <button
-              className="w-full bg-green-600 text-white font-semibold py-3 mt-6 rounded-md hover:bg-green-700 transition"
-              onClick={handleProceedToPayment}
-            >
-              Pay
-            </button>
+            {isEventExpired ? (
+  <div className="mt-6 text-center text-red-600 font-bold">
+    This event has already ended. Ticket purchase is no longer available.
+  </div>
+) : (
+  <button
+    className="w-full bg-green-600 text-white font-semibold py-3 mt-6 rounded-md hover:bg-green-700 transition"
+    onClick={handleProceedToPayment}
+    disabled={eventDetail?.stock === 0}
+  >
+    {eventDetail?.stock === 0 ? "Sold Out" : "Pay"}
+  </button>
+)}
+
           </div>
         </div>
       );

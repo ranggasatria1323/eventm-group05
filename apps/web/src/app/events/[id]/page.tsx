@@ -79,6 +79,8 @@ export default function EventDetail() {
     fetchEvent();
   }, [id, router]);
 
+  const isEventExpired = event ? new Date(event.date) < new Date() : false;
+
   const handleAddReview = async () => {
     const token = getToken();
 
@@ -184,14 +186,21 @@ export default function EventDetail() {
               >
                 Back to Homepage
               </button>
-              <button
-                onClick={() =>
-                  router.push(`/transaction/${event.id}`)
-                }
-                className="px-6 py-3 bg-[#ff5a5f] text-white font-semibold rounded-md hover:bg-opacity-90"
-              >
-                Buy Ticket
-              </button>
+              {!isEventExpired ? (
+                <button
+                  onClick={() => router.push(`/transaction/${event?.id}`)}
+                  className="px-6 py-3 bg-[#ff5a5f] text-white font-semibold rounded-md hover:bg-opacity-90"
+                >
+                  Buy Ticket
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="px-6 py-3 bg-gray-400 text-white font-semibold rounded-md cursor-not-allowed"
+                >
+                  Event Ended
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -236,23 +245,32 @@ export default function EventDetail() {
           </div>
 
           <div className="bg-gray-100 p-6 rounded-lg shadow-md">
-            {reviews.length > 0 ? (
-              reviews.map((review, index) => (
-                <div className='flex'>
-                  <img className="h-10 w-10 rounded-full border object-cover mr-3" src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${review.user.image}`}/>
-                <div key={index} className="mb-3 border-b pb-2">
-                  <p className="text-gray-700">{review.comment}</p>
-                  <p className="text-sm text-gray-500">
-                    Rating: {review.rating} | By {review.user.name} |{' '}
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No reviews yet.</p>
-            )}
-          </div>
+  {reviews.length > 0 ? (
+    reviews.map((review, index) => (
+      <div key={index} className="flex items-center mb-3 border-b pb-2">
+        {/* ✅ Gunakan gambar default jika review.user.image tidak ada */}
+        <img
+          className="h-10 w-10 rounded-full border object-cover mr-3"
+          src={review.user.image 
+            ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${review.user.image}` 
+            : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk_FXy4YZZT1e7rhjFmME4WVyH4VUwGdM0iQ&s"}
+          alt={review.user.name || "Anonymous User"}
+        />
+        
+        <div>
+          <p className="text-gray-700">{review.comment}</p>
+          <p className="text-sm text-gray-500">
+            Rating: {review.rating} | By {review.user.name || "Anonymous"} |{" "}
+            {new Date(review.createdAt).toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-gray-500">No reviews yet.</p>
+  )}
+</div>
+
         </div>
       </div>
 

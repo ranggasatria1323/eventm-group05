@@ -28,7 +28,13 @@ export const fetchEventById = async (id: string) => {
 // Fungsi untuk mengambil daftar diskon
 export const fetchDiscounts = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}profile`);
+    const token = Cookies.get("token") || ""; // Ambil token dari cookies
+
+    const response = await axios.get(`${API_BASE_URL}discounts`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (response.status === 200) {
       return response.data.data;
@@ -60,5 +66,44 @@ export const fetchUserPoints = async () => {
   } catch (error) {
     console.error("Failed to fetch user points:", error);
     return null;
+  }
+};
+
+export const getUserProfile = async () => {
+  try {
+    const token = Cookies.get("token") || ""; // Ambil token dari cookies
+
+    const response = await axios.get(`${API_BASE_URL}profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      return response.data.data; // Pastikan ini mengembalikan data profil pengguna termasuk userType
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Failed to fetch user profile:", error);
+    return null;
+  }
+};
+
+export const createTransaction = async (transactionData: any) => {
+  try {
+    const token = Cookies.get("token") || ""; // Ambil token dari cookies
+    console.log("Token:", token); // Log token untuk debugging
+
+    const response = await axios.post(`${API_BASE_URL}transactions`, transactionData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Pastikan token dikirim
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    throw error;
   }
 };

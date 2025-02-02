@@ -45,14 +45,14 @@ model Event {
   date                 DateTime? @db.Date
   event_type           String?   @db.VarChar(50)
   price                Int?
+  stock                Int?
   max_voucher_discount Int?
   ticket               Ticket[]
   category             String?   @db.VarChar(50)
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
   reviews              Review[]
-  
-  transactions         Transaction[] @relation("EventTransactions") // Tambahkan ini
+  transactions         Transaction[] @relation("EventTransactions")
 
   @@map("events")
 }
@@ -67,7 +67,6 @@ model Ticket {
   purchaseDate DateTime
   event        Event        @relation(fields: [eventId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
-  transactions Transaction[]
 
   @@map("tickets")
 }
@@ -75,21 +74,20 @@ model Ticket {
 model Transaction {
   id             Int      @id @default(autoincrement())
   userId         Int
-  ticketId       Int
   eventId        Int
+  ticketQuantity Int
   amount         Decimal
   pointsUsed     Int
   discountId     Int?
-  ticketQuantity Int      // Tambahkan ini
+  paymentMethod  String
   date           DateTime @default(now())
 
   user     User     @relation(fields: [userId], references: [id])
-  ticket   Ticket   @relation(fields: [ticketId], references: [id])
   event    Event    @relation(fields: [eventId], references: [id], name: "EventTransactions")
   discount Discount? @relation(fields: [discountId], references: [id])
-
-  @@map("transactions")
 }
+
+
 
 model Discount {
   id         Int      @id @default(autoincrement())

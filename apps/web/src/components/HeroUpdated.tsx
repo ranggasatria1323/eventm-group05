@@ -11,7 +11,7 @@ export default function Hero() {
 
   const getEventList = async () => {
     const eventsSelection = await eventListProcess();
-    const eventIncoming = await eventListProcess({ type: 'landing' });
+    const eventIncoming = await eventListProcess({ type:'landing' });
 
     const limitEventsSelection = eventsSelection.slice(0, 4);
     const limitEventsIncoming = eventIncoming.slice(0, 6);
@@ -30,10 +30,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold">Kategori Event</h2>
-          <a
-            href="/events/category"
-            className="text-blue-600 flex items-center"
-          >
+          <a href="/events/category" className="text-blue-600 flex items-center">
             Lihat Semua <ChevronRight className="w-4 h-4 ml-1" />
           </a>
         </div>
@@ -65,52 +62,70 @@ export default function Hero() {
           </a>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {events.map((item: any, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow-lg overflow-hidden"
-            >
-              <img
-                src={
-                  `${process.env.NEXT_PUBLIC_BASE_API_URL}event-images/${item.image}` ||
-                  'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'
-                }
-                alt="Event"
-                className="w-full h-48 object-cover object-top"
-              />
-              <div className="p-4">
-                <div className="text-sm text-gray-500 mb-2">
-                  {new Date(item.date).toLocaleString('en-GB', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </div>
-                <h3 className="font-semibold mb-2 line-clamp-2">
-                  {item.title}
-                </h3>
-                <div className="flex items-center text-sm text-gray-500 mb-4">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {item.location}
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="text-blue-600 font-semibold">
-                    {item.price === 0
-                      ? 'Free'
-                      : `Rp ${item.price.toLocaleString()}`}
+          {events.map((item: any, index) => {
+            const [isExpanded, setIsExpanded] = useState(false);
+
+            return (
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-lg overflow-hidden"
+              >
+                <img
+                  src={
+                    `${process.env.NEXT_PUBLIC_BASE_API_URL}event-images/${item.image}` ||
+                    'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'
+                  }
+                  alt="Event"
+                  className="w-full h-48 object-cover object-top"
+                />
+                <div className="p-4">
+                  <div className="text-sm text-gray-500 mb-2">
+                    {new Date(item.date).toLocaleString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
                   </div>
-                  <a
-                    href={`/events/${item.id}`}
-                    className="text-blue-600 flex items-center"
-                  >
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                      Lihat Detail
-                    </button>
-                  </a>
+                  <h3 className="font-semibold mb-2 line-clamp-2">
+                    {item.title}
+                  </h3>
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {item.location}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-blue-600 font-semibold">
+                      {item.price === 0 ? "Free" : `Rp ${item.price.toLocaleString()}`}
+                    </div>
+                    <a
+                      href={`/events/${item.id}`}
+                      className="text-blue-600 flex items-center"
+                    >
+                      <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                        Lihat Detail
+                      </button>
+                    </a>
+                  </div>
+                  {/* Description Validation */}
+                  <div className="mt-2">
+                    {item.description.length > 26 ? (
+                      <>
+                        <p>{isExpanded ? item.description : `${item.description.slice(0, 26)}...`}</p>
+                        <button 
+                          onClick={() => setIsExpanded(!isExpanded)} 
+                          className="text-blue-600"
+                        >
+                          {isExpanded ? 'read less' : 'read more'}
+                        </button>
+                      </>
+                    ) : (
+                      <p>{item.description}</p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -124,7 +139,7 @@ export default function Hero() {
             </a>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
-            {eventsIncoming.map((item: any, index) => (
+            {eventsIncoming.map((item:any, index) => (
               <div
                 key={index}
                 className="bg-white rounded-xl shadow-md overflow-hidden "
@@ -154,9 +169,7 @@ export default function Hero() {
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="text-blue-600 font-semibold">
-                      {item.price === 0
-                        ? 'Free'
-                        : `Rp ${item.price.toLocaleString()}`}
+                      {item.price === 0 ? "Free" : `Rp ${item.price.toLocaleString()}`}
                     </div>
                     <a href={`/events/${item.id}`}>
                       <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">

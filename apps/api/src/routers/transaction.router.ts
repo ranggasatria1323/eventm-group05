@@ -5,7 +5,6 @@ import { verifyCustomer } from "../middlewares/auth.middleware"; // Middleware u
 const router = express.Router();
 const transactionController = new TransactionController();
 
-
 router.post("/transactions", verifyCustomer, transactionController.createTransaction);
 
 export default router;

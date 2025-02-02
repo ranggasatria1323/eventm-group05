@@ -12,82 +12,113 @@ class TransactionController {
    */
   createTransaction = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const { ticketId, ticketQuantity, discountId, usePoints, paymentMethod } = req.body;
+      const { eventId, ticketQuantity, discountId, usePoints, paymentMethod } = req.body;
+      console.log('Request body:', req.body); // Log payload yang diterima
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(400).json({
-          status: "error",
-          message: "User ID is missing",
-        });
+        return res.status(401).json({ status: "error", message: "Unauthorized" });
       }
 
-      // Fetch ticket details
-      const ticket = await prisma.ticket.findUnique({
-        where: { id: ticketId },
-        include: { event: true }, // Pastikan tiket memiliki relasi ke event
-      });
-      if (!ticket) {
-        return res.status(404).json({
-          status: "error",
-          message: "Ticket not found",
-        });
+      // Validasi data yang diterima
+      if (!eventId || !ticketQuantity || !paymentMethod) {
+        return res.status(400).json({ status: "error", message: "Invalid data" });
       }
 
-      // Fetch user details
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user) {
-        return res.status(404).json({
-          status: "error",
-          message: "User not found",
-        });
+      // Periksa apakah ticketQuantity adalah nomor
+      if (isNaN(ticketQuantity)) {
+        return res.status(400).json({ status: "error", message: "Invalid ticket quantity" });
       }
 
-      let totalPrice = (ticket.price.toNumber() ?? 0) * ticketQuantity;
-      let pointsUsed = 0;
+      // Gunakan Prisma Transaction untuk mencegah race condition
+      const transactionResult = await prisma.$transaction(async (prisma) => {
+        // Cek apakah event tersedia
+        const event = await prisma.event.findUnique({
+          where: { id: Number(eventId) },
+          select: { id: true, stock: true, price: true }
+        });
 
-      // Gunakan Diskon Jika Ada
-      if (discountId) {
-        const discount = await prisma.discount.findUnique({ where: { id: discountId } });
-        if (discount) {
-          totalPrice -= (discount.percentage.toNumber() / 100) * totalPrice;
+        console.log('Event data:', event); // Log data event untuk memastikan stok tersedia
+
+        if (!event) {
+          throw new Error("Event not found");
         }
-      }
 
-      // Gunakan Poin Jika Dipilih
-      if (usePoints && user.points > 0) {
-        pointsUsed = user.points;
-        totalPrice -= pointsUsed;
-        await prisma.user.update({
-          where: { id: userId },
-          data: { points: 0 }, // Reset poin setelah digunakan
+        // Validasi jika event memiliki stok dan harga
+        if (event.stock === null || event.price === null) {
+          throw new Error("Invalid event data (stock or price missing)");
+        }
+
+        // Validasi stok tiket cukup
+        if (event.stock < ticketQuantity) {
+          throw new Error("Insufficient ticket stock");
+        }
+
+        let totalPrice = event.price * ticketQuantity;
+        let pointsUsed = 0;
+
+        // Jika ada diskon, kurangi harga
+        if (discountId) {
+          const discount = await prisma.discount.findUnique({ where: { id: Number(discountId) } });
+          if (discount) {
+            totalPrice -= (Number(discount.percentage) / 100) * totalPrice;
+          }
+        }
+
+        // Jika user menggunakan poin
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (usePoints && user && user.points > 0) {
+          pointsUsed = Math.min(user.points, totalPrice); // Jangan biarkan total harga negatif
+          totalPrice -= pointsUsed;
+
+          // Reset poin setelah digunakan
+          await prisma.user.update({
+            where: { id: userId },
+            data: { points: user.points - pointsUsed }
+          });
+        }
+
+        totalPrice = Math.max(0, totalPrice); // Pastikan harga tidak negatif
+
+        // Kurangi stok tiket dari event secara aman (hanya jika transaksi berhasil)
+        await prisma.event.update({
+          where: { id: Number(eventId) },
+          data: { stock: { decrement: ticketQuantity } }
         });
-      }
 
-      // Pastikan total harga tidak negatif
-      totalPrice = totalPrice < 0 ? 0 : totalPrice;
-
-      // Buat transaksi
-      const transaction = await prisma.transaction.create({
-        data: {
-          userId: userId,
-          eventId: ticket.event.id, // Gunakan eventId dari tiket
-          ticketId: ticket.id,
-          ticketQuantity,
-          amount: totalPrice,
-          pointsUsed,
-          discountId: discountId || undefined,
-          date: new Date(),
-        },
+        // Buat transaksi setelah stok dikurangi
+        return await prisma.transaction.create({
+          data: {
+            userId: userId,
+            eventId: Number(eventId),
+            ticketQuantity,
+            amount: totalPrice,
+            pointsUsed,
+            discountId: discountId ? Number(discountId) : undefined,
+            paymentMethod: paymentMethod, // Tambahkan metode pembayaran
+            date: new Date()
+          }
+        });
       });
 
       return res.status(201).json({
         status: "success",
         message: "Transaction successful",
-        data: transaction,
+        data: transactionResult,
       });
-    } catch (error) {
-      next(error);
+    } catch (error: unknown) {
+      console.error("Error in createTransaction:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({
+          status: "error",
+          message: error.message || "Transaction failed",
+        });
+      } else {
+        return res.status(400).json({
+          status: "error",
+          message: "Transaction failed due to an unknown error",
+        });
+      }
     }
   };
 }
