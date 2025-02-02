@@ -8,7 +8,7 @@ interface AuthRequest extends Request {
     id: number;
     name: string;
     email: string;
-    userType: string;
+    userType: string |null;
   };
 }
 

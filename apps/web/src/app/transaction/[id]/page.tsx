@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { fetchDiscounts, fetchEventById, fetchUserPoints } from '@/api/transaction';
+import {ToastContainer, toast} from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 interface PaymentMethod {
   id: string;
@@ -25,8 +27,9 @@ const paymentMethods: PaymentMethod[] = [
 ];
 
 const TransactionPage = () => {
-  const searchParams = useSearchParams();
-  const eventId = searchParams.get("id"); // Get event ID from URL
+  const { id } = useParams();
+  const router = useRouter();
+
   const [eventDetail, setEventDetail] = useState<any>(null);
   const [discounts, setDiscounts] = useState<any[]>([]);
   const [userPoints, setUserPoints] = useState<any>(null);
@@ -42,14 +45,14 @@ const TransactionPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        if (!eventId) {
+        if (!id) {
           console.error("Event ID not found in URL");
           return;
         }
 
         // Fetch all data in parallel
         const [eventData, discountData, pointsData] = await Promise.all([
-          fetchEventById(eventId),
+          fetchEventById(id),
           fetchDiscounts(),
           fetchUserPoints(),
         ]);
@@ -69,7 +72,7 @@ const TransactionPage = () => {
     };
 
     fetchData();
-  }, [eventId]);
+  }, [id]);
 
   // Calculate total price based on ticket quantity, discount, and points
   useEffect(() => {
@@ -98,9 +101,19 @@ const TransactionPage = () => {
   }, [ticketQuantity, selectedDiscount, useAllPoints, eventDetail, userPoints]);
 
   const handleProceedToPayment = () => {
-    // Implement payment processing logic here
-    console.log("Proceeding to payment with method:", selectedPaymentMethod);
-};
+    if (!selectedPaymentMethod) {
+      toast.error("Please select a payment method!", { position: "top-center" });
+      return;
+    }
+
+    // Simulate payment success
+    toast.success("Payment successful! Redirecting to ticket page...", { position: "top-center" });
+
+    // Delay for 2 seconds before redirecting
+    setTimeout(() => {
+      router.push(`/ticket/${id}`);
+    }, 2000);
+  };
 
   return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
@@ -115,7 +128,7 @@ const TransactionPage = () => {
                 {eventDetail ? (
                   <>
                     <p className="mt-2"><strong>Event:</strong> {eventDetail.title}</p>
-                    <p className="mt-1"><strong>Date:</strong> {eventDetail.date}</p>
+                    <p className="mt-1"><strong>Date:</strong> {new Date(eventDetail.date).toLocaleDateString("id-ID")}</p>
                     <p className="mt-1"><strong>Location:</strong> {eventDetail.location}</p>
                   </>
                 ) : (
@@ -219,7 +232,7 @@ const TransactionPage = () => {
               className="w-full bg-green-600 text-white font-semibold py-3 mt-6 rounded-md hover:bg-green-700 transition"
               onClick={handleProceedToPayment}
             >
-              Proceed to Payment
+              Pay
             </button>
           </div>
         </div>

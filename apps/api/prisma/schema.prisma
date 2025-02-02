@@ -112,4 +112,3 @@ model Review {
   @@map("reviews")
 }
 
-

@@ -183,7 +183,7 @@ export default function EventDetail() {
               </button>
               <button
                 onClick={() =>
-                  router.push(`/transaction?eventId=${event.id}`)
+                  router.push(`/transaction/${event.id}`)
                 }
                 className="px-6 py-3 bg-[#ff5a5f] text-white font-semibold rounded-md hover:bg-opacity-90"
               >
