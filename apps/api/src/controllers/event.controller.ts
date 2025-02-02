@@ -13,26 +13,30 @@ interface AuthRequest extends Request {
 }
 
 type User = {
+  id: number;
   name: string;
   email: string;
   userType: string;
-  id: number;
+};
+
+type EventUpdateInput = Prisma.EventUpdateInput & {
+  deleted?: boolean;
 };
 
 export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
     let events = [];
-    if(req.query.type == 'landing'){
+    if (req.query.type == 'landing') {
       events = await prisma.event.findMany({
-        orderBy:{
-          date:'asc'
-        }
+        orderBy: {
+          date: 'asc',
+        },
       });
-    }else{
+    } else {
       events = await prisma.event.findMany({
-        orderBy:{
-          created_at:'desc'
-        }
+        orderBy: {
+          created_at: 'desc',
+        },
       });
     }
 
@@ -154,6 +158,49 @@ export const getEventById = async (req: Request, res: Response) => {
   }
 };
 
+export const editEvent = async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  const {
+    title,
+    description,
+    image,
+    location,
+    date,
+    event_type,
+    price,
+    max_voucher_discount,
+    category,
+  } = req.body;
+
+  try {
+    const updatedEvent = await prisma.event.update({
+      where: { id: id },
+      data: {
+        title,
+        description,
+        image,
+        location,
+        date: new Date(date),
+        event_type,
+        price: Number(price),
+        max_voucher_discount: Number(max_voucher_discount),
+        category,
+      },
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Event updated successfully',
+      data: updatedEvent,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
+  }
+};
+
 export const getOrganizerEvents = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -218,7 +265,9 @@ export const searchEvents = async (req: Request, res: Response) => {
     });
 
     if (events.length === 0) {
-      res.status(200).json({ status: 'success', message: 'No events found', data: events });
+      res
+        .status(200)
+        .json({ status: 'success', message: 'No events found', data: events });
     } else {
       res.status(200).json({ status: 'success', data: events });
     }
@@ -230,64 +279,24 @@ export const searchEvents = async (req: Request, res: Response) => {
   }
 };
 
-export const editEvent = async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-    const {
-      title,
-      description,
-      date,
-      image,
-      location,
-      event_type,
-      price,
-      stock,
-      max_voucher_discount,
-      category,
-    } = req.body;
-
-    const event = await prisma.event.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    if (!event) {
-      res.status(404).json({
-        status: 'not found',
-      });
-    } else {
-      const eventUpdate = await prisma.event.update({
+export const deleteEvent = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+  
+      const deleteEvent = await prisma.event.delete({
         where: {
-          id: id,
-        },
-        data: {
-          title: title || '',
-          description: description || '',
-          image: image || '',
-          location: location || '',
-          date: new Date(date) || '',
-          event_type: event_type || '',
-          price: price || 0,
-          stock: stock || 0,
-          max_voucher_discount: max_voucher_discount || 0,
-          category: category || '',
+          id: Number(id),
         },
       });
-
-      const outputData = { ...eventUpdate };
-
-      console.log({ ...outputData});
-
-      res.status(201).json({
-        status: 'success',
-        message: 'update event success',
-        data: { ...outputData},
+  
+      res.status(200).json({
+        status: 'delete success',
+        data: deleteEvent,
+      });
+    } catch (err) {
+      res.status(500).json({
+        status: 'error',
+        message: JSON.stringify(err),
       });
     }
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: JSON.stringify(err),
-    });
-  }
-};
+  };
