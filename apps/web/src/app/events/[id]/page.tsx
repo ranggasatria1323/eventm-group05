@@ -96,6 +96,9 @@ export default function EventDetail() {
       const response = await createReview(event!.id.toString(), newReview, newRating, token);
       const eventReviews = await fetchReviews(event!.id.toString(), token);
       setReviews(eventReviews);
+
+      setNewReview('');
+      setNewRating(5);
       
     } catch (error) {
       console.error('Failed to add review:', error);

@@ -14,6 +14,7 @@ import eventRouter from './routers/event.router';
 import profileRouter from './routers/profile.router';
 import discountRouter from './routers/discount.router';
 import reviewRouter from './routers/review.router';
+import transactionRouter from './routers/transaction.router';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ export default class App {
     this.app.use('/', profileRouter);
     this.app.use('/', discountRouter)
     this.app.use('/', reviewRouter)
+    this.app.use('/', transactionRouter)
   }
 
   public start(): void {

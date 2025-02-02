@@ -25,7 +25,7 @@ class TransactionController {
       // Fetch ticket details
       const ticket = await prisma.ticket.findUnique({
         where: { id: ticketId },
-        include: { event: true }, // ✅ Pastikan tiket memiliki relasi ke event
+        include: { event: true }, // Pastikan tiket memiliki relasi ke event
       });
       if (!ticket) {
         return res.status(404).json({
@@ -46,7 +46,7 @@ class TransactionController {
       let totalPrice = (ticket.price.toNumber() ?? 0) * ticketQuantity;
       let pointsUsed = 0;
 
-      // **Gunakan Diskon Jika Ada**
+      // Gunakan Diskon Jika Ada
       if (discountId) {
         const discount = await prisma.discount.findUnique({ where: { id: discountId } });
         if (discount) {
@@ -54,7 +54,7 @@ class TransactionController {
         }
       }
 
-      // **Gunakan Poin Jika Dipilih**
+      // Gunakan Poin Jika Dipilih
       if (usePoints && user.points > 0) {
         pointsUsed = user.points;
         totalPrice -= pointsUsed;
@@ -64,19 +64,19 @@ class TransactionController {
         });
       }
 
-      // **Pastikan total harga tidak negatif**
+      // Pastikan total harga tidak negatif
       totalPrice = totalPrice < 0 ? 0 : totalPrice;
 
-      // **Buat transaksi**
+      // Buat transaksi
       const transaction = await prisma.transaction.create({
         data: {
-          user: { connect: { id: userId } },
-          event: { connect: { id: ticket.event.id } }, // ✅ Gunakan eventId dari tiket
-          ticket: { connect: { id: ticketId } }, // ✅ Gunakan ticketId
+          userId: userId,
+          eventId: ticket.event.id, // Gunakan eventId dari tiket
+          ticketId: ticket.id,
           ticketQuantity,
           amount: totalPrice,
           pointsUsed,
-          discount: discountId ? { connect: { id: discountId } } : undefined,
+          discountId: discountId || undefined,
           date: new Date(),
         },
       });
