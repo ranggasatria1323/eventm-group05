@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient, Prisma,  } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,7 @@ interface AuthRequest extends Request {
     id: number;
     name: string;
     email: string;
-    userType: string |null;
+    userType: string | null;
   };
 }
 
@@ -62,6 +62,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
     date,
     event_type,
     price,
+    stock,
     max_voucher_discount,
     category,
   } = req.body;
@@ -80,6 +81,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
         date: new Date(date) || '',
         event_type: event_type || '',
         price: price || 0,
+        stock: Number(price) || 0,
         max_voucher_discount: max_voucher_discount || 0,
         category: category || '',
         created_by: user.id,
@@ -94,6 +96,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
         date: new Date(date) || '',
         event_type: event_type || '',
         price: Number(price) || 0,
+        stock: Number(stock) || 0,
         max_voucher_discount: Number(max_voucher_discount) || 0,
         category: category || '',
         created_by: user.id,
@@ -281,23 +284,23 @@ export const searchEvents = async (req: Request, res: Response) => {
 };
 
 export const deleteEvent = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-  
-      const deleteEvent = await prisma.event.delete({
-        where: {
-          id: Number(id),
-        },
-      });
-  
-      res.status(200).json({
-        status: 'delete success',
-        data: deleteEvent,
-      });
-    } catch (err) {
-      res.status(500).json({
-        status: 'error',
-        message: JSON.stringify(err),
-      });
-    }
-  };
+  try {
+    const { id } = req.params;
+
+    const deleteEvent = await prisma.event.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    res.status(200).json({
+      status: 'delete success',
+      data: deleteEvent,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
+  }
+};

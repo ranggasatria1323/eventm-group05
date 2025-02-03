@@ -69,7 +69,7 @@ export default function EventList() {
   }
 
   return (
-    <div className="p-6 bg-[#112240] border border-[#112240] rounded-lg">
+    <div className="p-6 bg-[#112240] border border-[#112240] rounded-lg h-[100vh]">
         <Link href="/dashboard">
       <h2 className="text-2xl font-bold text-[#64ffda] mb-6 ">My Events</h2>
         </Link>

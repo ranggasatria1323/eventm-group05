@@ -70,44 +70,6 @@ export const Header: React.FC = () => {
         id="tentang"
         className="md:flex justify-end h-8 bg-blue-900 px-4 md:px-10"
       >
-        <nav className="flex items-center space-x-6 md:text-sm overflow-x-auto">
-          <Link
-            href="/about"
-            className="text-gray-300 transition-colors hover:text-white "
-          >
-            Tentang Loket
-          </Link>
-          <Link
-            href="/creator"
-            className="text-gray-300 transition-colors hover:text-white"
-          >
-            Mulai Jadi Event Creator
-          </Link>
-          <Link
-            href="/profile"
-            className="text-gray-300 transition-colors hover:text-white"
-          >
-            Biaya
-          </Link>
-          <Link
-            href="/transaction"
-            className="text-gray-300 transition-colors hover:text-white"
-          >
-            Transaksi
-          </Link>
-          <Link
-            href="/blog"
-            className="text-gray-300 transition-colors hover:text-white"
-          >
-            Blog
-          </Link>
-          <Link
-            href="/contact"
-            className="text-gray-300 transition-colors hover:text-white"
-          >
-            Hubungi Kami
-          </Link>
-        </nav>
       </div>
       <div className="flex flex-row md:flex-row justify-between w-full md:h-16 items-center px-4 md:px-10">
         <Link
@@ -289,30 +251,6 @@ export const Header: React.FC = () => {
       <div className="hidden md:flex border-t border-opacity-30 border-blue-900">
         <div className="flex ml-4 md:ml-48 overflow-x-auto">
           <div className="flex h-10 items-center space-x-4 text-sm whitespace-nowrap">
-            <Link
-              href="/promo-indodana"
-              className="text-gray-300 transition-colors hover:text-white"
-            >
-              #Promo_Indodana
-            </Link>
-            <Link
-              href="/loket-screen"
-              className="text-gray-300 transition-colors hover:text-white"
-            >
-              #LOKETScreen
-            </Link>
-            <Link
-              href="/loket-promo"
-              className="text-gray-300 transition-colors hover:text-white"
-            >
-              #LOKET_Promo
-            </Link>
-            <Link
-              href="/loket-attraction"
-              className="text-gray-300 transition-colors hover:text-white"
-            >
-              #LoketAttraction
-            </Link>
           </div>
         </div>
       </div>

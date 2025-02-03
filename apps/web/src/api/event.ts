@@ -11,6 +11,7 @@ interface IEventsDto {
   date: string;
   event_type: string;
   price: number;
+  stock: number,
   max_voucher_discount: number;
   category: string;
 }

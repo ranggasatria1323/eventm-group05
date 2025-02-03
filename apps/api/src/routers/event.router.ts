@@ -22,7 +22,7 @@ router.post(
 );
 router.get('/events/:id', getEventById);
 router.patch('/events/:id', authMiddleware, editEvent);
-router.delete('/events/delete/:id', authMiddleware, deleteEvent);
+router.delete('/events/:id', authMiddleware, deleteEvent);
 router.get('/organizer-events', authMiddleware, getOrganizerEvents);
 router.get('/search', searchEvents);
 

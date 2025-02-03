@@ -56,7 +56,7 @@ export default function EventDetail() {
 
     try {
       await softDeleteEvent(event.id);
-      router.push('/dashboard/event-list'); // Redirect after deletion
+      router.push('/dashboard/event-list');
     } catch (error) {
       console.error('Error deleting event:', error);
     }

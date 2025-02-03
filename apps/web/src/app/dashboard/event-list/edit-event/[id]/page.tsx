@@ -1,370 +1,335 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { PhotoIcon } from '@heroicons/react/24/solid';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { editEventProcess, fetchEventById, fetchOrganizerEvents } from '@/api/event';
-import { Header } from '@/components/Header';
-import { useRouter, useParams } from 'next/navigation';
-import { getToken } from '@/api/dashboard';
-
-const getUserRole = () => {
-  return 'Event Organizer';
-};
+import type React from 'react';
+import { useState, useEffect } from 'react';
+import { Camera } from 'lucide-react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { editEventProcess , fetchEventById  } from '@/api/event';
 
 interface Event {
-  id: number;
   title: string;
-  date: string;
+  description: string;
+  image: string;
   location: string;
+  date: string;
   event_type: string;
   price: number;
+  stock: number,
+  max_voucher_discount: number;
+  category: string;
 }
 
-export default function EditEventProcess() {
-  const userRole = getUserRole();
-  const router = useRouter();
+function EditEvent() {
+  const [event, setEvent] = useState<Event>({
+    title: "",
+  description: "",
+  image: "",
+  location: "",
+  date: "",
+  event_type: "",
+  price: 0,
+  stock: 0,
+  max_voucher_discount: 0,
+  category: ""
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  if (userRole !== 'Event Organizer') {
-    return <p>You do not have permission to edit an event.</p>;
-  }
+  
 
-  const [events, setEvents] = useState<Event[]>([]);
-  const [eventName, setEventName] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [eventLocation, setEventLocation] = useState('');
-  const [eventDescription, setEventDescription] = useState('');
-  const [eventImage, setEventImage] = useState<File | null>(null);
-  const [eventPrice, setEventPrice] = useState('');
-  const [eventMaxDiscount, setEventMaxDiscount] = useState('');
-  const [eventType, setEventType] = useState('');
-  const [eventCategory, setEventCategory] = useState('');
-  const [eventStock, setEventStock] = useState('');
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        toast.error('Ukuran file harus kurang dari 1MB');
+        return;
+      }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+      if (!file.type.startsWith('image/')) {
+        toast.error('File harus berupa gambar');
+        return;
+      }
 
-    const formData = new FormData();
-    formData.append('title', eventName);
-    formData.append('description', eventDescription);
-    if (eventImage) {
-      formData.append('file', eventImage);
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEvent((prev) => ({ ...prev, image: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
     }
-    formData.append('location', eventLocation);
-    formData.append('date', eventDate);
-    if (eventType !== 'Free') {
-      formData.append('price', Number(eventPrice).toString());
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { title, value } = e.target;
+    if (title === 'phoneNumber') {
+      const numericValue = value.replace(/\D/g, '');
+      setEvent((prev) => ({
+        ...prev,
+        [title]: numericValue,
+      }));
+      return;
     }
-    formData.append(
-      'max_voucher_discount',
-      Number(eventMaxDiscount).toString(),
-    );
-    formData.append('event_type', eventType);
-    formData.append('category', eventCategory);
-    formData.append('stock', Number(eventStock).toString());
+    setEvent((prev) => ({
+      ...prev,
+      [title]: value,
+    }));
+  };
 
-    const { id } = useParams() 
-
-    // Call the API function to edit the event
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
-      await editEventProcess(Number(id), formData); // Use the event ID here
-      console.log('Event edited successfully');
-      router.push('/dashboard/event-list');
+      const formData = new FormData();
+      formData.append('title', event.title || '');
+      formData.append(
+        'date',
+        event.date ? new Date(event.date).toISOString() : '',
+      );
+      formData.append('location', event.location || '');
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      const response = await editEventProcess(formData);
+      if (response.status === 'success') {
+        toast.success('Data berhasil disimpan!');
+        const updatedData = await fetchEventById();
+        if (updatedData.status === 'success') {
+          setEvent(updatedData.data);
+        }
+      } else {
+        toast.error('Gagal menyimpan data.');
+      }
     } catch (error) {
-      console.error('Error editing event:', error);
+      toast.error('Terjadi kesalahan saat menyimpan data.');
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleEventTypeChange = (selectedType: string) => {
-    setEventType(selectedType);
-    if (selectedType === 'Free') {
-      setEventPrice('');
-    }
-  };
-
-  const handlePriceChange = (e: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    setEventPrice(e.target.value);
   };
 
   useEffect(() => {
-      const fetchEvents = async () => {
-        const token = getToken();
-  
-        if (!token) {
-          router.push('/login'); // Redirect to login if no token
-          return;
+    const fetchEvent = async () => {
+      try {
+        const data = await fetchEventById();
+        if (data.status === 'success') {
+          setProfile({
+            ...data.data,
+            birthdate: data.data.birthdate
+              ? new Date(data.data.birthdate).toISOString().split('T')[0]
+              : null,
+            remainingDays: data.data.remainingDays || 0,
+          });
         }
-  
-        const organizerEvents = await fetchOrganizerEvents(token);
-        setEvents(organizerEvents);
-      };
-  
-      fetchEvents();
-    }, [router]);
+      } catch (error) {
+        toast.error('Failed to fetch profile data');
+      }
+    };
+    fetchProfile();
+  }, []);
 
   return (
-    <>
-      <Header />
-      <form onSubmit={handleSubmit} className="px-3 py-2 md:px-20 md:py-10 ">
-        <div className="border p-4 rounded-xl bg-gray-50">
-          <div className="space-y-12 ">
-            <div className="border-b border-gray-900/10 pb-12">
-              <h2 className="text-base/7 font-semibold text-blue-900">
-                Edit Event
-              </h2>
-              <p className="mt-1 text-sm/6 text-gray-600">
-                Edit the Event details!
-              </p>
-              <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div className="sm:col-span-4">
-                  <label
-                    htmlFor="title"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Title
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="title"
-                      name="title"
-                      type="text"
-                      placeholder="title"
-                      className="block w-[50%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                      value={eventName}
-                      onChange={(e) => setEventName(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-span-full">
-                  <label
-                    htmlFor="date"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={eventDate}
-                    onChange={(e) => setEventDate(e.target.value)}
-                    required
-                    className="block w-[150px] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  />
-                </div>
-                <div className="col-span-full">
-                  <label
-                    htmlFor="description"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Description
-                  </label>
-                  <div className="mt-2">
-                    <textarea
-                      id="description"
-                      name="description"
-                      rows={3}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                      value={eventDescription}
-                      onChange={(e) => setEventDescription(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <p className="mt-3 text-sm/6 text-gray-600">
-                    Describe your event briefly and clearly.
-                  </p>
-                </div>
-                <div className="sm:col-span-4">
-                  <label
-                    htmlFor="location"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Location
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="location"
-                      name="location"
-                      type="text"
-                      placeholder="Lokasi Event"
-                      value={eventLocation}
-                      onChange={(e) => setEventLocation(e.target.value)}
-                      required
-                      className="block w-[50%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                    />
-                  </div>
-                </div>
-                <div className="sm:col-span-4 w-[50%]">
-                  <label
-                    htmlFor="price"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Price
-                  </label>
-                  <div className="mt-2 ">
-                    <Input
-                      type="text"
-                      value={eventPrice.replace(/[^0-9]/g, '')}
-                      onChange={handlePriceChange}
-                      disabled={eventType === 'Free'}
-                      required
-                      className="outline outline-1 -outline-offset-1 outline-gray-300"
-                    />
-                  </div>
-                </div>
-                <div className="sm:col-span-4">
-                  <label
-                    htmlFor="event type"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Event Type
-                  </label>
-                  <Select
-                    value={eventType}
-                    onValueChange={handleEventTypeChange}
-                    required
-                  >
-                    <SelectTrigger className="w-[180px] mt-2 outline outline-1 -outline-offset-1 outline-gray-300">
-                      <SelectValue placeholder="Select a event type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white ">
-                      <SelectGroup>
-                        <SelectLabel>Event Type</SelectLabel>
-                        <SelectItem value="Paid">Paid</SelectItem>
-                        <SelectItem value="Free">Free</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="sm:col-span-4">
-                  <label
-                    htmlFor="category"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Category
-                  </label>
-                  <Select
-                    value={eventCategory}
-                    onValueChange={setEventCategory}
-                    required
-                  >
-                    <SelectTrigger className="w-[180px] mt-2 outline outline-1 -outline-offset-1 outline-gray-300">
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectGroup>
-                        <SelectLabel>Category</SelectLabel>
-                        <SelectItem value="sport">Sport</SelectItem>
-                        <SelectItem value="konser">Konser</SelectItem>
-                        <SelectItem value="kuliner">Kuliner</SelectItem>
-                        <SelectItem value="pameran">Pameran</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="sm:col-span-4 w-[16%] ">
-                  <label
-                    htmlFor="max_discount"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Max Discount
-                  </label>
-                  <Input
-                    type="text"
-                    value={eventMaxDiscount.replace(/[^0-9]/g, '')}
-                    onChange={(e) => setEventMaxDiscount(e.target.value)}
-                    required
-                    className="outline outline-1 -outline-offset-1 outline-gray-300"
-                  />
-                </div>
-                <div className="sm:col-span-4 w-[10%]">
-                  <label
-                    htmlFor="stock"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Stock
-                  </label>
-                  <div className="mt-2 ">
-                    <Input
-                      type="text"
-                      value={eventStock.replace(/[^0-9]/g, '')}
-                      onChange={(e) => setEventStock(e.target.value)}
-                      required
-                      className="outline outline-1 -outline-offset-1 outline-gray-300"
-                    />
-                  </div>
-                </div>
-                <div className="col-span-full mt-8">
-                  <label
-                    htmlFor="cover-photo"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Event Poster
-                  </label>
-                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                    <div className="text-center">
-                      {eventImage ? (
-                        <img src={URL.createObjectURL(eventImage)} />
-                      ) : (
-                        <PhotoIcon
-                          aria-hidden="true"
-                          className="mx-auto size-12 text-gray-300"
-                        />
-                      )}
-                      <div className="mt-4 flex text-sm/6 text-gray-600">
-                        <label
-                          htmlFor="file-upload"
-                          className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                        >
-                          <span>Upload a file</span>
-                          <input
-                            id="file-upload"
-                            name="eventImage"
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              setEventImage(e.target.files?.[0] || null)
-                            }
-                            className="sr-only"
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs/5 text-gray-600">
-                        PNG, JPG, GIF up to 10MB
-                      </p>
-                    </div>
-                  </div>
-                </div>
+    <div classtitle="min-h-screen bg-gray-50">
+      <div classtitle="max-w-4xl mx-auto py-8 px-4">
+        <h1 classtitle="text-2xl font-bold text-gray-900 mb-8">
+          Informasi Dasar
+        </h1>
+        <div classtitle="bg-white rounded-lg shadow p-6">
+          {/* Profile Image */}
+          <div classtitle="flex flex-col items-center mb-8">
+            <div classtitle="relative group">
+              <div classtitle="w-32 h-32 rounded-full overflow-hidden">
+              { imageFile ? <img src={URL.createObjectURL(imageFile)} />  : profile?.image ?  <img src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile?.image}`} /> : <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_G0N9CN_iM6-kvF6qpZFibDRcR-t25KVQQA&s' />
+                  }
               </div>
+              <label classtitle="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full cursor-pointer group-hover:bg-blue-700 transition-colors">
+                <Camera classtitle="w-5 h-5 text-white" />
+                <input
+                  type="file"
+                  classtitle="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </label>
             </div>
           </div>
-          <div className="mt-6 flex items-center justify-end gap-x-6">
+
+          {/* Input Fields */}
+          <div classtitle="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Nama */}
+            <div>
+              <label
+                classtitle="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="title"
+              >
+                Nama
+              </label>
+              <input
+                type="text"
+                id="title"
+                title="title"
+                value={profile.title}
+                readOnly
+                classtitle="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* location */}
+            <div>
+              <label
+                classtitle="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="location"
+              >
+                location
+              </label>
+              <input
+                type="location"
+                id="location"
+                title="location"
+                value={profile.location}
+                readOnly
+                classtitle="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Tipe Pengguna */}
+            <div>
+              <label
+                classtitle="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="description"
+              >
+                Tipe Pengguna
+              </label>
+              <input
+                type="text"
+                id="description"
+                title="description"
+                value={profile.description}
+                readOnly
+                classtitle="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Nomor Telepon */}
+            <div>
+              <label
+                classtitle="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="phoneNumber"
+              >
+                Nomor Telepon
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                title="phoneNumber"
+                value={profile.phoneNumber || ''}
+                onChange={handleInputChange}
+                classtitle="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Tanggal Lahir */}
+            <div>
+              <label
+                classtitle="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="birthdate"
+              >
+                Tanggal Lahir
+              </label>
+              <input
+                type="date"
+                id="birthdate"
+                title="birthdate"
+                value={profile.birthdate || ''}
+                onChange={handleInputChange}
+                classtitle="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Jenis Kelamin */}
+            <div>
+              <label
+                classtitle="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="gender"
+              >
+                Jenis Kelamin
+              </label>
+              <select
+                id="gender"
+                title="gender"
+                value={profile.gender || ''}
+                onChange={handleInputChange}
+                classtitle="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Pilih jenis kelamin</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Points Section */}
+          <div classtitle="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div classtitle="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:bg-blue-100 hover:shadow-md transition duration-200">
+              <h2 classtitle="text-lg font-semibold text-blue-700 mb-2">
+                Referral Code
+              </h2>
+              <p classtitle="text-sm text-gray-700">
+                Gunakan kode ini untuk mengundang teman:
+              </p>
+              <div classtitle="mt-4 flex items-center justify-between">
+                <span classtitle="text-xl font-bold text-blue-900">
+                {profile.referralCode || "Tidak ada referral code"}
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(profile.referralCode);
+                    toast.success('Kode referral berhasil disalin!');
+                  }}
+                  classtitle="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+                >
+                  Salin
+                </button>
+              </div>
+            </div>
+            <div classtitle="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 hover:shadow-md transition duration-200">
+              <h2 classtitle="text-lg font-semibold text-green-700 mb-2">
+                Points
+              </h2>
+              <p classtitle="text-sm text-gray-700">
+                Anda memiliki jumlah poin berikut:
+              </p>
+              <div classtitle="mt-4 flex items-center">
+                <span classtitle="text-3xl font-bold text-green-900">
+                  {profile.points.toLocaleString()}
+                </span>
+                <span classtitle="ml-2 text-sm text-gray-500">poin</span>
+              </div>
+              <p classtitle="mt-2 text-sm text-gray-600">
+                Sisa waktu sebelum poin kadaluarsa:{' '}
+                <span classtitle="font-semibold text-green-800">
+                  {profile.remainingDays} hari
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div classtitle="mt-8 text-center">
             <button
-              type="button"
-              className="text-sm/6 font-semibold text-gray-900"
+              onClick={handleSave}
+              disabled={isLoading}
+              classtitle="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Edit
+              {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
           </div>
         </div>
-      </form>
-    </>
+      </div>
+      <ToastContainer />
+    </div>
   );
 }
+
+export default EditEvent;
