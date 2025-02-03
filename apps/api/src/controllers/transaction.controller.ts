@@ -1,92 +1,111 @@
-import type { NextFunction, Request as ExpressRequest, Response } from "express";
-import prisma from "../prisma";
-import type { User } from "@prisma/client";
+import { Request, Response, NextFunction } from 'express';
+import prisma from '../prisma';
+import type { User } from '@prisma/client';
 
-interface AuthRequest extends ExpressRequest {
+interface AuthRequest extends Request {
   user?: User;
 }
 
 class TransactionController {
   /**
-   * Create a new transaction
+   * Create a new transaction and delete the discount if used
    */
-  createTransaction = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  createTransaction = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const { eventId, ticketQuantity, discountId, usePoints, paymentMethod } = req.body;
-      console.log('Request body:', req.body); // Log payload yang diterima
+      const { eventId, ticketQuantity, discountId, usePoints, paymentMethod } =
+        req.body;
+      console.log('Request body:', req.body);
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({ status: "error", message: "Unauthorized" });
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'Unauthorized' });
       }
 
-      // Validasi data yang diterima
       if (!eventId || !ticketQuantity || !paymentMethod) {
-        return res.status(400).json({ status: "error", message: "Invalid data" });
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'Invalid data' });
       }
 
-      // Periksa apakah ticketQuantity adalah nomor
       if (isNaN(ticketQuantity)) {
-        return res.status(400).json({ status: "error", message: "Invalid ticket quantity" });
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'Invalid ticket quantity' });
       }
 
-      // Gunakan Prisma Transaction untuk mencegah race condition
+      // 🔹 Gunakan Prisma Transaction untuk menjaga konsistensi data
       const transactionResult = await prisma.$transaction(async (prisma) => {
-        // Cek apakah event tersedia
+        // 🔹 Cek apakah event tersedia
         const event = await prisma.event.findUnique({
           where: { id: Number(eventId) },
-          select: { id: true, stock: true, price: true }
+          select: { id: true, stock: true, price: true },
         });
 
-        console.log('Event data:', event); // Log data event untuk memastikan stok tersedia
-
         if (!event) {
-          throw new Error("Event not found");
+          throw new Error('Event not found');
         }
 
-        // Validasi jika event memiliki stok dan harga
         if (event.stock === null || event.price === null) {
-          throw new Error("Invalid event data (stock or price missing)");
+          throw new Error('Invalid event data (stock or price missing)');
         }
 
-        // Validasi stok tiket cukup
         if (event.stock < ticketQuantity) {
-          throw new Error("Insufficient ticket stock");
+          throw new Error('Insufficient ticket stock');
         }
 
         let totalPrice = event.price * ticketQuantity;
         let pointsUsed = 0;
 
-        // Jika ada diskon, kurangi harga
+        // 🔹 Jika ada diskon, gunakan dan tandai sebagai sudah digunakan
         if (discountId) {
-          const discount = await prisma.discount.findUnique({ where: { id: Number(discountId) } });
-          if (discount) {
-            totalPrice -= (Number(discount.percentage) / 100) * totalPrice;
+          const discount = await prisma.discount.findFirst({
+            where: { id: Number(discountId), used: false }, // Pastikan diskon belum digunakan
+          });
+
+          if (!discount) {
+            throw new Error('Invalid or already used discount ID');
           }
+
+          totalPrice -= (Number(discount.percentage) / 100) * totalPrice;
+
+          // **🔹 Tandai diskon sebagai sudah digunakan, bukan dihapus**
+          await prisma.discount.update({
+            where: { id: Number(discountId) },
+            data: { used: true }, // Tandai diskon sebagai sudah digunakan
+          });
+
+          console.log(
+            `Discount with ID: ${discountId} has been marked as used.`,
+          );
         }
 
-        // Jika user menggunakan poin
+        // 🔹 Jika user menggunakan poin
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (usePoints && user && user.points > 0) {
-          pointsUsed = Math.min(user.points, totalPrice); // Jangan biarkan total harga negatif
+          pointsUsed = Math.min(user.points, totalPrice);
           totalPrice -= pointsUsed;
 
-          // Reset poin setelah digunakan
           await prisma.user.update({
             where: { id: userId },
-            data: { points: user.points - pointsUsed }
+            data: { points: user.points - pointsUsed },
           });
         }
 
-        totalPrice = Math.max(0, totalPrice); // Pastikan harga tidak negatif
+        totalPrice = Math.max(0, totalPrice);
 
-        // Kurangi stok tiket dari event secara aman (hanya jika transaksi berhasil)
+        // 🔹 Kurangi stok tiket dari event
         await prisma.event.update({
           where: { id: Number(eventId) },
-          data: { stock: { decrement: ticketQuantity } }
+          data: { stock: { decrement: ticketQuantity } },
         });
 
-        // Buat transaksi setelah stok dikurangi
+        // 🔹 Buat transaksi baru
         return await prisma.transaction.create({
           data: {
             userId: userId,
@@ -95,28 +114,28 @@ class TransactionController {
             amount: totalPrice,
             pointsUsed,
             discountId: discountId ? Number(discountId) : undefined,
-            paymentMethod: paymentMethod, // Tambahkan metode pembayaran
-            date: new Date()
-          }
+            paymentMethod: paymentMethod,
+            date: new Date(),
+          },
         });
       });
 
       return res.status(201).json({
-        status: "success",
-        message: "Transaction successful",
+        status: 'success',
+        message: 'Transaction successful',
         data: transactionResult,
       });
     } catch (error: unknown) {
-      console.error("Error in createTransaction:", error);
+      console.error('Error in createTransaction:', error);
       if (error instanceof Error) {
         return res.status(400).json({
-          status: "error",
-          message: error.message || "Transaction failed",
+          status: 'error',
+          message: error.message || 'Transaction failed',
         });
       } else {
         return res.status(400).json({
-          status: "error",
-          message: "Transaction failed due to an unknown error",
+          status: 'error',
+          message: 'Transaction failed due to an unknown error',
         });
       }
     }

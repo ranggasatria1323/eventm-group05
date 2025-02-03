@@ -49,6 +49,7 @@ const TransactionPage = () => {
 
   const [eventDetail, setEventDetail] = useState<any>(null);
   const [discounts, setDiscounts] = useState<any[]>([]);
+  const [usedDiscounts, setUsedDiscounts] = useState<number[]>([]);
   const [userPoints, setUserPoints] = useState<any>(null);
   const [ticketQuantity, setTicketQuantity] = useState<number>(1);
   const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(
@@ -73,7 +74,6 @@ const TransactionPage = () => {
           return;
         }
 
-        // Fetch all data in parallel
         const [eventData, discountData, pointsData, userProfile] =
           await Promise.all([
             fetchEventById(eventId),
@@ -86,7 +86,6 @@ const TransactionPage = () => {
           setEventDetail(eventData);
           setTotalPrice(eventData.price);
 
-          // Cek apakah event sudah berakhir
           const eventDate = new Date(eventData.date);
           const now = new Date();
           if (eventDate < now) {
@@ -94,12 +93,19 @@ const TransactionPage = () => {
           }
         }
 
-        setDiscounts(discountData);
-        setUserPoints(pointsData);
+        // 🔹 Ambil diskon yang sudah digunakan dari localStorage
+        const usedDiscounts = JSON.parse(
+          localStorage.getItem('usedDiscounts') || '[]',
+        );
 
+        // 🔹 Hanya tampilkan diskon yang belum digunakan
+        setDiscounts(
+          discountData.filter((d: Discount) => !usedDiscounts.includes(d.id)),
+        );
+
+        setUserPoints(pointsData);
         setUserRole(userProfile.userType);
 
-        // Cek peran pengguna
         if (userProfile.userType !== 'Customer') {
           toast.error('Only customers can access this page!', {
             position: 'top-center',
@@ -150,39 +156,59 @@ const TransactionPage = () => {
     }
 
     try {
-      // 🔹 Send transaction request
-      const transactionData = {
+      const transactionData: any = {
         eventId,
         ticketQuantity,
-        discountId: selectedDiscount,
         usePoints: useAllPoints,
         paymentMethod: selectedPaymentMethod,
       };
 
+      if (selectedDiscount) {
+        transactionData.discountId = selectedDiscount.id;
+      }
+
       const response = await createTransaction(transactionData);
 
-      // ✅ If successful, show toast & update UI
       toast.success('Payment successful! Redirecting to ticket page...', {
         position: 'top-center',
       });
 
-      // ✅ Reduce ticket stock on UI
       setEventDetail((prev: any) => ({
         ...prev,
         stock: prev.stock - ticketQuantity,
       }));
 
-      // ✅ Reset ticket quantity
       setTicketQuantity(1);
 
-      // ✅ Redirect to ticket page after 2 seconds
+      // **🔹 Hapus diskon yang sudah digunakan dari state & localStorage**
+      if (selectedDiscount) {
+        setDiscounts((prev) =>
+          prev.filter((d) => d.id !== selectedDiscount.id),
+        );
+        setSelectedDiscount(null);
+
+        // **🔹 Hapus dari localStorage juga agar tidak muncul setelah reload**
+        const usedDiscounts = JSON.parse(
+          localStorage.getItem('usedDiscounts') || '[]',
+        );
+        const updatedUsedDiscounts = [...usedDiscounts, selectedDiscount.id];
+        localStorage.setItem(
+          'usedDiscounts',
+          JSON.stringify(updatedUsedDiscounts),
+        );
+      }
+
       setTimeout(() => {
-        router.push(`/ticket/${id}`);
+        router.push('/');
       }, 2000);
-    } catch (error) {
-      toast.error('Transaction failed! Please try again.', {
-        position: 'top-center',
-      });
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message ||
+          'Transaction failed! Please try again.',
+        {
+          position: 'top-center',
+        },
+      );
       console.error('Transaction error:', error);
     }
   };
@@ -276,14 +302,14 @@ const TransactionPage = () => {
                       onChange={(e) => {
                         const selected =
                           discounts.find(
-                            (d: Discount) => d.id === Number(e.target.value),
+                            (d) => d.id === Number(e.target.value),
                           ) || null;
                         setSelectedDiscount(selected);
                       }}
                       className="w-40 border p-2 rounded-md"
                     >
                       <option value="">No Discount</option>
-                      {discounts.map((discount: Discount) => (
+                      {discounts.map((discount) => (
                         <option key={discount.id} value={discount.id}>
                           {`${discount.percentage}% Off`}
                         </option>

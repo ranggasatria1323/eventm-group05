@@ -11,6 +11,7 @@ import { getToken, removeToken, fetchUserData } from './../../api/dashboard';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function Dashboard() {
+
   const router = useRouter();
   const [userName, setUserName] = useState<string>('EO Name');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);

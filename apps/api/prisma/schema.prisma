@@ -95,6 +95,7 @@ model Discount {
   percentage Decimal
   startDate  DateTime
   endDate    DateTime
+  used       Boolean  @default(false) // Tambahkan kolom ini
   user       User     @relation(fields: [userId], references: [id])
   transactions Transaction[]
 
