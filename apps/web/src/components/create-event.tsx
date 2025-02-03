@@ -35,7 +35,7 @@ export default function CreateEvent() {
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [eventPrice, setEventPrice] = useState('');
   const [eventMaxDiscount, setEventMaxDiscount] = useState('');
-  const [eventType, setEventType] = useState('');
+  const [eventType, setEventType] = useState('Paid');
   const [eventCategory, setEventCategory] = useState('');
   const [eventStock, setEventStock] = useState('');
 
@@ -46,7 +46,12 @@ export default function CreateEvent() {
     formData.append('title', eventName);
     formData.append('description', eventDescription);
     if (eventImage) {
-      formData.append('file', eventImage);
+      if (eventImage.size <= 10 * 1024 * 1024) { // 10MB dalam byte
+        formData.append('file', eventImage);
+      } else {
+        alert("File gambar kegedean!");
+        formData.append('file', eventImage);
+      }
     }
     formData.append('location', eventLocation);
     formData.append('date', eventDate);
@@ -235,10 +240,12 @@ export default function CreateEvent() {
                     <SelectContent className="bg-white">
                       <SelectGroup>
                         <SelectLabel>Category</SelectLabel>
-                        <SelectItem value="sport">Sport</SelectItem>
-                        <SelectItem value="konser">Konser</SelectItem>
-                        <SelectItem value="kuliner">Kuliner</SelectItem>
-                        <SelectItem value="pameran">Pameran</SelectItem>
+                        <SelectItem value="Musik">Musik</SelectItem>
+                        <SelectItem value="Exhibition">Exhibition</SelectItem>
+                        <SelectItem value="Sport">Sport</SelectItem>
+                        <SelectItem value="Workshop">Workshop</SelectItem>
+                        <SelectItem value="Festival">Festival</SelectItem>
+                        <SelectItem value="Exhibition">Exhibition</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -285,7 +292,7 @@ export default function CreateEvent() {
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                     <div className="text-center">
                       {eventImage ? (
-                        <img src={URL.createObjectURL(eventImage)} />
+                        <img className="h-[320px]" src={URL.createObjectURL(eventImage)} />
                       ) : (
                         <PhotoIcon
                           aria-hidden="true"

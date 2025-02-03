@@ -93,6 +93,9 @@ export default function Hero() {
                   <MapPin className="w-4 h-4 mr-1" />
                   {item.location}
                 </div>
+                <div className="flex items-center text-sm text-gray-500 mb-4">
+                  Stock : {item.stock}
+                </div>
                 <div className="flex justify-between items-center">
                   <div className="text-blue-600 font-semibold">
                     {item.price === 0

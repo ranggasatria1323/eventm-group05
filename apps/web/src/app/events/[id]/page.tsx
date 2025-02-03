@@ -26,6 +26,7 @@ interface Event {
   date: string;
   event_type: string;
   price: number;
+  stock: number;
   createdBy: string;
 }
 
@@ -134,7 +135,7 @@ export default function EventDetail() {
             <img
               src={`${process.env.NEXT_PUBLIC_BASE_API_URL}event-images/${event.image}`}
               alt={event.title}
-              className="w-full max-w-lg h-auto rounded-lg shadow-lg object-cover"
+              className="w-full max-w-lg h-[300px] rounded-lg shadow-lg object-cover"
             />
           </div>
 
@@ -170,8 +171,14 @@ export default function EventDetail() {
                   {event.price === 0 ? "Free" : `Rp ${event.price.toLocaleString()}`}
                   </p>
                 </div>
-                <div className="col-span-2">
-                  <h2 className="text-sm font-semibold text-gray-500">
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-500">Stock</h2>
+                  <p className="text-black">
+                  {event.stock}
+                  </p>
+                </div>
+                <div>
+                <h2 className="text-sm font-semibold text-gray-500">
                     Created By
                   </h2>
                   <p className="text-black">{event.createdBy || 'Unknown'}</p>
