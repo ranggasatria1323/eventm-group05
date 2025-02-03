@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { fetchEventById } from '../../../../api/event';
+import { fetchEventById, softDeleteEvent } from '../../../../api/event';
 import { getToken } from '../../../../api/dashboard';
 import LoadingSpinner from '../../../../components/loading';
 
@@ -46,6 +46,21 @@ export default function EventDetail() {
       </div>
     );
   }
+
+  const handleDelete = async () => {
+    const token = getToken();
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      await softDeleteEvent(event.id);
+      router.push('/dashboard/event-list'); // Redirect after deletion
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0A192F] text-[#ccd6f6] flex items-center justify-center">
@@ -94,13 +109,17 @@ export default function EventDetail() {
             </div>
           </div>
 
-          {/* Tombol Back */}
-          <div className="mt-8 text-center">
+          {/* Tombol Back and Delete */}
+          <div className="mt-8 text-center flex justify-between">
             <button
               onClick={() => router.push('/dashboard/event-list')}
               className="px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80"
             >
               Back to Events
+            </button>
+            <button onClick={() => router.push(`/dashboard/event-list/edit-event/${event.id}`)} className="px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80">Edit</button>
+            <button onClick={handleDelete} className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700">
+              Delete
             </button>
           </div>
         </div>
