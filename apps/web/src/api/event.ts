@@ -1,11 +1,7 @@
-'use client';
-
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const base_url = 'http://localhost:1234';
-
-
+const base_url = 'http://localhost:1234'; // Adjust the URL as needed
 
 interface IEventsDto {
   title: string;
@@ -101,9 +97,36 @@ export const searchEvents = async (query: string) => {
         Authorization: `Bearer ${Cookies.get('token')}`,
       },
     });
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
     console.error('Error searching events:', error);
     return [];
+  }
+};
+
+export const editEventProcess = async (id: number, data: FormData) => {
+  try {
+    const response = await axios.put(`${base_url}/event/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error editing event:', error);
+    throw error;
+  }
+};
+
+export const softDeleteEvent = async (eventId: number): Promise<void> => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+    return await axios.delete(`${base_url}/events/${eventId}`, {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (error) {
+    console.error('Error soft deleting event:', error);
+    throw error; // Propagate error to be handled in UI
   }
 };

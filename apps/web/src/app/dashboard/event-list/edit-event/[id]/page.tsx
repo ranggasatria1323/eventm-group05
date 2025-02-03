@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ChangeEvent, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PhotoIcon } from '@heroicons/react/24/solid';
 import {
   Select,
@@ -10,24 +10,35 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
-import { Input } from './ui/input';
-import { eventCreateProcess } from '../api/event';
-import { Header } from './Header';
-import { useRouter } from 'next/navigation';
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { editEventProcess, fetchEventById, fetchOrganizerEvents } from '@/api/event';
+import { Header } from '@/components/Header';
+import { useRouter, useParams } from 'next/navigation';
+import { getToken } from '@/api/dashboard';
 
 const getUserRole = () => {
   return 'Event Organizer';
 };
 
-export default function CreateEvent() {
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  location: string;
+  event_type: string;
+  price: number;
+}
+
+export default function EditEventProcess() {
   const userRole = getUserRole();
   const router = useRouter();
 
   if (userRole !== 'Event Organizer') {
-    return <p>You do not have permission to create an event.</p>;
+    return <p>You do not have permission to edit an event.</p>;
   }
 
+  const [events, setEvents] = useState<Event[]>([]);
   const [eventName, setEventName] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventLocation, setEventLocation] = useState('');
@@ -61,13 +72,15 @@ export default function CreateEvent() {
     formData.append('category', eventCategory);
     formData.append('stock', Number(eventStock).toString());
 
-    // Call the API function to create the event
+    const { id } = useParams() 
+
+    // Call the API function to edit the event
     try {
-      await eventCreateProcess(formData);
-      console.log('Event created successfully');
+      await editEventProcess(Number(id), formData); // Use the event ID here
+      console.log('Event edited successfully');
       router.push('/dashboard/event-list');
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error('Error editing event:', error);
     }
   };
 
@@ -84,6 +97,22 @@ export default function CreateEvent() {
     setEventPrice(e.target.value);
   };
 
+  useEffect(() => {
+      const fetchEvents = async () => {
+        const token = getToken();
+  
+        if (!token) {
+          router.push('/login'); // Redirect to login if no token
+          return;
+        }
+  
+        const organizerEvents = await fetchOrganizerEvents(token);
+        setEvents(organizerEvents);
+      };
+  
+      fetchEvents();
+    }, [router]);
+
   return (
     <>
       <Header />
@@ -92,10 +121,10 @@ export default function CreateEvent() {
           <div className="space-y-12 ">
             <div className="border-b border-gray-900/10 pb-12">
               <h2 className="text-base/7 font-semibold text-blue-900">
-                Create Event
+                Edit Event
               </h2>
               <p className="mt-1 text-sm/6 text-gray-600">
-                Create the Event you want!
+                Edit the Event details!
               </p>
               <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="sm:col-span-4">
@@ -110,7 +139,7 @@ export default function CreateEvent() {
                       id="title"
                       name="title"
                       type="text"
-                      placeholder="judul event"
+                      placeholder="title"
                       className="block w-[50%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                       value={eventName}
                       onChange={(e) => setEventName(e.target.value)}
@@ -331,7 +360,7 @@ export default function CreateEvent() {
               type="submit"
               className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Create
+              Edit
             </button>
           </div>
         </div>
