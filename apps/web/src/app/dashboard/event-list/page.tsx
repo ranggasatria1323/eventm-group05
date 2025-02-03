@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { fetchOrganizerEvents } from './../../../api/event';
 import { getToken } from './../../../api/dashboard';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 interface Event {
   id: number;
@@ -17,6 +18,7 @@ interface Event {
 
 export default function EventList() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [deleteEvent, setDeleteEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
