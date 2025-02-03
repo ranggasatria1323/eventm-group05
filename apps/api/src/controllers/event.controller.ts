@@ -162,8 +162,16 @@ export const getEventById = async (req: Request, res: Response) => {
   }
 };
 
-export const editEvent = async (req: AuthRequest, res: Response) => {
+export const editEvent = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
+
+  if (isNaN(id) || id <= 0) {
+    return res.status(400).json({
+      status: "error",
+      message: "ID event tidak valid",
+    });
+  }
+
   const {
     title,
     description,
@@ -176,9 +184,17 @@ export const editEvent = async (req: AuthRequest, res: Response) => {
     category,
   } = req.body;
 
+  // Validasi input
+  if (!title || !date || !event_type || !price || !category) {
+    return res.status(400).json({
+      status: "error",
+      message: "Harap isi semua bidang yang diperlukan",
+    });
+  }
+
   try {
     const updatedEvent = await prisma.event.update({
-      where: { id: id },
+      where: { id },
       data: {
         title,
         description,
@@ -186,21 +202,33 @@ export const editEvent = async (req: AuthRequest, res: Response) => {
         location,
         date: new Date(date),
         event_type,
-        price: Number(price),
-        max_voucher_discount: Number(max_voucher_discount),
+        price: parseFloat(price),
+        max_voucher_discount: max_voucher_discount
+          ? parseFloat(max_voucher_discount)
+          : null,
         category,
       },
     });
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Event updated successfully',
+    return res.status(200).json({
+      status: "success",
+      message: "Event berhasil diperbarui",
       data: updatedEvent,
     });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: JSON.stringify(err),
+  } catch (err: any) {
+    console.error("Error updating event:", err);
+
+    if (err.code === "P2025") {
+      return res.status(404).json({
+        status: "error",
+        message: "Event tidak ditemukan",
+      });
+    }
+
+    return res.status(500).json({
+      status: "error",
+      message: "Terjadi kesalahan saat memperbarui event",
+      error: err.message,
     });
   }
 };

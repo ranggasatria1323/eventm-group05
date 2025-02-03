@@ -51,6 +51,36 @@ export async function eventCreateProcess(data: FormData) {
   }
 }
 
+export async function eventEditProcess(id: string, data: IEventsDto) {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+
+    const reqBody = {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      location: data.location,
+      date: data.date,
+      price: data.price,
+      image: data.image,
+      stock: data.stock,
+      event_type: data.event_type,
+      max_voucher_discount: data.max_voucher_discount
+    }
+
+    return await axios.patch(`${base_url}/events/${id}`, reqBody, {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (err: any) {
+    console.error('Error editing event:', err);
+  }
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
 export const fetchOrganizerEvents = async (token: string) => {
@@ -102,16 +132,6 @@ export const searchEvents = async (query: string) => {
   } catch (error) {
     console.error('Error searching events:', error);
     return [];
-  }
-};
-
-export const editEventProcess = async (id: number, data: FormData) => {
-  try {
-    const response = await axios.put(`${base_url}/event/${id}`, data);
-    return response.data;
-  } catch (error) {
-    console.error('Error editing event:', error);
-    throw error;
   }
 };
 
