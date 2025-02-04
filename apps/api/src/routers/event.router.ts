@@ -5,8 +5,8 @@ import {
   getOrganizerEvents,
   getEventById,
   searchEvents,
-  editEvent,
   deleteEvent,
+  updateEvent // Import the updateEvent function
 } from '../controllers/event.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { uploader } from 'uploader';
@@ -21,7 +21,7 @@ router.post(
   createEvents,
 );
 router.get('/events/:id', getEventById);
-router.patch('/events/:id', authMiddleware, editEvent);
+router.put('/events/:id', authMiddleware, updateEvent); // Add the updateEvent route
 router.delete('/events/:id', authMiddleware, deleteEvent);
 router.get('/organizer-events', authMiddleware, getOrganizerEvents);
 router.get('/search', searchEvents);

@@ -11,7 +11,7 @@ interface IEventsDto {
   date: string;
   event_type: string;
   price: number;
-  stock: number,
+  stock: number;
   max_voucher_discount: number;
   category: string;
 }
@@ -51,33 +51,20 @@ export async function eventCreateProcess(data: FormData) {
   }
 }
 
-export async function eventEditProcess(id: string, data: IEventsDto) {
+export async function eventUpdateProcess(id:string, data: FormData) {
   try {
     let newToken = '';
     if (Cookies.get('token')) {
       newToken = 'Bearer ' + Cookies.get('token');
     }
 
-    const reqBody = {
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      location: data.location,
-      date: data.date,
-      price: data.price,
-      image: data.image,
-      stock: data.stock,
-      event_type: data.event_type,
-      max_voucher_discount: data.max_voucher_discount
-    }
-
-    return await axios.patch(`${base_url}/events/${id}`, reqBody, {
+    return await axios.put(`${base_url}/events/${id}`, data, {
       headers: {
         Authorization: newToken,
       },
     });
   } catch (err: any) {
-    console.error('Error editing event:', err);
+    console.error('Error updating event:', err); // Added error handling
   }
 }
 

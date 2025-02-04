@@ -10,27 +10,26 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { eventUpdateProcess, fetchEventById } from '@/api/event';
-import { useParams, useRouter } from 'next/navigation';
+} from '../components/ui/select';
+import { Input } from './ui/input';
+import { eventUpdateProcess, fetchEventById } from '../api/event';
+import { Header } from './Header';
+import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { getToken } from '@/api/dashboard';
 
 const getUserRole = () => {
   return 'Event Organizer';
 };
 
-export default function UpdateEvent() {
+export default function UpdateEvent({ eventId }: { eventId: string }) {
   const userRole = getUserRole();
   const router = useRouter();
-  const { id } = useParams();
 
   if (userRole !== 'Event Organizer') {
     return <p>You do not have permission to update an event.</p>;
   }
 
-  if (!id) {
+  if (!eventId) {
     return <p>Event ID is required to update the event.</p>;
   }
 
@@ -56,7 +55,6 @@ export default function UpdateEvent() {
   };
 
   const [eventData, setEventData] = useState(initialEventData);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [eventName, setEventName] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventLocation, setEventLocation] = useState('');
@@ -71,22 +69,10 @@ export default function UpdateEvent() {
 
   useEffect(() => {
     const fetchEvent = async () => {
-          const token = getToken();
-    
-          if (!token) {
-            router.push('/login');
-            return;
-          }
-    
-          const eventId = Array.isArray(id) ? id[0] : id;
-    
-          if (!eventId || !token) {
-            console.error('Missing event ID or token');
-            return;
-          }
-  try {
-          const eventData = await fetchEventById(eventId, token);
-  
+      const token = Cookies.get('token') || ''; // Provide a fallback value if the token is undefined
+      if (token) {
+        const eventData = await fetchEventById(eventId, token); // Pass the token as the second argument
+        if (eventData) {
           setEventName(eventData.title);
           setEventDate(formatDate(eventData.date)); // Format the date as needed
           setEventLocation(eventData.location);
@@ -98,21 +84,20 @@ export default function UpdateEvent() {
           setEventStock(eventData.stock);
 
           if (eventData.image) {
-            fetch(process.env.NEXT_PUBLIC_BASE_API_URL + 'event-images/' + eventData.image)
+            fetch(process.env.NEXT_PUBLIC_BASE_API_URL + 'images/' + eventData.image)
               .then(response => response.blob())
               .then(blob => setEventImage(new File([blob], 'eventImage.jpg', { type: blob.type })));
           } else {
             setEventImage(null);
           }
-        } catch (error) {
-          console.error('Error fetching event details:', error);
-        } finally {
-          setIsLoading(false);
         }
-      };
-  
-      fetchEvent();
-    }, [id, router]);
+      } else {
+        console.error("Token is not available");
+      }
+    };
+
+    fetchEvent();
+  }, [eventId]);
 
   const handleEventTypeChange = (selectedType: string) => {
     setEventType(selectedType);
@@ -152,7 +137,7 @@ export default function UpdateEvent() {
 
     // Call the API function to update the event
     try {
-      await eventUpdateProcess(String(id), formData);
+      await eventUpdateProcess(eventId, formData);
       console.log('Event updated successfully');
       router.push('/dashboard/event-list');
     } catch (error) {
@@ -260,7 +245,7 @@ export default function UpdateEvent() {
                         <div className="mt-2 ">
                           <Input
                             type="text"
-                            value={String(eventPrice).replace(/[^0-9]/g, '')}
+                            value={eventPrice.replace(/[^0-9]/g, '')}
                             onChange={handlePriceChange}
                             disabled={eventType === 'Free'}
                             required
@@ -329,7 +314,7 @@ export default function UpdateEvent() {
                         </label>
                         <Input
                           type="text"
-                          value={String(eventMaxDiscount).replace(/[^0-9]/g, '')}
+                          value={eventMaxDiscount.replace(/[^0-9]/g, '')}
                           onChange={(e) => setEventMaxDiscount(e.target.value)}
                           required
                           className="outline outline-1 -outline-offset-1 outline-gray-300"
@@ -345,7 +330,7 @@ export default function UpdateEvent() {
                         <div className="mt-2 ">
                           <Input
                             type="text"
-                            value={String(eventStock).replace(/[^0-9]/g, '')}
+                            value={eventStock.replace(/[^0-9]/g, '')}
                             onChange={(e) => setEventStock(e.target.value)}
                             required
                             className="outline outline-1 -outline-offset-1 outline-gray-300"

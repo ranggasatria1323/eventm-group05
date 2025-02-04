@@ -162,77 +162,6 @@ export const getEventById = async (req: Request, res: Response) => {
   }
 };
 
-export const editEvent = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  if (isNaN(id) || id <= 0) {
-    return res.status(400).json({
-      status: "error",
-      message: "ID event tidak valid",
-    });
-  }
-
-  const {
-    title,
-    description,
-    image,
-    location,
-    date,
-    event_type,
-    price,
-    max_voucher_discount,
-    category,
-  } = req.body;
-
-  // Validasi input
-  if (!title || !date || !event_type || !price || !category) {
-    return res.status(400).json({
-      status: "error",
-      message: "Harap isi semua bidang yang diperlukan",
-    });
-  }
-
-  try {
-    const updatedEvent = await prisma.event.update({
-      where: { id },
-      data: {
-        title,
-        description,
-        image,
-        location,
-        date: new Date(date),
-        event_type,
-        price: parseFloat(price),
-        max_voucher_discount: max_voucher_discount
-          ? parseFloat(max_voucher_discount)
-          : null,
-        category,
-      },
-    });
-
-    return res.status(200).json({
-      status: "success",
-      message: "Event berhasil diperbarui",
-      data: updatedEvent,
-    });
-  } catch (err: any) {
-    console.error("Error updating event:", err);
-
-    if (err.code === "P2025") {
-      return res.status(404).json({
-        status: "error",
-        message: "Event tidak ditemukan",
-      });
-    }
-
-    return res.status(500).json({
-      status: "error",
-      message: "Terjadi kesalahan saat memperbarui event",
-      error: err.message,
-    });
-  }
-};
-
 export const getOrganizerEvents = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -329,6 +258,59 @@ export const deleteEvent = async (req: Request, res: Response) => {
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),
+    });
+  }
+};
+
+export const updateEvent = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params; // Get event ID from request parameters
+    const {
+      title,
+      description,
+      location,
+      date,
+      event_type,
+      price,
+      stock,
+      max_voucher_discount,
+      category,
+    } = req.body;
+
+    // Validate user ID
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User ID is missing',
+      });
+    }
+
+    // Update the event in the database
+    const updatedEvent = await prisma.event.update({
+      where: { id: Number(id) },
+      data: {
+        title,
+        description,
+        location,
+        date: new Date(date),
+        event_type,
+        price: Number(price),
+        stock: Number(stock),
+        max_voucher_discount: Number(max_voucher_discount),
+        category,
+      },
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Event updated successfully',
+      data: updatedEvent,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(error),
     });
   }
 };
