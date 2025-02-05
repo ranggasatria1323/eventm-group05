@@ -19,12 +19,10 @@ interface AuthRequest extends Request {
 }
 
 export default class AuthController {
-  // Register user
   async register(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { name, email, password, referralCode } = req.body;
 
-      // Cek apakah user dengan email tersebut sudah terdaftar
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         return res.status(400).json({
@@ -37,9 +35,17 @@ export default class AuthController {
       const hashedPassword = await bcrypt.hash(password, salt);
 
       let discount = null;
+      const newUser = await prisma.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          userType: null, // Role not selected yet
+          referralCode: null, // Not generated yet
+        },
+      });
 
       if (referralCode) {
-        // Validasi referral code
         const referrer = await prisma.user.findUnique({
           where: { referralCode },
         });
@@ -51,39 +57,30 @@ export default class AuthController {
           });
         }
 
-        // Berikan diskon 10% ke pengguna baru
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 3);
-
-        discount = await prisma.discount.create({
-          data: {
-            userId: referrer.id, // User yang menggunakan referral mendapatkan diskon
-            percentage: 10,
-            startDate,
-            endDate,
-          },
-        });
-
-        // Berikan poin kepada pemilik referral code
         await prisma.user.update({
           where: { id: referrer.id },
           data: {
             points: { increment: 10000 }, // Tambahkan 10.000 poin
           },
         });
+
+        
+
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 3);
+
+        discount = await prisma.discount.create({
+          data: {
+            userId: newUser.id, // User yang menggunakan referral mendapatkan diskon
+            percentage: 10,
+            startDate,
+            endDate,
+          },
+        });
       }
 
-      // Buat user baru tanpa referral code
-      const newUser = await prisma.user.create({
-        data: {
-          name,
-          email,
-          password: hashedPassword,
-          userType: null, // Role belum dipilih
-          referralCode: null, // Belum digenerate
-        },
-      });
+      
 
       const token = jwt.sign(
         { id: newUser.id, email: newUser.email },
@@ -96,7 +93,7 @@ export default class AuthController {
         message: 'User registered successfully',
         data: {
           token,
-          discount, // Diskon jika referral code digunakan
+          discount, 
         },
       });
     } catch (error) {
