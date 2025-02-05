@@ -276,8 +276,9 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
       max_voucher_discount,
       category,
     } = req.body;
+    const {  file } = req 
 
-    // Validate user ID
+       // Validate user ID
     const userId = req.user?.id;
     if (!userId) {
       return res.status(400).json({
@@ -290,6 +291,7 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
     const updatedEvent = await prisma.event.update({
       where: { id: Number(id) },
       data: {
+        created_by:1,
         title,
         description,
         location,
@@ -299,6 +301,7 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
         stock: Number(stock),
         max_voucher_discount: Number(max_voucher_discount),
         category,
+        image:file?.filename
       },
     });
 

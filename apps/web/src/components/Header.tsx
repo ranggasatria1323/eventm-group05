@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Search, X } from 'lucide-react';
+import { Search, SearchIcon, X } from 'lucide-react';
 import { fetchUserProfile, loginUser, logoutUser } from '../api/header';
 import { searchEvents } from '../api/event';
 import { useRouter } from 'next/navigation'; // Import useRouter
@@ -87,7 +87,7 @@ export const Header: React.FC = () => {
           <div className="relative w-full">
             <Input
               type="search"
-              placeholder="Cari event seru di sini"
+              placeholder="Look for exciting events here"
               className="rounded-l-[5px] w-full pl-4 bg-[#101c46] text-white placeholder:text-gray-400 border-none rounded-r-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -111,6 +111,91 @@ export const Header: React.FC = () => {
         <div className="md:ml-auto md:flex md:items-center md:space-x-2">
           {isLoggedIn ? (
             <>
+            {/* Drawer */}
+            <button onClick={() => setIsDrawerOpen(true)}>
+                <div className="max-sm:absolute max-sm:right-10 max-sm:top-0 flex items-center cursor-pointer">
+                  <SearchIcon className='md:hidden white' />
+                  {/* <img
+                    src={
+                      user.image
+                        ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}`
+                        : defaultAvatar
+                    }
+                    alt="User Avatar"
+                    className="h-10 w-10 max-sm:h-7 max-sm:mt-[3px] max-sm:w-7 max-sm:mr-1 rounded-full border object-cover"
+                  /> */}
+                  <div className="max-sm:hidden ml-2 text-left">
+                    <span className="block font-medium text-white">
+                      {user.name}
+                    </span>
+                  </div>
+                </div>
+              </button>
+              {/* Auth Drawer */}
+              <div
+                className={`fixed inset-0 bg-black/50 transition-opacity z-50 ${
+                  isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+                onClick={() => setIsDrawerOpen(false)}
+              >
+                <div
+                  className={`fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transition-transform duration-300 ${
+                    isDrawerOpen ? 'translate-y-0' : 'translate-y-full'
+                  }`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Drawer Header */}
+                  <div className="p-4 border-b flex justify-between items-center">
+                    <img
+                      src={
+                        user.image
+                          ? `${process.env.NEXT_PUBLIC_BASE_API_URL}images/${user.image}`
+                          : defaultAvatar
+                      }
+                      alt="User Avatar"
+                      className="h-10 w-10 max-sm:h-9 max-sm:w-9 max-sm:mr-1 rounded-full border object-cover"
+                    />
+                    <h2 className="text-xl font-semibold">{user.name}</h2>
+                    <button
+                      onClick={() => setIsDrawerOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Drawer Content */}
+                  <div className="p-6 flex flex-col space-y-4">
+                    <Link
+                      href="/profile"
+                      className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/ticket"
+                      className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      My Ticket
+                    </Link>
+                    <Link
+                      href="/dashboard"
+                      className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link href="/login">
+                      <Button
+                        onClick={handleLogout}
+                        variant="ghost"
+                        className="block w-full text-left py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md"
+                      >
+                        Logout
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
               {/* Drawer */}
               <button onClick={() => setIsDrawerOpen(true)}>
                 <div className="max-sm:absolute max-sm:right-0 max-sm:top-0 flex items-center cursor-pointer">
@@ -121,7 +206,7 @@ export const Header: React.FC = () => {
                         : defaultAvatar
                     }
                     alt="User Avatar"
-                    className="h-10 w-10 max-sm:h-9 max-sm:w-9 max-sm:mr-1 rounded-full border object-cover"
+                    className="h-10 w-10 max-sm:h-7 max-sm:mt-[3px] max-sm:w-7 max-sm:mr-1 rounded-full border object-cover"
                   />
                   <div className="max-sm:hidden ml-2 text-left">
                     <span className="block font-medium text-white">
@@ -139,7 +224,7 @@ export const Header: React.FC = () => {
               >
                 <div
                   className={`fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transition-transform duration-300 ${
-                    isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+                    isDrawerOpen ? 'translate-y-0' : 'translate-y-full'
                   }`}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -202,7 +287,7 @@ export const Header: React.FC = () => {
                 onClick={() => setIsDrawerOpen(true)}
                 className="flex ml-[113px] bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Masuk
+                Login
               </button>
               {/* Auth Drawer */}
               <div
@@ -219,7 +304,7 @@ export const Header: React.FC = () => {
                 >
                   {/* Drawer Header */}
                   <div className="p-4 border-b flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">Masuk atau Daftar</h2>
+                    <h2 className="text-xl font-semibold">Login or Register</h2>
                     <button
                       onClick={() => setIsDrawerOpen(false)}
                       className="p-2 hover:bg-gray-100 rounded-full"
@@ -232,12 +317,12 @@ export const Header: React.FC = () => {
                   <div className="p-6 flex flex-col space-y-4">
                     <a href="/login">
                       <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium">
-                        Masuk
+                        Login
                       </button>
                     </a>
                     <a href="/register">
                       <button className="w-full bg-white text-blue-600 py-3 px-4 rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors text-lg font-medium">
-                        Daftar
+                        Register
                       </button>
                     </a>
                   </div>

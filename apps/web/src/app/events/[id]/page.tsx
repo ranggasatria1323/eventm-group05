@@ -168,7 +168,7 @@ export default function EventDetail() {
                 <div>
                   <h2 className="text-sm font-semibold text-gray-500">Price</h2>
                   <p className="text-black">
-                  {event.price === 0 ? "Free" : `Rp ${event.price.toLocaleString()}`}
+                  {!event.price ? "Free" : `Rp ${event.price.toLocaleString()}`}
                   </p>
                 </div>
                 <div>

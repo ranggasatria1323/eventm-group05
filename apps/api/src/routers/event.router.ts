@@ -21,7 +21,8 @@ router.post(
   createEvents,
 );
 router.get('/events/:id', getEventById);
-router.put('/events/:id', authMiddleware, updateEvent); // Add the updateEvent route
+router.put('/events/:id', 
+authMiddleware, uploader('IMG', 'event-images').single('file'), updateEvent); // Add the updateEvent route
 router.delete('/events/:id', authMiddleware, deleteEvent);
 router.get('/organizer-events', authMiddleware, getOrganizerEvents);
 router.get('/search', searchEvents);

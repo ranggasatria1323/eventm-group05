@@ -3,14 +3,31 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { fetchEventById, softDeleteEvent } from '../../../../api/event';
-import { getToken } from '../../../../api/dashboard';
+import { getToken, removeToken } from '../../../../api/dashboard';
 import LoadingSpinner from '../../../../components/loading';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Menu, X } from 'lucide-react';
 
 export default function EventDetail() {
   const { id } = useParams(); 
   const router = useRouter();
   const [event, setEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+      const toggleDrawer = () => {
+        setIsDrawerOpen(!isDrawerOpen); // Toggle drawer visibility
+      };
+    });
+  
+    const handleLogout = () => {
+      removeToken();
+      setIsLoggedIn(false);
+      router.push('/login'); // Redirect ke login setelah logout
+    };
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -64,8 +81,97 @@ export default function EventDetail() {
 
   return (
     <div className="min-h-screen bg-[#0A192F] text-[#ccd6f6] flex items-center justify-center">
+      <h2 className="absolute top-4 text-2xl font-bold text-[#64ffda] mb-6 ">My Events</h2>
+        <button
+          onClick={() => setIsDrawerOpen(true)}
+          className="absolute top-[20px] right-[30px] flex ml-[113px] bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Menu />
+        </button>
+        {/* Auth Drawer */}
+        <div
+          className={`fixed inset-0 bg-black/50 transition-opacity z-50 ${
+            isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+          onClick={() => setIsDrawerOpen(false)}
+        >
+          <div
+            className={`fixed right-0 top-0 h-full w-full max-w-md bg-[#112240] shadow-lg transition-transform duration-300 ${
+              isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div className="p-4 border-b flex justify-between items-center text-white">
+              <h2 className="text-xl font-semibold">Menu</h2>
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Drawer Content */}
+            <div className="bg-[#112240]">
+              <ul className="px-3 space-y-4">
+                <li>
+                  <Link href="/dashboard">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
+                    >
+                      Dashboard
+                    </Button>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href="/dashboard/event-list">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
+                    >
+                      Event List
+                    </Button>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href="/">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
+                    >
+                      Home
+                    </Button>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href="/dashboard/create">
+                    <Button className="w-full bg-[#64ffda] text-[#0A192F] font-semibold hover:bg-opacity-80 transition-colors duration-200">
+                      Create Event
+                    </Button>
+                  </Link>
+                </li>
+
+                <li>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
+                    onClick={handleLogout}
+                  >
+                    Log Out
+                  </Button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          </div>
       {/* Detail Acara */}
-      <div className="bg-[#112240] w-full max-w-lg rounded-lg shadow-lg overflow-hidden">
+      <div className='border-b-2'></div>
+      <div className="bg-[#112240] w-full max-w-lg rounded-lg shadow-lg overflow-hidden mt-[80px]">
         {/* Gambar Acara */}
         <div className="relative w-full h-60">
           <img
@@ -104,7 +210,7 @@ export default function EventDetail() {
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-semibold text-[#64ffda]">Price</h2>
               <p className="text-[#ccd6f6]">
-              {event.price === 0 ? "Free" : `Rp ${event.price.toLocaleString()}`}
+              {!event.price ? "Free" : `Rp ${event.price.toLocaleString()}`}
               </p>
             </div>
           </div>

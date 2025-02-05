@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, Calendar, MapPin, Ticket } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -76,7 +76,7 @@ function Search() {
                   </div>
                   <div className="flex items-center text-blue-600 text-sm">
                     <span>
-                      {item.price === 0
+                      {!item.price
                         ? 'Free'
                         : `Rp ${item.price.toLocaleString()}`}
                     </span>

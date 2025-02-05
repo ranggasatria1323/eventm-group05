@@ -132,7 +132,7 @@ function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">
-          Informasi Dasar
+        Basic Information
         </h1>
         <div className="bg-white rounded-lg shadow p-6">
           {/* Profile Image */}
@@ -162,7 +162,7 @@ function ProfilePage() {
                 className="block text-sm font-medium text-gray-700 mb-1"
                 htmlFor="name"
               >
-                Nama
+                Name
               </label>
               <input
                 type="text"
@@ -198,7 +198,7 @@ function ProfilePage() {
                 className="block text-sm font-medium text-gray-700 mb-1"
                 htmlFor="userType"
               >
-                Tipe Pengguna
+                User Type
               </label>
               <input
                 type="text"
@@ -216,7 +216,7 @@ function ProfilePage() {
                 className="block text-sm font-medium text-gray-700 mb-1"
                 htmlFor="phoneNumber"
               >
-                Nomor Telepon
+                Phone Number
               </label>
               <input
                 type="tel"
@@ -234,7 +234,7 @@ function ProfilePage() {
                 className="block text-sm font-medium text-gray-700 mb-1"
                 htmlFor="birthdate"
               >
-                Tanggal Lahir
+                Date of birth
               </label>
               <input
                 type="date"
@@ -252,7 +252,7 @@ function ProfilePage() {
                 className="block text-sm font-medium text-gray-700 mb-1"
                 htmlFor="gender"
               >
-                Jenis Kelamin
+                Gender
               </label>
               <select
                 id="gender"
@@ -261,9 +261,9 @@ function ProfilePage() {
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Pilih jenis kelamin</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
+                <option value="">Select gender</option>
+                <option value="Laki-laki">Male</option>
+                <option value="Perempuan">Female</option>
               </select>
             </div>
           </div>
@@ -275,20 +275,20 @@ function ProfilePage() {
                 Referral Code
               </h2>
               <p className="text-sm text-gray-700">
-                Gunakan kode ini untuk mengundang teman:
+              Use this code to invite friends:
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-xl font-bold text-blue-900">
-                {profile.referralCode || "Tidak ada referral code"}
+                {profile.referralCode || "There is no referral code"}
                 </span>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(profile.referralCode);
-                    toast.success('Kode referral berhasil disalin!');
+                    toast.success('Referral code copied successfully!');
                   }}
                   className="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
                 >
-                  Salin
+                  Copy
                 </button>
               </div>
             </div>
@@ -297,7 +297,7 @@ function ProfilePage() {
                 Points
               </h2>
               <p className="text-sm text-gray-700">
-                Anda memiliki jumlah poin berikut:
+              You have the following number of points:
               </p>
               <div className="mt-4 flex items-center">
                 <span className="text-3xl font-bold text-green-900">
@@ -306,9 +306,9 @@ function ProfilePage() {
                 <span className="ml-2 text-sm text-gray-500">poin</span>
               </div>
               <p className="mt-2 text-sm text-gray-600">
-                Sisa waktu sebelum poin kadaluarsa:{' '}
+              Remaining time before points expire:{' '}
                 <span className="font-semibold text-green-800">
-                  {profile.remainingDays} hari
+                  {profile.remainingDays} days
                 </span>
               </p>
             </div>
@@ -321,7 +321,7 @@ function ProfilePage() {
               disabled={isLoading}
               className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+              {isLoading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </div>
