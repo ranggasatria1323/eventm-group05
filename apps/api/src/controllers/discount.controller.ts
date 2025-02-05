@@ -1,30 +1,30 @@
-import { Request, Response, NextFunction } from 'express';
-import prisma from '../prisma';
-import type { User } from '@prisma/client';
+import { Request, Response, NextFunction } from "express";
+import prisma from "../prisma";
+import type { User } from "@prisma/client";
 
 interface AuthRequest extends Request {
   user?: User;
 }
 
-// Mendapatkan diskon aktif pengguna
+// Mendapatkan diskon aktif pengguna yang belum digunakan
 export const getUserDiscounts = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id; // Dapatkan ID pengguna dari middleware autentikasi
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(400).json({
-        status: 'error',
-        message: 'User ID is missing',
+        status: "error",
+        message: "User ID is missing",
       });
     }
 
     const now = new Date();
 
-    // Ambil semua diskon aktif pengguna
+    // Ambil semua diskon aktif pengguna yang belum digunakan
     const discounts = await prisma.discount.findMany({
       where: {
         userId,
-        endDate: { gt: now }, // endDate harus lebih besar dari tanggal sekarang
+        endDate: { gt: now }, // Diskon masih berlaku
       },
       select: {
         id: true,
@@ -35,10 +35,22 @@ export const getUserDiscounts = async (req: AuthRequest, res: Response, next: Ne
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: discounts,
     });
   } catch (error) {
     next(error);
   }
 };
+
+export const getAvailableDiscounts = async (req: Request, res: Response) => {
+  try {
+    const discounts = await prisma.discount.findMany();
+
+    return res.status(200).json({ status: "success", data: discounts });
+  } catch (error) {
+    console.error("Error fetching discounts:", error);
+    return res.status(500).json({ status: "error", message: "Failed to fetch discounts" });
+  }
+};
+
