@@ -140,6 +140,105 @@ class TransactionController {
       }
     }
   };
+  /**
+   * Get all transactions related to the Event Organizer's events
+   */
+  getTransactionStatsByEO = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      console.log('user:', req.user);
+      console.log('auth:', req.headers.authorization);
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // 🔹 Ambil semua event yang dibuat oleh EO (gunakan `createdBy` untuk filter EO)
+      const events = await prisma.event.findMany({
+        where: { created_by: userId }, // Pastikan event memiliki `createdBy`
+        select: { id: true, title: true },
+      });
+
+      const eventIds = events.map((event) => event.id);
+
+      if (eventIds.length === 0) {
+        return res
+          .status(200)
+          .json({ message: 'No transactions found for your events.' });
+      }
+
+      // 🔹 Ambil transaksi berdasarkan eventId yang dibuat EO
+      const transactions = await prisma.transaction.groupBy({
+        by: ['eventId'],
+        where: { eventId: { in: eventIds } },
+        _sum: { ticketQuantity: true, amount: true },
+      });
+
+      // 🔹 Format hasil data untuk frontend chart
+      const stats = transactions.map((trx) => {
+        const event = events.find((e) => e.id === trx.eventId);
+        return {
+          eventName: event ? event.title : 'Unknown Event',
+          totalTicketsSold: trx._sum.ticketQuantity || 0,
+          totalRevenue: trx._sum.amount || 0,
+        };
+      });
+      console.log('Transaksi yang dikembalikan:', stats)
+
+      return res.status(200).json(stats);
+    } catch (error) {
+      console.error('Error fetching transaction stats:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  };
+  /**
+   * Get all transactions with event and user details
+   */
+  getAllTransactions = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      console.log('Fetching all transactions...');
+
+      // 🔹 Ambil semua transaksi dengan informasi event & user
+      const transactions = await prisma.transaction.findMany({
+        include: {
+          event: { select: { id: true, title: true, price: true } }, // Info event
+          user: { select: { id: true, name: true, email: true } }, // Info user
+        },
+        orderBy: { date: 'desc' }, // Urutkan dari yang terbaru
+      });
+
+      // 🔹 Format hasil data agar lebih mudah digunakan di frontend
+      const formattedTransactions = transactions.map((txn) => ({
+        transactionId: txn.id,
+        userId: txn.user.id,
+        userName: txn.user.name,
+        userEmail: txn.user.email,
+        eventId: txn.event.id,
+        eventName: txn.event.title,
+        ticketQuantity: txn.ticketQuantity,
+        amountPaid: txn.amount,
+        paymentMethod: txn.paymentMethod,
+        date: txn.date,
+      }));
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'All transactions fetched successfully',
+        data: formattedTransactions,
+      });
+    } catch (error) {
+      console.error('Error fetching all transactions:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  };
 }
 
 export default TransactionController;
