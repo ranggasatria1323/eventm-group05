@@ -34,8 +34,8 @@ function ProfilePage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
-
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -78,7 +78,10 @@ function ProfilePage() {
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
+    setIsModalOpen(true);
+  };
+  const handleConfirmSave = async () => {
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append('phoneNumber', profile.phoneNumber || '');
@@ -104,8 +107,12 @@ function ProfilePage() {
     } catch (error) {
       toast.error('Terjadi kesalahan saat menyimpan data.');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
+      setIsModalOpen(false); // Close the modal after confirming save
     }
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false); // Close the modal without saving
   };
 
   useEffect(() => {
@@ -132,15 +139,22 @@ function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">
-        Basic Information
+          Basic Information
         </h1>
         <div className="bg-white rounded-lg shadow p-6">
           {/* Profile Image */}
           <div className="flex flex-col items-center mb-8">
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden">
-              { imageFile ? <img src={URL.createObjectURL(imageFile)} />  : profile?.image ?  <img src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile?.image}`} /> : <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_G0N9CN_iM6-kvF6qpZFibDRcR-t25KVQQA&s' />
-                  }
+                {imageFile ? (
+                  <img src={URL.createObjectURL(imageFile)} />
+                ) : profile?.image ? (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile?.image}`}
+                  />
+                ) : (
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_G0N9CN_iM6-kvF6qpZFibDRcR-t25KVQQA&s" />
+                )}
               </div>
               <label className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full cursor-pointer group-hover:bg-blue-700 transition-colors">
                 <Camera className="w-5 h-5 text-white" />
@@ -275,11 +289,11 @@ function ProfilePage() {
                 Referral Code
               </h2>
               <p className="text-sm text-gray-700">
-              Use this code to invite friends:
+                Use this code to invite friends:
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-xl font-bold text-blue-900">
-                {profile.referralCode || "There is no referral code"}
+                  {profile.referralCode || 'There is no referral code'}
                 </span>
                 <button
                   onClick={() => {
@@ -297,7 +311,7 @@ function ProfilePage() {
                 Points
               </h2>
               <p className="text-sm text-gray-700">
-              You have the following number of points:
+                You have the following number of points:
               </p>
               <div className="mt-4 flex items-center">
                 <span className="text-3xl font-bold text-green-900">
@@ -306,7 +320,7 @@ function ProfilePage() {
                 <span className="ml-2 text-sm text-gray-500">poin</span>
               </div>
               <p className="mt-2 text-sm text-gray-600">
-              Remaining time before points expire:{' '}
+                Remaining time before points expire:{' '}
                 <span className="font-semibold text-green-800">
                   {profile.remainingDays} days
                 </span>
@@ -326,6 +340,30 @@ function ProfilePage() {
           </div>
         </div>
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-[#112240] rounded-lg p-6 w-96 animate__animated animate__fadeIn animate__fast">
+            <h2 className="text-xl text-[#64ffda] font-semibold mb-4 text-center">
+              Are you sure you want to save these changes?
+            </h2>
+            <div className="flex justify-around">
+              <button
+                onClick={handleCancel}
+                className="px-6 py-3 bg-gray-500 text-white font-semibold rounded-md hover:bg-opacity-80"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSave}
+                className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <ToastContainer />
     </div>
   );
