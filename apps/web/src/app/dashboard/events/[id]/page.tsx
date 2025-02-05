@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { fetchEventById, softDeleteEvent } from '../../../../api/event';
-import { fetchUserData, getToken, removeToken } from '../../../../api/dashboard';
+import {
+  fetchUserData,
+  getToken,
+  removeToken,
+} from '../../../../api/dashboard';
 import LoadingSpinner from '../../../../components/loading';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -11,25 +15,27 @@ import { Menu, X } from 'lucide-react';
 import Navbar from '@/components/navbar-dashboard';
 
 export default function EventDetail() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const router = useRouter();
   const [event, setEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [deletingEvent, setDeletingEvent] = useState<boolean>(false);
 
   useEffect(() => {
-      const toggleDrawer = () => {
-        setIsDrawerOpen(!isDrawerOpen); // Toggle drawer visibility
-      };
-    });
-  
-    const handleLogout = () => {
-      removeToken();
-      setIsLoggedIn(false);
-      router.push('/login'); // Redirect ke login setelah logout
+    const toggleDrawer = () => {
+      setIsDrawerOpen(!isDrawerOpen); // Toggle drawer visibility
     };
+  });
+
+  const handleLogout = () => {
+    removeToken();
+    setIsLoggedIn(false);
+    router.push('/login'); // Redirect ke login setelah logout
+  };
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -40,11 +46,11 @@ export default function EventDetail() {
         return;
       }
 
-      const eventId = Array.isArray(id) ? id[0] : id; 
+      const eventId = Array.isArray(id) ? id[0] : id;
 
       try {
         const eventData = await fetchEventById(eventId, token);
-        const userData : any = await fetchUserData(token)
+        const userData: any = await fetchUserData(token);
         setEvent(eventData);
         setIsLoading(false);
         setUserName(userData.name || '');
@@ -76,10 +82,14 @@ export default function EventDetail() {
     }
 
     try {
+      setDeletingEvent(true);
       await softDeleteEvent(event.id);
       router.push('/dashboard/event-list');
     } catch (error) {
       console.error('Error deleting event:', error);
+    } finally {
+      setDeletingEvent(false);
+      setIsModalOpen(false);
     }
   };
 
@@ -87,7 +97,7 @@ export default function EventDetail() {
     <div className="min-h-screen bg-[#0A192F] text-[#ccd6f6] flex items-center justify-center">
       <Navbar userName={userName} />
       {/* Detail Acara */}
-      <div className='border-b-2'></div>
+      <div className="border-b-2"></div>
       <div className="bg-[#112240] w-full max-w-lg rounded-lg shadow-lg overflow-hidden mt-[53px]">
         {/* Gambar Acara */}
         <div className="relative w-full h-60">
@@ -127,7 +137,7 @@ export default function EventDetail() {
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-semibold text-[#64ffda]">Price</h2>
               <p className="text-[#ccd6f6]">
-              {!event.price ? "Free" : `Rp ${event.price.toLocaleString()}`}
+                {!event.price ? 'Free' : `Rp ${event.price.toLocaleString()}`}
               </p>
             </div>
           </div>
@@ -146,13 +156,47 @@ export default function EventDetail() {
             >
               Back
             </button>
-            <button onClick={() => router.push(`/dashboard/event-list/edit-event/${event.id}`)} className="px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80">Edit</button>
-            <button onClick={handleDelete} className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700">
+            <button
+              onClick={() =>
+                router.push(`/dashboard/event-list/edit-event/${event.id}`)
+              }
+              className="px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700"
+            >
               Delete
             </button>
           </div>
         </div>
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-[#112240] rounded-lg p-6 w-96">
+            <h2 className="text-xl text-[#64ffda] font-semibold mb-4 text-center">
+              Are you sure you want to delete this event?
+            </h2>
+            <div className="flex justify-around">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-6 py-3 bg-gray-500 text-white font-semibold rounded-md hover:bg-opacity-80"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700"
+                disabled={deletingEvent}
+              >
+                {deletingEvent ? 'Deleting...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
