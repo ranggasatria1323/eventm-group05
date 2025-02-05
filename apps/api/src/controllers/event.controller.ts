@@ -184,6 +184,7 @@ export const getOrganizerEvents = async (req: AuthRequest, res: Response) => {
         location: true,
         event_type: true,
         price: true,
+        category:true
       },
     });
 

@@ -1,4 +1,3 @@
-import { HeaderOnlyLogo } from '@/components/HeaderOnlyLogo';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
@@ -15,7 +14,6 @@ export default function EventDasboardRoot({
   children: React.ReactNode;
 }) {
   return <>
-    <HeaderOnlyLogo />
   {children}
   </>;
 }

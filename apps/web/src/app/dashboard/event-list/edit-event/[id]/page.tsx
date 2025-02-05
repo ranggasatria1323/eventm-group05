@@ -15,7 +15,8 @@ import { Input } from '@/components/ui/input';
 import { eventUpdateProcess, fetchEventById } from '@/api/event';
 import { useParams, useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { getToken } from '@/api/dashboard';
+import { fetchUserData, getToken } from '@/api/dashboard';
+import Navbar from '@/components/navbar-dashboard';
 
 const getUserRole = () => {
   return 'Event Organizer';
@@ -68,6 +69,7 @@ export default function UpdateEvent() {
   const [eventType, setEventType] = useState('Paid');
   const [eventCategory, setEventCategory] = useState('');
   const [eventStock, setEventStock] = useState('');
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -86,6 +88,7 @@ export default function UpdateEvent() {
           }
   try {
           const eventData = await fetchEventById(eventId, token);
+          const userData : any = await fetchUserData(token)
   
           setEventName(eventData.title);
           setEventDate(formatDate(eventData.date)); // Format the date as needed
@@ -96,6 +99,7 @@ export default function UpdateEvent() {
           setEventType(eventData.event_type);
           setEventCategory(eventData.category);
           setEventStock(eventData.stock);
+          setUserName(userData.name || '');
 
           if (eventData.image) {
             fetch(process.env.NEXT_PUBLIC_BASE_API_URL + 'event-images/' + eventData.image)
@@ -162,8 +166,9 @@ export default function UpdateEvent() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="px-3 py-2 md:px-20 md:py-10 ">
-              <div className="border p-4 rounded-xl bg-gray-50">
+      <Navbar userName={userName} />
+      <form onSubmit={handleSubmit} className="px-3 py-2 md:px-20 md:py-10  bg-[#112240] ">
+              <div className="border p-4 rounded-xl mt-16 md:mt-10 bg-gray-100">
                 <div className="space-y-12 ">
                   <div className="border-b border-gray-900/10 pb-12">
                     <h2 className="text-base/7 font-semibold text-blue-900">
@@ -310,7 +315,7 @@ export default function UpdateEvent() {
                           <SelectContent className="bg-white">
                             <SelectGroup>
                               <SelectLabel>Category</SelectLabel>
-                              <SelectItem value="Musik">Musik</SelectItem>
+                              <SelectItem value="Musik">Music</SelectItem>
                               <SelectItem value="Exhibition">Exhibition</SelectItem>
                               <SelectItem value="Sport">Sport</SelectItem>
                               <SelectItem value="Workshop">Workshop</SelectItem>
@@ -320,7 +325,7 @@ export default function UpdateEvent() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="sm:col-span-4 w-[16%] ">
+                      <div className="sm:col-span-4 ">
                         <label
                           htmlFor="max_discount"
                           className="block text-sm/6 font-medium text-gray-900"
@@ -332,10 +337,10 @@ export default function UpdateEvent() {
                           value={String(eventMaxDiscount).replace(/[^0-9]/g, '')}
                           onChange={(e) => setEventMaxDiscount(e.target.value)}
                           required
-                          className="outline outline-1 -outline-offset-1 outline-gray-300"
+                          className="outline outline-1 -outline-offset-1 outline-gray-300  w-[30%] md:w-[10%]" 
                         />
                       </div>
-                      <div className="sm:col-span-4 w-[10%]">
+                      <div className="sm:col-span-4 w-[30%] md:w-[10%]">
                         <label
                           htmlFor="stock"
                           className="block text-sm/6 font-medium text-gray-900"
@@ -360,16 +365,16 @@ export default function UpdateEvent() {
                           Event Poster
                         </label>
                         <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                          <div className="text-center">
-                            {eventImage ? (
-                              <img className="h-[320px]" src={URL.createObjectURL(eventImage)} />
+                          <div className="text-center flex-col">
+                          {eventImage ? (
+                              <img className="md:h-[320px]" src={URL.createObjectURL(eventImage)} />
                             ) : (
                               <PhotoIcon
                                 aria-hidden="true"
                                 className="mx-auto size-12 text-gray-300"
                               />
                             )}
-                            <div className="mt-4 flex text-sm/6 text-gray-600">
+                            <div className="mt-4 flex justify-center text-sm/6 text-gray-600">
                               <label
                                 htmlFor="file-upload"
                                 className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
@@ -398,12 +403,14 @@ export default function UpdateEvent() {
                   </div>
                 </div>
                 <div className="mt-6 flex items-center justify-end gap-x-6">
+                  <a href={`/dashboard/events/${id}`}>
                   <button
                     type="button"
                     className="text-sm/6 font-semibold text-gray-900"
                   >
                     Cancel
                   </button>
+                  </a>
                   <button
                     type="submit"
                     className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

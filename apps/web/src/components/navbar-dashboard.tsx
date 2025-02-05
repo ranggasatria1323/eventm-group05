@@ -29,11 +29,11 @@ export default function Navbar({ userName }: NavbarProps) {
   };
 
   return (
-    <nav className="max-sm:flex sm:flex fixed top-0 z-50 w-full bg-[#0A192F] border-b border-[#112240]">
+    <nav className="max-sm:flex sm:flex absolute top-0 z-50 w-full bg-[#0A192F] border-b border-[#112240]">
       <div className="px-4 py-3 lg:px-6 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/dashboard">
-            <span className="text-xl font-bold text-[#64ffda]">EVENTASY</span>
+            <span className="text-xl font-bold text-[#64ffda]">Dashboard</span>
           </Link>
         </div>
         <button
@@ -57,7 +57,7 @@ export default function Navbar({ userName }: NavbarProps) {
           >
             {/* Drawer Header */}
             <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Menu</h2>
+              <h2 className="text-xl font-semibold">{userName}</h2>
               <button
                 onClick={() => setIsDrawerOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-full"
@@ -124,7 +124,7 @@ export default function Navbar({ userName }: NavbarProps) {
           </div>
         </div>
         {/* Display user name or default */}
-        <h1 className="max-sm:absolute md:absolute sm:right-[30px] max-sm:right-[70px] font-bold text-lg text-[#ccd6f6]">
+        <h1 className="hidden md:flex md:absolute sm:right-[30px] max-sm:right-[70px] font-bold text-lg text-[#ccd6f6]">
           {userName}
         </h1>
       </div>

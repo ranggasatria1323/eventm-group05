@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { fetchEventById, softDeleteEvent } from '../../../../api/event';
-import { getToken, removeToken } from '../../../../api/dashboard';
+import { fetchUserData, getToken, removeToken } from '../../../../api/dashboard';
 import LoadingSpinner from '../../../../components/loading';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
+import Navbar from '@/components/navbar-dashboard';
 
 export default function EventDetail() {
   const { id } = useParams(); 
@@ -16,6 +17,7 @@ export default function EventDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
       const toggleDrawer = () => {
@@ -42,8 +44,10 @@ export default function EventDetail() {
 
       try {
         const eventData = await fetchEventById(eventId, token);
+        const userData : any = await fetchUserData(token)
         setEvent(eventData);
         setIsLoading(false);
+        setUserName(userData.name || '');
       } catch (error) {
         console.error('Failed to fetch event details:', error);
       }
@@ -81,97 +85,10 @@ export default function EventDetail() {
 
   return (
     <div className="min-h-screen bg-[#0A192F] text-[#ccd6f6] flex items-center justify-center">
-      <h2 className="absolute top-4 text-2xl font-bold text-[#64ffda] mb-6 ">My Events</h2>
-        <button
-          onClick={() => setIsDrawerOpen(true)}
-          className="absolute top-[20px] right-[30px] flex ml-[113px] bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Menu />
-        </button>
-        {/* Auth Drawer */}
-        <div
-          className={`fixed inset-0 bg-black/50 transition-opacity z-50 ${
-            isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          onClick={() => setIsDrawerOpen(false)}
-        >
-          <div
-            className={`fixed right-0 top-0 h-full w-full max-w-md bg-[#112240] shadow-lg transition-transform duration-300 ${
-              isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Drawer Header */}
-            <div className="p-4 border-b flex justify-between items-center text-white">
-              <h2 className="text-xl font-semibold">Menu</h2>
-              <button
-                onClick={() => setIsDrawerOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Drawer Content */}
-            <div className="bg-[#112240]">
-              <ul className="px-3 space-y-4">
-                <li>
-                  <Link href="/dashboard">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
-                    >
-                      Dashboard
-                    </Button>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link href="/dashboard/event-list">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
-                    >
-                      Event List
-                    </Button>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link href="/">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
-                    >
-                      Home
-                    </Button>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link href="/dashboard/create">
-                    <Button className="w-full bg-[#64ffda] text-[#0A192F] font-semibold hover:bg-opacity-80 transition-colors duration-200">
-                      Create Event
-                    </Button>
-                  </Link>
-                </li>
-
-                <li>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F] transition-colors duration-200"
-                    onClick={handleLogout}
-                  >
-                    Log Out
-                  </Button>
-                </li>
-              </ul>
-            </div>
-          </div>
-          </div>
+      <Navbar userName={userName} />
       {/* Detail Acara */}
       <div className='border-b-2'></div>
-      <div className="bg-[#112240] w-full max-w-lg rounded-lg shadow-lg overflow-hidden mt-[80px]">
+      <div className="bg-[#112240] w-full max-w-lg rounded-lg shadow-lg overflow-hidden mt-[53px]">
         {/* Gambar Acara */}
         <div className="relative w-full h-60">
           <img
@@ -219,9 +136,15 @@ export default function EventDetail() {
           <div className="mt-8 text-center flex justify-between">
             <button
               onClick={() => router.push('/dashboard/event-list')}
-              className="px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80"
+              className="hidden md:flex px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80"
             >
               Back to Events
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/event-list')}
+              className="flex md:hidden px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80"
+            >
+              Back
             </button>
             <button onClick={() => router.push(`/dashboard/event-list/edit-event/${event.id}`)} className="px-6 py-3 bg-[#64ffda] text-[#0A192F] font-semibold rounded-md hover:bg-opacity-80">Edit</button>
             <button onClick={handleDelete} className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700">
