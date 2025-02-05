@@ -35,8 +35,6 @@ function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -132,15 +130,25 @@ function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">
-        Basic Information
+          Basic Information
         </h1>
         <div className="bg-white rounded-lg shadow p-6">
           {/* Profile Image */}
           <div className="flex flex-col items-center mb-8">
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden">
-              { imageFile ? <img src={URL.createObjectURL(imageFile)} />  : profile?.image ?  <img src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile?.image}`} /> : <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_G0N9CN_iM6-kvF6qpZFibDRcR-t25KVQQA&s' />
-                  }
+                {imageFile ? (
+                  <img
+                    className="object-cover object-center h-full w-full"
+                    src={URL.createObjectURL(imageFile)}
+                  />
+                ) : profile?.image ? (
+                  <img className="object-cover object-center h-full w-full"
+                    src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile?.image}`}
+                  />
+                ) : (
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_G0N9CN_iM6-kvF6qpZFibDRcR-t25KVQQA&s" />
+                )}
               </div>
               <label className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full cursor-pointer group-hover:bg-blue-700 transition-colors">
                 <Camera className="w-5 h-5 text-white" />
@@ -269,17 +277,19 @@ function ProfilePage() {
           </div>
 
           {/* Points Section */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:bg-blue-100 hover:shadow-md transition duration-200">
+            
+            {profile.userType !== 'Event Organizer' && (<div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:bg-blue-100 hover:shadow-md transition duration-200">
               <h2 className="text-lg font-semibold text-blue-700 mb-2">
                 Referral Code
               </h2>
               <p className="text-sm text-gray-700">
-              Use this code to invite friends:
+                Use this code to invite friends:
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-xl font-bold text-blue-900">
-                {profile.referralCode || "There is no referral code"}
+                  {profile.referralCode || 'There is no referral code'}
                 </span>
                 <button
                   onClick={() => {
@@ -291,27 +301,29 @@ function ProfilePage() {
                   Copy
                 </button>
               </div>
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 hover:shadow-md transition duration-200">
-              <h2 className="text-lg font-semibold text-green-700 mb-2">
-                Points
-              </h2>
-              <p className="text-sm text-gray-700">
-              You have the following number of points:
-              </p>
-              <div className="mt-4 flex items-center">
-                <span className="text-3xl font-bold text-green-900">
-                  {profile.points.toLocaleString()}
-                </span>
-                <span className="ml-2 text-sm text-gray-500">poin</span>
+            </div>)}
+            {profile.userType !== 'Event Organizer' && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 hover:shadow-md transition duration-200">
+                <h2 className="text-lg font-semibold text-green-700 mb-2">
+                  Points
+                </h2>
+                <p className="text-sm text-gray-700">
+                  You have the following number of points:
+                </p>
+                <div className="mt-4 flex items-center">
+                  <span className="text-3xl font-bold text-green-900">
+                    {profile.points.toLocaleString()}
+                  </span>
+                  <span className="ml-2 text-sm text-gray-500">poin</span>
+                </div>
+                <p className="mt-2 text-sm text-gray-600">
+                  Remaining time before points expire:{' '}
+                  <span className="font-semibold text-green-800">
+                    {profile.remainingDays} days
+                  </span>
+                </p>
               </div>
-              <p className="mt-2 text-sm text-gray-600">
-              Remaining time before points expire:{' '}
-                <span className="font-semibold text-green-800">
-                  {profile.remainingDays} days
-                </span>
-              </p>
-            </div>
+            )}
           </div>
 
           {/* Save Button */}

@@ -320,7 +320,6 @@ export default function UpdateEvent() {
                               <SelectItem value="Sport">Sport</SelectItem>
                               <SelectItem value="Workshop">Workshop</SelectItem>
                               <SelectItem value="Festival">Festival</SelectItem>
-                              <SelectItem value="Exhibition">Exhibition</SelectItem>
                             </SelectGroup>
                           </SelectContent>
                         </Select>

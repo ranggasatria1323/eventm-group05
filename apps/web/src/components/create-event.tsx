@@ -46,10 +46,11 @@ export default function CreateEvent() {
     formData.append('title', eventName);
     formData.append('description', eventDescription);
     if (eventImage) {
-      if (eventImage.size <= 10 * 1024 * 1024) { // 10MB dalam byte
+      if (eventImage.size <= 10 * 1024 * 1024) {
+        // 10MB dalam byte
         formData.append('file', eventImage);
       } else {
-        alert("File gambar kegedean!");
+        alert('File gambar kegedean!');
         formData.append('file', eventImage);
       }
     }
@@ -240,12 +241,11 @@ export default function CreateEvent() {
                     <SelectContent className="bg-white">
                       <SelectGroup>
                         <SelectLabel>Category</SelectLabel>
-                        <SelectItem value="Musik">Musik</SelectItem>
+                        <SelectItem value="Music">Music</SelectItem>
                         <SelectItem value="Exhibition">Exhibition</SelectItem>
                         <SelectItem value="Sport">Sport</SelectItem>
                         <SelectItem value="Workshop">Workshop</SelectItem>
                         <SelectItem value="Festival">Festival</SelectItem>
-                        <SelectItem value="Exhibition">Exhibition</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -290,16 +290,19 @@ export default function CreateEvent() {
                     Event Poster
                   </label>
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                    <div className="text-center">
+                    <div className="text-center flex-col">
                       {eventImage ? (
-                        <img className="h-[320px]" src={URL.createObjectURL(eventImage)} />
+                        <img
+                          className="md:h-[320px]"
+                          src={URL.createObjectURL(eventImage)}
+                        />
                       ) : (
                         <PhotoIcon
                           aria-hidden="true"
                           className="mx-auto size-12 text-gray-300"
                         />
                       )}
-                      <div className="mt-4 flex text-sm/6 text-gray-600">
+                      <div className="mt-4 flex justify-center text-sm/6 text-gray-600">
                         <label
                           htmlFor="file-upload"
                           className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
