@@ -17,8 +17,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { fetchUserData, getToken } from '@/api/dashboard';
 import Navbar from '@/components/navbar-dashboard';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const getUserRole = () => {
   return 'Event Organizer';
@@ -169,21 +167,50 @@ export default function UpdateEvent() {
     formData.append('category', eventCategory);
     formData.append('stock', Number(eventStock).toString());
 
+    try {
+      await eventUpdateProcess(String(id), formData);
+      console.log('Event updated successfully');
+    } catch (error) {
+      console.error('Error updating event:', error);
+    }
     setIsModalOpen(true);
   };
 
   const handleConfirmSubmit = async () => {
     setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append('title', eventName);
+    formData.append('description', eventDescription);
+    if (eventImage) {
+      if (eventImage.size <= 10 * 1024 * 1024) {
+        // 10MB in bytes
+        formData.append('file', eventImage);
+      } else {
+        alert('File image is too large!');
+      }
+    }
+    formData.append('location', eventLocation);
+    formData.append('date', eventDate);
+    if (eventType !== 'Free') {
+      formData.append('price', Number(eventPrice).toString());
+    }
+    formData.append(
+      'max_voucher_discount',
+      Number(eventMaxDiscount).toString(),
+    );
+    formData.append('event_type', eventType);
+    formData.append('category', eventCategory);
+    formData.append('stock', Number(eventStock).toString());
+
     try {
       await eventUpdateProcess(String(id), new FormData());
       console.log('Event updated successfully');
-      toast.success('Event updated successfully');
       router.push('/dashboard/event-list');
     } catch (error) {
       console.error('Error updating event:', error);
     } finally {
       setIsSubmitting(false);
-      setIsModalOpen(false); // Close the modal after submitting
+      setIsModalOpen(false); // Close modal after submit
     }
   };
 
@@ -474,7 +501,6 @@ export default function UpdateEvent() {
           </div>
         </div>
       )}
-      <ToastContainer position='top-right' autoClose={5000} />
     </>
   );
 }
