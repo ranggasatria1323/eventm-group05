@@ -12,8 +12,39 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { eventListProcess } from '@/api/event';
 
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+  return (
+    <div className="flex justify-center space-x-2 mt-6">
+      <button
+        className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </button>
+      <span className="px-4 py-2 bg-gray-200 rounded">Page {currentPage} of {totalPages}</span>
+      <button
+        className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
 export default function Jelajah() {
   const [events, setEvents] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 8;
 
   const getEventList = async () => {
     const eventsData = await eventListProcess();
@@ -86,7 +117,9 @@ export default function Jelajah() {
               </Card>
             ))}
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
+        
       </div>
     </>
   );

@@ -18,6 +18,7 @@ function Search() {
   const query = router.get('query')
 
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const getSearch = async (query: string) => {
     try {
@@ -37,6 +38,17 @@ function Search() {
   return (
     <div className="min-h-auto bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="container mx-auto px-4 py-12">
+        {hasSearched && searchResults.length === 0 && (
+          <div className="text-center text-2xl text-gray-600 mt-12">
+            <img src='https://static.vecteezy.com/system/resources/previews/005/163/918/non_2x/search-no-result-found-word-concept-illustration-flat-design-eps10-modern-graphic-element-for-landing-page-empty-state-ui-infographic-icon-vector.jpg' alt='No results found' width={718}
+              height={404} />
+            <p className="text-center text-gray-500">
+              Sorry there are no event for this search. Please try another
+              phrase.
+            </p>
+          </div>
+          
+        )}
         {searchResults.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {searchResults.map((item, index) => (

@@ -107,3 +107,21 @@ export const createTransaction = async (transactionData: any) => {
     throw error;
   }
 };
+
+export const getTickets = async (ticketId: number) => {
+  try {
+    const token = Cookies.get("token") || ""; // Ambil token dari cookies
+    console.log("Token:", token); // Log token untuk debugging
+
+    const response = await axios.get(`${API_BASE_URL}tickets/${ticketId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Pastikan token dikirim
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching ticket:", error);
+    throw error;
+  }
+};

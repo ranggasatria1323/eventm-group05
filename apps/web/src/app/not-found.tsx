@@ -1,6 +1,6 @@
 export default function NotFoundPage() {
     return (<>
-      <div className="max-sm:hidden min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900 text-white">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900 text-white">
         {/* Animated Illustration */}
         <div className="relative flex items-center justify-center">
           <div className="absolute w-64 h-64 bg-blue-700 rounded-full blur-3xl opacity-30 animate-pulse"></div>
