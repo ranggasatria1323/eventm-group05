@@ -83,7 +83,7 @@ model Transaction {
   date           DateTime @default(now())
 
   user     User     @relation(fields: [userId], references: [id])
-  event    Event    @relation(fields: [eventId], references: [id], name: "EventTransactions", onDelete: Cascade)
+  event    Event    @relation(fields: [eventId], references: [id], name: "EventTransactions",  onDelete: Cascade)
   discount Discount? @relation(fields: [discountId], references: [id])
 
   @@map("transactions")

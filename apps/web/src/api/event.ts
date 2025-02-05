@@ -16,7 +16,7 @@ interface IEventsDto {
   category: string;
 }
 
-export async function eventListProcess(data?: { type: string }) {
+export async function eventListProcess( data?: { type: string; }) {
   try {
     const response = await axios.get(base_url + '/events?type=' + data?.type);
     console.log('API response:', response.data);

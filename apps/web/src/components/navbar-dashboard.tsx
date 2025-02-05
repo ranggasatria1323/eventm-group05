@@ -57,7 +57,7 @@ export default function Navbar({ userName }: NavbarProps) {
           >
             {/* Drawer Header */}
             <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-xl font-semibold">{userName}</h2>
+              <h2 className="text-xl text-white font-semibold">{userName}</h2>
               <button
                 onClick={() => setIsDrawerOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-full"

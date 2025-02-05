@@ -6,7 +6,8 @@ import {
   getEventById,
   searchEvents,
   deleteEvent,
-  updateEvent // Import the updateEvent function
+  updateEvent, // Import the updateEvent function
+  getEventsPagination
 } from '../controllers/event.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { uploader } from 'uploader';
@@ -14,6 +15,7 @@ import { uploader } from 'uploader';
 const router = Router();
 
 router.get('/events/', getEvents);
+router.get('/events-pagination/', getEventsPagination)
 router.post(
   '/event',
   authMiddleware,

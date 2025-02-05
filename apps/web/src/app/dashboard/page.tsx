@@ -6,7 +6,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from './../../components/ui/button';
 import Navbar from './../../components/navbar-dashboard';
-import { getToken, removeToken, fetchUserData, fetchTransactions } from './../../api/dashboard';
+import {
+  getToken,
+  removeToken,
+  fetchUserData,
+  fetchTransactions,
+} from './../../api/dashboard';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -23,7 +28,9 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalTicketSold, setTotalTicketSold] = useState<number>(0);
   const [mostPopularEvent, setMostPopularEvent] = useState<string>('No Data');
-  const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
+  const [chartData, setChartData] = useState<
+    { name: string; data: number[] }[]
+  >([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -50,10 +57,14 @@ export default function Dashboard() {
 
         const transactionsData = await fetchTransactions(token);
         console.log('transactionsData', transactionsData);
-        if (transactionsData) {
-          
+        if (transactionsData && transactionsData.length > 0) {
           setTransactions(transactionsData);
           processTransactionData(transactionsData);
+        } else {
+          setTotalTicketSold(0);
+          setMostPopularEvent('No Data');
+          setChartData([]);
+          setCategories([]);
         }
       } else {
         router.push('/login');
@@ -67,13 +78,19 @@ export default function Dashboard() {
     if (data.length === 0) return;
 
     // Hitung total tiket terjual
-    const totalTickets = data.reduce((sum, index) => sum + index.totalTicketsSold, 0);
+    const totalTickets = data.reduce(
+      (sum, index) => sum + index.totalTicketsSold,
+      0,
+    );
 
     // Hitung event dengan penjualan tiket tertinggi
-    const eventSales = data.reduce((acc, txn) => {
-      acc[txn.eventName] = (acc[txn.eventName] || 0) + txn.totalTicketsSold;
-      return acc;
-    }, {} as Record<string, number>);
+    const eventSales = data.reduce(
+      (acc, txn) => {
+        acc[txn.eventName] = (acc[txn.eventName] || 0) + txn.totalTicketsSold;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     const sortedEvents = Object.entries(eventSales).sort((a, b) => b[1] - a[1]);
 
@@ -138,7 +155,10 @@ export default function Dashboard() {
                 </Link>
               </li>
               <li>
-                <Button className="w-full text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F]" onClick={handleLogout}>
+                <Button
+                  className="w-full text-[#ccd6f6] bg-transparent hover:bg-[#64ffda] hover:text-[#0A192F]"
+                  onClick={handleLogout}
+                >
                   Log Out
                 </Button>
               </li>
@@ -149,11 +169,15 @@ export default function Dashboard() {
             <div className="p-6 bg-[#112240] border border-[#112240] rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-[#0A192F] border border-[#112240] p-4 rounded-lg">
-                  <h5 className="text-lg font-bold mb-2 text-[#64ffda]">Total Ticket Sold</h5>
+                  <h5 className="text-lg font-bold mb-2 text-[#64ffda]">
+                    Total Ticket Sold
+                  </h5>
                   <p className="text-sm text-[#8892b0]">{totalTicketSold}</p>
                 </div>
                 <div className="bg-[#0A192F] border border-[#112240] p-4 rounded-lg">
-                  <h5 className="text-lg font-bold mb-2 text-[#64ffda]">Most Popular Event</h5>
+                  <h5 className="text-lg font-bold mb-2 text-[#64ffda]">
+                    Most Popular Event
+                  </h5>
                   <p className="text-sm text-[#8892b0]">{mostPopularEvent}</p>
                 </div>
               </div>
@@ -168,8 +192,14 @@ export default function Dashboard() {
                     chart: { toolbar: { show: true }, background: '#112240' },
                     colors: ['#64ffda', '#4a90e2', '#50e3c2', '#f5a623'],
                     plotOptions: { bar: { columnWidth: '45%' } },
-                    xaxis: { categories, labels: { style: { colors: '#ccd6f6' } } },
-                    legend: { position: 'bottom', labels: { colors: '#ccd6f6' } },
+                    xaxis: {
+                      categories,
+                      labels: { style: { colors: '#ccd6f6' } },
+                    },
+                    legend: {
+                      position: 'bottom',
+                      labels: { colors: '#ccd6f6' },
+                    },
                   }}
                 />
               </div>

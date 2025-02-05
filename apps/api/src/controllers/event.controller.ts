@@ -53,6 +53,50 @@ export const getEvents = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const getEventsPagination = async (req: AuthRequest, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 4;
+    const skip = (page - 1) * limit;
+
+    let events = [];
+    if (req.query.type == 'landing') {
+      events = await prisma.event.findMany({
+        orderBy: {
+          date: 'asc',
+        },
+        skip,
+        take: limit,
+      });
+    } else {
+      events = await prisma.event.findMany({
+        orderBy: {
+          created_at: 'desc',
+        },
+        skip,
+        take: limit,
+      });
+    }
+
+    const totalEvents = await prisma.event.count({
+      where: req.query.type == 'landing' ? {} : {}
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'get post success',
+      data: events,
+      page,
+      totalPages: Math.ceil(totalEvents / limit),
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: JSON.stringify(err),
+      data: null,
+    });
+  }
+};
+
 export const createEvents = async (req: AuthRequest, res: Response) => {
   const {
     title,
@@ -244,28 +288,31 @@ export const searchEvents = async (req: Request, res: Response) => {
 export const deleteEvent = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const eventId = Number(id);
 
-    const deleteEvent = await prisma.event.delete({
-      where: {
-        id: Number(id),
-      },
+    await prisma.transaction.deleteMany({
+      where: { eventId },
+    });
+
+    const deletedEvent = await prisma.event.delete({
+      where: { id: eventId },
     });
 
     res.status(200).json({
       status: 'delete success',
-      data: deleteEvent,
+      data: deletedEvent,
     });
   } catch (err) {
     res.status(500).json({
       status: 'error',
-      message: JSON.stringify(err),
+      message: err instanceof Error ? err.message : JSON.stringify(err),
     });
   }
 };
 
 export const updateEvent = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params; // Get event ID from request parameters
+    const { id } = req.params; 
     const {
       title,
       description,
@@ -292,7 +339,7 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
     const updatedEvent = await prisma.event.update({
       where: { id: Number(id) },
       data: {
-        created_by:1,
+        created_by: userId,
         title,
         description,
         location,

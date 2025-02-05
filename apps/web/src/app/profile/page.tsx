@@ -147,9 +147,12 @@ function ProfilePage() {
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden">
                 {imageFile ? (
-                  <img src={URL.createObjectURL(imageFile)} />
-                ) : profile?.image ? (
                   <img
+                    className="object-cover object-center h-full w-full"
+                    src={URL.createObjectURL(imageFile)}
+                  />
+                ) : profile?.image ? (
+                  <img className="object-cover object-center h-full w-full"
                     src={`${process.env.NEXT_PUBLIC_BASE_API_URL}images/${profile?.image}`}
                   />
                 ) : (
@@ -283,8 +286,10 @@ function ProfilePage() {
           </div>
 
           {/* Points Section */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:bg-blue-100 hover:shadow-md transition duration-200">
+            
+            {profile.userType !== 'Event Organizer' && (<div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:bg-blue-100 hover:shadow-md transition duration-200">
               <h2 className="text-lg font-semibold text-blue-700 mb-2">
                 Referral Code
               </h2>
@@ -305,27 +310,29 @@ function ProfilePage() {
                   Copy
                 </button>
               </div>
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 hover:shadow-md transition duration-200">
-              <h2 className="text-lg font-semibold text-green-700 mb-2">
-                Points
-              </h2>
-              <p className="text-sm text-gray-700">
-                You have the following number of points:
-              </p>
-              <div className="mt-4 flex items-center">
-                <span className="text-3xl font-bold text-green-900">
-                  {profile.points.toLocaleString()}
-                </span>
-                <span className="ml-2 text-sm text-gray-500">poin</span>
+            </div>)}
+            {profile.userType !== 'Event Organizer' && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 hover:shadow-md transition duration-200">
+                <h2 className="text-lg font-semibold text-green-700 mb-2">
+                  Points
+                </h2>
+                <p className="text-sm text-gray-700">
+                  You have the following number of points:
+                </p>
+                <div className="mt-4 flex items-center">
+                  <span className="text-3xl font-bold text-green-900">
+                    {profile.points.toLocaleString()}
+                  </span>
+                  <span className="ml-2 text-sm text-gray-500">poin</span>
+                </div>
+                <p className="mt-2 text-sm text-gray-600">
+                  Remaining time before points expire:{' '}
+                  <span className="font-semibold text-green-800">
+                    {profile.remainingDays} days
+                  </span>
+                </p>
               </div>
-              <p className="mt-2 text-sm text-gray-600">
-                Remaining time before points expire:{' '}
-                <span className="font-semibold text-green-800">
-                  {profile.remainingDays} days
-                </span>
-              </p>
-            </div>
+            )}
           </div>
 
           {/* Save Button */}
