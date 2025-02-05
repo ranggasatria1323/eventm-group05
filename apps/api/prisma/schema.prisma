@@ -85,6 +85,8 @@ model Transaction {
   user     User     @relation(fields: [userId], references: [id])
   event    Event    @relation(fields: [eventId], references: [id], name: "EventTransactions")
   discount Discount? @relation(fields: [discountId], references: [id])
+
+  @@map("transactions")
 }
 
 
@@ -95,6 +97,7 @@ model Discount {
   percentage Decimal
   startDate  DateTime
   endDate    DateTime
+  used       Boolean  @default(false) // Tambahkan kolom ini
   user       User     @relation(fields: [userId], references: [id])
   transactions Transaction[]
 
