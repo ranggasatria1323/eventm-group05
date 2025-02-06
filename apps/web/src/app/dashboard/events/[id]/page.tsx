@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import Navbar from '@/components/navbar-dashboard';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function EventDetail() {
   const { id } = useParams();
@@ -62,6 +64,29 @@ export default function EventDetail() {
     fetchEvent();
   }, [id, router]);
 
+  const handleDelete = async () => {
+    const token = getToken();
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    setDeletingEvent(true);
+    try {
+      await softDeleteEvent(event.id);
+      toast.success('Event deleted successfully');
+      setTimeout(() => {
+        router.push('/dashboard/event-list');
+      }, 2000);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast.error('Failed to delete event');
+    } finally {
+      setDeletingEvent(false);
+      setIsModalOpen(false);
+    }
+  };
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -74,32 +99,12 @@ export default function EventDetail() {
     );
   }
 
-  const handleDelete = async () => {
-    const token = getToken();
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-
-    try {
-      setDeletingEvent(true);
-      await softDeleteEvent(event.id);
-      router.push('/dashboard/event-list');
-    } catch (error) {
-      console.error('Error deleting event:', error);
-    } finally {
-      setDeletingEvent(false);
-      setIsModalOpen(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#0A192F] text-[#ccd6f6] flex items-center justify-center">
       <Navbar userName={userName} />
-      {/* Detail Acara */}
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="border-b-2"></div>
       <div className="bg-[#112240] w-full max-w-lg rounded-lg shadow-lg overflow-hidden mt-[53px]">
-        {/* Gambar Acara */}
         <div className="relative w-full h-60">
           <img
             src={`${process.env.NEXT_PUBLIC_BASE_API_URL}event-images/${event.image}`}
@@ -108,7 +113,6 @@ export default function EventDetail() {
           />
         </div>
 
-        {/* Informasi Acara */}
         <div className="p-6">
           <h1 className="text-3xl font-bold text-[#64ffda] mb-4 text-center">
             {event.title}
@@ -142,7 +146,6 @@ export default function EventDetail() {
             </div>
           </div>
 
-          {/* Tombol Back and Delete */}
           <div className="mt-8 text-center flex justify-between">
             <button
               onClick={() => router.push('/dashboard/event-list')}

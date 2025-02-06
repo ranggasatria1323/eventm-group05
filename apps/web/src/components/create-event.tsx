@@ -15,6 +15,8 @@ import { Input } from './ui/input';
 import { eventCreateProcess } from '../api/event';
 import { Header } from './Header';
 import { useRouter } from 'next/navigation';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const getUserRole = () => {
   return 'Event Organizer';
@@ -50,7 +52,7 @@ export default function CreateEvent() {
         // 10MB dalam byte
         formData.append('file', eventImage);
       } else {
-        alert('File gambar kegedean!');
+        toast.error('File gambar kegedean!');
         formData.append('file', eventImage);
       }
     }
@@ -67,13 +69,14 @@ export default function CreateEvent() {
     formData.append('category', eventCategory);
     formData.append('stock', Number(eventStock).toString());
 
-    // Call the API function to create the event
     try {
       await eventCreateProcess(formData);
-      console.log('Event created successfully');
-      router.push('/dashboard/event-list');
+      toast.success('Event created successfully!');
+      setTimeout(() => {
+        router.push('/dashboard/event-list');
+      }, 2000);
     } catch (error) {
-      console.error('Error creating event:', error);
+      toast.error('Failed to create event');
     }
   };
 
@@ -93,6 +96,7 @@ export default function CreateEvent() {
   return (
     <>
       <Header />
+      <ToastContainer position="top-right" autoClose={3000} />
       <form onSubmit={handleSubmit} className="px-3 py-2 md:px-20 md:py-10 ">
         <div className="border p-4 rounded-xl bg-gray-50">
           <div className="space-y-12 ">

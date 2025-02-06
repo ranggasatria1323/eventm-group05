@@ -10,9 +10,7 @@ export default function UnauthorizedPage() {
         </div>
 
         {/* Error Title */}
-        <h1 className="text-5xl font-extrabold mb-4 animate-pulse">
-          403 - Forbidden
-        </h1>
+        <h1 className="text-5xl font-extrabold mb-4 animate-pulse">403</h1>
 
         {/* Error Message */}
         <p className="text-lg text-gray-200 mb-8">
