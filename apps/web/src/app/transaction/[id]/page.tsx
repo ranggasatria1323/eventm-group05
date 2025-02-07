@@ -199,7 +199,7 @@ const TransactionPage = () => {
       }
 
       setTimeout(() => {
-        router.push('/');
+        router.push(`/ticket/${id}`);
       }, 2000);
     } catch (error: any) {
       toast.error(

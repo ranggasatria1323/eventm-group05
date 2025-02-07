@@ -171,12 +171,12 @@ export default function UpdateEvent() {
     formData.append('stock', Number(eventStock).toString());
 
     setIsModalOpen(true);
-    // try {
-    //   await eventUpdateProcess(String(id), formData);
-    //   console.log('Event updated successfully');
-    // } catch (error) {
-    //   console.error('Error updating event:', error);
-    // }
+    try {
+      await eventUpdateProcess(String(id), formData);
+      console.log('Event updated successfully');
+    } catch (error) {
+      console.error('Error updating event:', error);
+    }
   };
 
   const handleConfirmSubmit = async () => {
