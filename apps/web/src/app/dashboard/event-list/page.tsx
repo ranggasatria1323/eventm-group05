@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchOrganizerEvents } from './../../../api/event';
-import { getToken } from './../../../api/dashboard';
+import { fetchUserData, getToken, removeToken } from './../../../api/dashboard';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
+import Navbar from '@/components/navbar-dashboard';
 
 interface Event {
   id: number;
@@ -13,14 +16,23 @@ interface Event {
   location: string;
   event_type: string;
   price: number;
+  category:string;
 }
 
 export default function EventList() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [deleteEvent, setDeleteEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
+
+    const toggleDrawer = () => {
+      setIsDrawerOpen(!isDrawerOpen); // Toggle drawer visibility
+    };
     const fetchEvents = async () => {
       const token = getToken();
 
@@ -30,7 +42,9 @@ export default function EventList() {
       }
 
       const organizerEvents = await fetchOrganizerEvents(token);
+      const userData : any = await fetchUserData(token)
       setEvents(organizerEvents);
+      setUserName(userData.name || '');
       setIsLoading(false);
     };
 
@@ -66,12 +80,15 @@ export default function EventList() {
     );
   }
 
-  return (
-    <div className="p-6 bg-[#112240] border border-[#112240] rounded-lg">
-        <Link href="/dashboard">
-      <h2 className="text-2xl font-bold text-[#64ffda] mb-6 ">My Events</h2>
-        </Link>
+  const handleLogout = () => {
+      removeToken();
+      setIsLoggedIn(false);
+      router.push('/login'); // Redirect ke login setelah logout
+    };
 
+  return (<><Navbar userName={userName}/>
+    <div className="p-6 bg-[#112240] border border-[#112240] rounded-lg md:h-[100vh] h-[100%] mt-10">
+      <h2 className="text-2xl font-bold text-[#64ffda] mb-6 ">My Events</h2>
       {events.length === 0 ? (
         <p className="text-[#8892b0]">You have not created any events yet.</p>
       ) : (
@@ -99,7 +116,10 @@ export default function EventList() {
                   <strong>Type:</strong> {event.event_type}
                 </p>
                 <p className="text-sm text-[#8892b0]">
-                  <strong>Price:</strong> {event.price === 0 ? "Free" : `Rp ${event.price.toLocaleString()}`}
+                  <strong>Price:</strong> {!event.price ? "Free" : `Rp ${event.price.toLocaleString()}`}
+                </p>
+                <p className="text-sm text-[#8892b0]">
+                  <strong>Category:</strong> {event.category}
                 </p>
                 <div className="flex items-center mt-4">
                   <span
@@ -116,5 +136,6 @@ export default function EventList() {
         </div>
       )}
     </div>
+    </>
   );
 }

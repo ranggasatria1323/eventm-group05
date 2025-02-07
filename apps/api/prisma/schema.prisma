@@ -34,26 +34,25 @@ model User {
   @@map("users")
 }
 
-
 model Event {
-  id                              Int @id @default(autoincrement())
-  user                            User @relation(fields: [created_by],references: [id])
-  created_by                      Int
-  title                           String? @db.VarChar(200)
-  description                     String?
-  image                           String? @db.VarChar(50)
-  location                        String? @db.VarChar (50)
-  date                            DateTime? @db.Date
-  event_type                      String? @db.VarChar(50)
-  price                           Int?
-  stock                           Int?
-  max_voucher_discount            Int?
-  ticket                          Ticket[]
-  category                        String? @db.VarChar (50)
-  created_at                      DateTime @default(now())
-  updated_at                      DateTime @updatedAt
-  reviews                         Review[] // Relasi ke tabel Review
-
+  id                   Int       @id @default(autoincrement())
+  user                 User      @relation(fields: [created_by], references: [id])
+  created_by           Int
+  title                String?   @db.VarChar(200)
+  description          String?
+  image                String?   @db.VarChar(50)
+  location             String?   @db.VarChar(50)
+  date                 DateTime? @db.Date
+  event_type           String?   @db.VarChar(50)
+  price                Int?
+  stock                Int?
+  max_voucher_discount Int?
+  ticket               Ticket[]
+  category             String?   @db.VarChar(50)
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  reviews              Review[]
+  transactions         Transaction[] @relation("EventTransactions")
 
   @@map("events")
 }
@@ -68,25 +67,29 @@ model Ticket {
   purchaseDate DateTime
   event        Event        @relation(fields: [eventId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
-  transactions Transaction[]
 
   @@map("tickets")
 }
 
 model Transaction {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  ticketId   Int
-  amount     Decimal
-  pointsUsed Int
-  discountId Int?
-  date       DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id])
-  ticket     Ticket   @relation(fields: [ticketId], references: [id])
-  discount   Discount? @relation(fields: [discountId], references: [id])
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  eventId        Int
+  ticketQuantity Int
+  amount         Decimal
+  pointsUsed     Int
+  discountId     Int?
+  paymentMethod  String
+  date           DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  event    Event    @relation(fields: [eventId], references: [id], name: "EventTransactions",  onDelete: Cascade)
+  discount Discount? @relation(fields: [discountId], references: [id])
 
   @@map("transactions")
 }
+
+
 
 model Discount {
   id         Int      @id @default(autoincrement())
@@ -94,6 +97,7 @@ model Discount {
   percentage Decimal
   startDate  DateTime
   endDate    DateTime
+  used       Boolean  @default(false) // Tambahkan kolom ini
   user       User     @relation(fields: [userId], references: [id])
   transactions Transaction[]
 
@@ -112,5 +116,3 @@ model Review {
 
   @@map("reviews")
 }
-
-

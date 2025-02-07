@@ -1,11 +1,7 @@
-'use client';
-
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const base_url = 'http://localhost:1234';
-
-
+const base_url = 'http://localhost:1234'; // Adjust the URL as needed
 
 interface IEventsDto {
   title: string;
@@ -15,11 +11,12 @@ interface IEventsDto {
   date: string;
   event_type: string;
   price: number;
+  stock: number;
   max_voucher_discount: number;
   category: string;
 }
 
-export async function eventListProcess(data?: { type: string }) {
+export async function eventListProcess( data?: { type: string; }) {
   try {
     const response = await axios.get(base_url + '/events?type=' + data?.type);
     console.log('API response:', response.data);
@@ -51,6 +48,23 @@ export async function eventCreateProcess(data: FormData) {
     });
   } catch (err: any) {
     console.error('Error creating event:', err); // Added error handling
+  }
+}
+
+export async function eventUpdateProcess(id:string, data: FormData) {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+
+    return await axios.put(`${base_url}/events/${id}`, data, {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (err: any) {
+    console.error('Error updating event:', err); // Added error handling
   }
 }
 
@@ -101,9 +115,26 @@ export const searchEvents = async (query: string) => {
         Authorization: `Bearer ${Cookies.get('token')}`,
       },
     });
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
     console.error('Error searching events:', error);
     return [];
+  }
+};
+
+export const softDeleteEvent = async (eventId: number): Promise<void> => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+    return await axios.delete(`${base_url}/events/${eventId}`, {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (error) {
+    console.error('Error soft deleting event:', error);
+    throw error; // Propagate error to be handled in UI
   }
 };

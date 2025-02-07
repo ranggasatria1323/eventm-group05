@@ -8,31 +8,35 @@ interface AuthRequest extends Request {
     id: number;
     name: string;
     email: string;
-    userType: string;
+    userType: string | null;
   };
 }
 
 type User = {
+  id: number;
   name: string;
   email: string;
   userType: string;
-  id: number;
+};
+
+type EventUpdateInput = Prisma.EventUpdateInput & {
+  deleted?: boolean;
 };
 
 export const getEvents = async (req: AuthRequest, res: Response) => {
   try {
     let events = [];
-    if(req.query.type == 'landing'){
+    if (req.query.type == 'landing') {
       events = await prisma.event.findMany({
-        orderBy:{
-          date:'asc'
-        }
+        orderBy: {
+          date: 'asc',
+        },
       });
-    }else{
+    } else {
       events = await prisma.event.findMany({
-        orderBy:{
-          created_at:'desc'
-        }
+        orderBy: {
+          created_at: 'desc',
+        },
       });
     }
 
@@ -40,6 +44,50 @@ export const getEvents = async (req: AuthRequest, res: Response) => {
       status: 'success',
       message: 'get post success',
       data: events,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: JSON.stringify(err),
+      data: null,
+    });
+  }
+};
+
+export const getEventsPagination = async (req: AuthRequest, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 4;
+    const skip = (page - 1) * limit;
+
+    let events = [];
+    if (req.query.type == 'landing') {
+      events = await prisma.event.findMany({
+        orderBy: {
+          date: 'asc',
+        },
+        skip,
+        take: limit,
+      });
+    } else {
+      events = await prisma.event.findMany({
+        orderBy: {
+          created_at: 'desc',
+        },
+        skip,
+        take: limit,
+      });
+    }
+
+    const totalEvents = await prisma.event.count({
+      where: req.query.type == 'landing' ? {} : {}
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'get post success',
+      data: events,
+      page,
+      totalPages: Math.ceil(totalEvents / limit),
     });
   } catch (err) {
     res.status(500).json({
@@ -58,6 +106,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
     date,
     event_type,
     price,
+    stock,
     max_voucher_discount,
     category,
   } = req.body;
@@ -76,6 +125,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
         date: new Date(date) || '',
         event_type: event_type || '',
         price: price || 0,
+        stock: Number(price) || 0,
         max_voucher_discount: max_voucher_discount || 0,
         category: category || '',
         created_by: user.id,
@@ -90,6 +140,7 @@ export const createEvents = async (req: AuthRequest, res: Response) => {
         date: new Date(date) || '',
         event_type: event_type || '',
         price: Number(price) || 0,
+        stock: Number(stock) || 0,
         max_voucher_discount: Number(max_voucher_discount) || 0,
         category: category || '',
         created_by: user.id,
@@ -134,11 +185,12 @@ export const getEventById = async (req: Request, res: Response) => {
     });
 
     if (!event) {
-      res.status(400).json({
-        status: 'event not found',
+      return res.status(400).json({
+        status: 'error',
+        message: 'Event not found',
       });
     } else {
-      res.status(200).json({
+      return res.status(200).json({
         status: 'success',
         data: {
           ...event,
@@ -147,7 +199,7 @@ export const getEventById = async (req: Request, res: Response) => {
       });
     }
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),
     });
@@ -176,6 +228,7 @@ export const getOrganizerEvents = async (req: AuthRequest, res: Response) => {
         location: true,
         event_type: true,
         price: true,
+        category:true
       },
     });
 
@@ -218,7 +271,9 @@ export const searchEvents = async (req: Request, res: Response) => {
     });
 
     if (events.length === 0) {
-      res.status(200).json({ status: 'success', message: 'No events found', data: events });
+      res
+        .status(200)
+        .json({ status: 'success', message: 'No events found', data: events });
     } else {
       res.status(200).json({ status: 'success', data: events });
     }
@@ -230,64 +285,83 @@ export const searchEvents = async (req: Request, res: Response) => {
   }
 };
 
-export const editEvent = async (req: Request, res: Response) => {
+export const deleteEvent = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const { id } = req.params;
+    const eventId = Number(id);
+
+    await prisma.transaction.deleteMany({
+      where: { eventId },
+    });
+
+    const deletedEvent = await prisma.event.delete({
+      where: { id: eventId },
+    });
+
+    res.status(200).json({
+      status: 'delete success',
+      data: deletedEvent,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: err instanceof Error ? err.message : JSON.stringify(err),
+    });
+  }
+};
+
+export const updateEvent = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params; 
     const {
       title,
       description,
-      date,
-      image,
       location,
+      date,
       event_type,
       price,
       stock,
       max_voucher_discount,
       category,
     } = req.body;
+    const {  file } = req 
 
-    const event = await prisma.event.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    if (!event) {
-      res.status(404).json({
-        status: 'not found',
-      });
-    } else {
-      const eventUpdate = await prisma.event.update({
-        where: {
-          id: id,
-        },
-        data: {
-          title: title || '',
-          description: description || '',
-          image: image || '',
-          location: location || '',
-          date: new Date(date) || '',
-          event_type: event_type || '',
-          price: price || 0,
-          stock: stock || 0,
-          max_voucher_discount: max_voucher_discount || 0,
-          category: category || '',
-        },
-      });
-
-      const outputData = { ...eventUpdate };
-
-      console.log({ ...outputData});
-
-      res.status(201).json({
-        status: 'success',
-        message: 'update event success',
-        data: { ...outputData},
+       // Validate user ID
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User ID is missing',
       });
     }
-  } catch (err) {
-    res.status(500).json({
+
+    // Update the event in the database
+    const updatedEvent = await prisma.event.update({
+      where: { id: Number(id) },
+      data: {
+        created_by: userId,
+        title,
+        description,
+        location,
+        date: new Date(date),
+        event_type,
+        price: Number(price),
+        stock: Number(stock),
+        max_voucher_discount: Number(max_voucher_discount),
+        category,
+        image:file?.filename
+      },
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Event updated successfully',
+      data: updatedEvent,
+    });
+  } catch (error) {
+    return res.status(500).json({
       status: 'error',
-      message: JSON.stringify(err),
+      message: JSON.stringify(error),
     });
   }
 };

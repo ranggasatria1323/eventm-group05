@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowRight, Calendar, MapPin } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -7,13 +8,43 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Calendar, MapPin, Clock, ArrowRight } from 'lucide-react';
-import { eventListProcess } from '@/api/event';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { eventListProcess } from '@/api/event';
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+  return (
+    <div className="flex justify-center space-x-2 mt-6">
+      <button
+        className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </button>
+      <span className="px-4 py-2 bg-gray-200 rounded">Page {currentPage} of {totalPages}</span>
+      <button
+        className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </div>
+  );
+};
 
 export default function Jelajah() {
   const [events, setEvents] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 8;
 
   const getEventList = async () => {
     const eventsData = await eventListProcess();
@@ -26,14 +57,13 @@ export default function Jelajah() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="min-h-auto bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="container mx-auto px-4 py-12">
-          <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">
-            Upcoming Events
-          </h1>
-
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold">Event List</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {events.map((item: any, index) => (
+            {events.map((item, index) => (
               <Card
                 key={index}
                 className="overflow-hidden hover:shadow-lg transition-shadow bg-white"
@@ -70,7 +100,7 @@ export default function Jelajah() {
                   </div>
                   <div className="flex items-center text-blue-600 text-sm">
                     <span>
-                      {item.price === 0
+                      {!item.price
                         ? 'Free'
                         : `Rp ${item.price.toLocaleString()}`}
                     </span>
@@ -87,7 +117,9 @@ export default function Jelajah() {
               </Card>
             ))}
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
+        
       </div>
     </>
   );

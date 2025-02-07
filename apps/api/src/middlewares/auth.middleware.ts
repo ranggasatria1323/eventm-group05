@@ -210,3 +210,64 @@ export const verifyEventOrganizer = async (
     res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 };
+
+export const verifyCustomer = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized: Missing Authorization header",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized: Token is missing",
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_KEY || "") as {
+      id: number;
+    };
+    const userId = decoded.id;
+
+    // ✅ Cari user berdasarkan ID
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { userType: true }, // Hanya ambil userType
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // ✅ Hanya izinkan akses jika userType adalah "Customer"
+    if (user.userType !== "Customer") {
+      return res.status(403).json({
+        status: "error",
+        message: "Forbidden: Only Customers can access this resource",
+      });
+    }
+
+    req.user = { id: userId, userType: user.userType } as User;
+    next();
+  } catch (error) {
+    console.error("Error in verifyCustomer middleware:", error);
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized: Invalid or expired token",
+    });
+  }
+};

@@ -15,6 +15,8 @@ import { Input } from './ui/input';
 import { eventCreateProcess } from '../api/event';
 import { Header } from './Header';
 import { useRouter } from 'next/navigation';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const getUserRole = () => {
   return 'Event Organizer';
@@ -35,18 +37,24 @@ export default function CreateEvent() {
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [eventPrice, setEventPrice] = useState('');
   const [eventMaxDiscount, setEventMaxDiscount] = useState('');
-  const [eventType, setEventType] = useState('');
+  const [eventType, setEventType] = useState('Paid');
   const [eventCategory, setEventCategory] = useState('');
+  const [eventStock, setEventStock] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Prepare the data for submission
     const formData = new FormData();
     formData.append('title', eventName);
     formData.append('description', eventDescription);
     if (eventImage) {
-      formData.append('file', eventImage);
+      if (eventImage.size <= 10 * 1024 * 1024) {
+        // 10MB dalam byte
+        formData.append('file', eventImage);
+      } else {
+        toast.error('File gambar kegedean!');
+        formData.append('file', eventImage);
+      }
     }
     formData.append('location', eventLocation);
     formData.append('date', eventDate);
@@ -59,14 +67,16 @@ export default function CreateEvent() {
     );
     formData.append('event_type', eventType);
     formData.append('category', eventCategory);
+    formData.append('stock', Number(eventStock).toString());
 
-    // Call the API function to create the event
     try {
       await eventCreateProcess(formData);
-      console.log('Event created successfully');
-      router.push('/dashboard/event-list');
+      toast.success('Event created successfully!');
+      setTimeout(() => {
+        router.push('/dashboard/event-list');
+      }, 2000);
     } catch (error) {
-      console.error('Error creating event:', error);
+      toast.error('Failed to create event');
     }
   };
 
@@ -86,6 +96,7 @@ export default function CreateEvent() {
   return (
     <>
       <Header />
+      <ToastContainer position="top-right" autoClose={3000} />
       <form onSubmit={handleSubmit} className="px-3 py-2 md:px-20 md:py-10 ">
         <div className="border p-4 rounded-xl bg-gray-50">
           <div className="space-y-12 ">
@@ -234,10 +245,11 @@ export default function CreateEvent() {
                     <SelectContent className="bg-white">
                       <SelectGroup>
                         <SelectLabel>Category</SelectLabel>
-                        <SelectItem value="sport">Sport</SelectItem>
-                        <SelectItem value="konser">Konser</SelectItem>
-                        <SelectItem value="kuliner">Kuliner</SelectItem>
-                        <SelectItem value="pameran">Pameran</SelectItem>
+                        <SelectItem value="Music">Music</SelectItem>
+                        <SelectItem value="Exhibition">Exhibition</SelectItem>
+                        <SelectItem value="Sport">Sport</SelectItem>
+                        <SelectItem value="Workshop">Workshop</SelectItem>
+                        <SelectItem value="Festival">Festival</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -257,6 +269,23 @@ export default function CreateEvent() {
                     className="outline outline-1 -outline-offset-1 outline-gray-300"
                   />
                 </div>
+                <div className="sm:col-span-4 w-[10%]">
+                  <label
+                    htmlFor="stock"
+                    className="block text-sm/6 font-medium text-gray-900"
+                  >
+                    Stock
+                  </label>
+                  <div className="mt-2 ">
+                    <Input
+                      type="text"
+                      value={eventStock.replace(/[^0-9]/g, '')}
+                      onChange={(e) => setEventStock(e.target.value)}
+                      required
+                      className="outline outline-1 -outline-offset-1 outline-gray-300"
+                    />
+                  </div>
+                </div>
                 <div className="col-span-full mt-8">
                   <label
                     htmlFor="cover-photo"
@@ -265,16 +294,19 @@ export default function CreateEvent() {
                     Event Poster
                   </label>
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                    <div className="text-center">
+                    <div className="text-center flex-col">
                       {eventImage ? (
-                        <img src={URL.createObjectURL(eventImage)} />
+                        <img
+                          className="md:h-[320px]"
+                          src={URL.createObjectURL(eventImage)}
+                        />
                       ) : (
                         <PhotoIcon
                           aria-hidden="true"
                           className="mx-auto size-12 text-gray-300"
                         />
                       )}
-                      <div className="mt-4 flex text-sm/6 text-gray-600">
+                      <div className="mt-4 flex justify-center text-sm/6 text-gray-600">
                         <label
                           htmlFor="file-upload"
                           className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
