@@ -6,16 +6,113 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id                Int         @id @default(autoincrement())
+  name              String
+  email             String      @unique
+  password          String
+  userType          String?
+  image             String?
+  phoneNumber       String?
+  birthdate         DateTime?   @db.Date
+  gender            String?
+  referralCode      String?     @unique
+  points            Int         @default(0)
+  pointsUpdatedAt   DateTime    @default(now())
+  referrerId        Int?        
+  createdAt         DateTime    @default(now())
+  events            Event[]
+  tickets           Ticket[]
+  discounts         Discount[]
+  transactions      Transaction[]
+  reviews           Review[] 
 
-  @@map("samples") // if you want to use snake_case format
+  @@map("users")
+}
+
+model Event {
+  id                   Int       @id @default(autoincrement())
+  user                 User      @relation(fields: [created_by], references: [id])
+  created_by           Int
+  title                String?   @db.VarChar(200)
+  description          String?
+  image                String?   @db.VarChar(50)
+  location             String?   @db.VarChar(50)
+  date                 DateTime? @db.Date
+  event_type           String?   @db.VarChar(50)
+  price                Int?
+  stock                Int?
+  max_voucher_discount Int?
+  ticket               Ticket[]
+  category             String?   @db.VarChar(50)
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  reviews              Review[]
+  transactions         Transaction[] @relation("EventTransactions")
+
+  @@map("events")
+}
+
+model Ticket {
+  id           Int          @id @default(autoincrement())
+  eventId      Int
+  userId       Int
+  ticketType   String
+  price        Decimal
+  status       String
+  purchaseDate DateTime
+  event        Event        @relation(fields: [eventId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("tickets")
+}
+
+model Transaction {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  eventId        Int
+  ticketQuantity Int
+  amount         Decimal
+  pointsUsed     Int
+  discountId     Int?
+  paymentMethod  String
+  date           DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  event    Event    @relation(fields: [eventId], references: [id], name: "EventTransactions",  onDelete: Cascade)
+  discount Discount? @relation(fields: [discountId], references: [id])
+
+  @@map("transactions")
+}
+
+
+
+model Discount {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  percentage Decimal
+  startDate  DateTime
+  endDate    DateTime
+  used       Boolean  @default(false) // Tambahkan kolom ini
+  user       User     @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+
+  @@map("discounts")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  userId    Int
+  comment   String   @db.Text
+  rating    Int      // Rating (1-5)
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
 }

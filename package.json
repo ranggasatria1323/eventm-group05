@@ -6,17 +6,14 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "serve": "turbo run serve",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "prepare": "husky install",
-    "postprepare": "bash -c 'chmod ug+x .husky/*'"
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.2",
     "@commitlint/config-conventional": "^18.4.2",
     "eslint": "^8.48.0",
-    "husky": "^8.0.0",
     "lint-staged": "^15.1.0",
-    "prettier": "^3.1.0",
+    "prettier": "^3.4.2",
     "tsc-alias": "^1.8.10",
     "tsconfig": "*",
     "turbo": "latest"
@@ -27,12 +24,8 @@
     "apps/*",
     "packages/*"
   ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "npx lint-staged"
-    }
-  },
   "dependencies": {
+    "@radix-ui/react-select": "^2.1.5",
     "@types/axios": "^0.14.0",
     "axios": "^1.7.2"
   }
